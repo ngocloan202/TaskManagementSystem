@@ -1,7 +1,7 @@
 {
   "name": "taskmanagementsystem",
   "version": "1.0.0",
-  "description": "",
+  "description": "A simple PHP + MySQL web app for Kanban‑style task/project management, using Tailwind CSS for styling.",
   "main": "index.js",
   "dependencies": {
     "@tailwindcss/cli": "^4.1.5",
@@ -21,12 +21,14 @@
   "devDependencies": {
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
     "tailwindcss": "^4.1.5"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tailwindcss -i frontend/css/input.css -o public/css/tailwind.css --minify",
-    "watch": "tailwindcss -i frontend/css/input.css -o public/css/tailwind.css --watch"
+    "watch": "tailwindcss -i frontend/css/input.css -o public/css/tailwind.css --watch",
+    "format": "prettier --write \"**/*.{js,css,php,html}\""
   },
   "keywords": [],
   "author": "",
