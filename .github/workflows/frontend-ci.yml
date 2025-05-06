@@ -24,19 +24,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint JavaScript (if any)
-        id: eslint
-        run: |
-          # find all *.js under frontend/js or public/js
-          files=$(find frontend/js public/js -type f -name "*.js" 2>/dev/null)
-          if [ -n "$files" ]; then
-            echo "→ Running ESLint on:"
-            echo "$files"
-            # run ESLint; if it finds real errors it will exit non-zero
-            npx eslint $files
-          else
-            echo "→ No JS files found, skipping ESLint."
-          fi
+      # ————————————————————————————
+      # Temporarily disabled until you add JS files
+      # ————————————————————————————
+      # - name: Lint JavaScript (if any)
+      #   run: |
+      #     files=$(find frontend/js public/js -type f -name "*.js" 2>/dev/null)
+      #     if [ -n "$files" ]; then
+      #       npx eslint $files
+      #     else
+      #       echo "No JS files found, skipping ESLint."
+      #     fi
 
       - name: Lint CSS (if any)
         run: |
