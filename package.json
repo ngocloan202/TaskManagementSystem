@@ -1,5 +1,6 @@
 {
   "name": "taskmanagementsystem",
+  "node": ">=20.0.0",
   "version": "1.0.0",
   "description": "A simple PHP + MySQL web app for Kanban‑style task/project management, using Tailwind CSS for styling.",
   "main": "index.js",
