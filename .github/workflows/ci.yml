@@ -1,50 +1,36 @@
 # .github/workflows/ci.yml
-name: CI – Build & Lint Frontend
+name: CI – Lint & Build CSS/JS
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   lint_and_build:
-    name: 🛠 Lint & Build CSS/JS
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      # 2. Setup Node.js
-      - name: Setup Node.js
+      - name: Setup Node.js ≥20
         uses: actions/setup-node@v3
         with:
-          node-version: "20.x"
+          node-version: '20.x'
 
-      # 3. Install npm dependencies
-      - name: Install npm deps
+      - name: Install dependencies
         run: npm ci
 
-      # 4. Lint JavaScript
-      - name: ESLint
+      - name: Lint JavaScript
         run: npx eslint "frontend/js/**/*.js" "public/js/**/*.js"
 
-      # 5. Lint CSS
-      - name: Stylelint
+      - name: Lint CSS
         run: npx stylelint "frontend/css/**/*.css" "public/css/**/*.css"
 
-      # 6. Check formatting
-      - name: Prettier check
+      - name: Format check
         run: npx prettier --check "**/*.{js,css,php,html}"
 
-      # 7. Build Tailwind CSS
       - name: Build Tailwind CSS
         run: npm run build:css
-
-      # 8. Upload built CSS (tuỳ chọn)
-      - name: Upload CSS artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: tailwind-css
-          path: public/css/tailwind.css
