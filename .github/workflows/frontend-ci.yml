@@ -1,0 +1,79 @@
+# .github/workflows/frontend-ci.yml
+name: Frontend CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  lint:
+    name: "🔍 Lint JS & CSS"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ≥20
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint JavaScript (if any)
+        id: eslint
+        run: |
+          # find all *.js under frontend/js or public/js
+          files=$(find frontend/js public/js -type f -name "*.js" 2>/dev/null)
+          if [ -n "$files" ]; then
+            echo "→ Running ESLint on:"
+            echo "$files"
+            # run ESLint; if it finds real errors it will exit non-zero
+            npx eslint $files
+          else
+            echo "→ No JS files found, skipping ESLint."
+          fi
+
+      - name: Lint CSS (if any)
+        run: |
+          files=$(find frontend/css public/css -type f -name "*.css" 2>/dev/null)
+          if [ -n "$files" ]; then
+            echo "→ Running Stylelint on:"
+            echo "$files"
+            npx stylelint $files
+          else
+            echo "→ No CSS files found, skipping Stylelint."
+          fi
+
+      - name: Check formatting (Prettier)
+        run: npx prettier --check "**/*.{js,css,php,html}"
+
+  build:
+    name: "🎨 Build Tailwind CSS"
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ≥20
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Tailwind CSS
+        run: npm run build:css
+
+      - name: Upload compiled CSS
+        uses: actions/upload-artifact@v3
+        with:
+          name: tailwind-css
+          path: public/css/tailwind.css
