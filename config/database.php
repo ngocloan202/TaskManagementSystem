@@ -7,7 +7,7 @@
     $connect = mysqli_connect($servername, $username, $password, $dbname);
     mysqli_set_charset($connect, "utf8");
     if ($connect -> connect_error) {
-        die("Không thể kết nối " . $connect -> connect_error);
+        die("Connection failed: " . $connect -> connect_error);
         exit();
     }
 ?>
