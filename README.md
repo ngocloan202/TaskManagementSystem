@@ -66,4 +66,3 @@ In your main layout (e.g. `app/Views/layouts/header.php`), add:
 ---
 
 Happy coding! 🚀  
-```
