@@ -1,10 +1,12 @@
 # TaskManagementSystem
+
 A simple PHP + MySQL web app for Kanban‑style task/project management, using Tailwind CSS for styling.
 
 ## Prerequisites
-- PHP 8.x  
-- MySQL 5.7+  
-- Node.js 14+ & npm  
+
+- PHP 8.x
+- MySQL 5.7+
+- Node.js 14+ & npm
 
 ## 1. Install Nodejs
 
@@ -49,6 +51,7 @@ npm run watch
 ```
 
 This will generate/update:
+
 ```
 public/css/tailwind.css
 ```
@@ -58,11 +61,11 @@ public/css/tailwind.css
 In your main layout (e.g. `app/Views/layouts/header.php`), add:
 
 ```html
-<link rel="stylesheet" href="/css/tailwind.css">
+<link rel="stylesheet" href="/css/tailwind.css" />
 ```
 
 …then start using Tailwind utility classes in your Views.
 
 ---
 
-Happy coding! 🚀  
+Happy coding! 🚀
