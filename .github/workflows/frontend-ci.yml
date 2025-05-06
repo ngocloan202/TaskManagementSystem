@@ -9,49 +9,47 @@ on:
 
 jobs:
   lint:
-    name: "🔍 Lint JS & CSS"
+    name: "Code Quality"
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use Node.js ≥20
+      - name: Setup Node.js 20+
         uses: actions/setup-node@v3
         with:
           node-version: "20.x"
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      # ————————————————————————————
-      # Temporarily disabled until you add JS files
-      # ————————————————————————————
-      # - name: Lint JavaScript (if any)
-      #   run: |
-      #     files=$(find frontend/js public/js -type f -name "*.js" 2>/dev/null)
-      #     if [ -n "$files" ]; then
-      #       npx eslint $files
-      #     else
-      #       echo "No JS files found, skipping ESLint."
-      #     fi
+      - name: Check JavaScript
+        run: |
+          if [ -d "frontend/js" ] || [ -d "public/js" ]; then
+            echo "Running ESLint on JavaScript files"
+            npx eslint "**/*.js" --max-warnings=0
+          else
+            echo "No JS directories found, skipping ESLint."
+          fi
+        continue-on-error: true
 
-      #- name: Lint CSS (if any)
-      #  run: |
-      #    files=$(find frontend/css public/css -type f -name "*.css" 2>/dev/null)
-      #    if [ -n "$files" ]; then
-      #      echo "→ Running Stylelint on:"
-      #     echo "$files"
-      #      npx stylelint $files
-      #    else
-      #      echo "→ No CSS files found, skipping Stylelint."
-      #    fi
+      - name: Check CSS
+        run: |
+          if [ -d "frontend/css" ] || [ -d "public/css" ]; then
+            echo "Running Stylelint on CSS files"
+            npx stylelint "**/*.css"
+          else
+            echo "No CSS directories found, skipping Stylelint."
+          fi
+        continue-on-error: true
 
-      - name: Check formatting (Prettier)
+      - name: Check formatting
         run: npx prettier --check "**/*.{js,css,php,html}"
 
   build:
-    name: 🎨 Build Tailwind CSS
+    name: "Build Frontend"
     runs-on: ubuntu-latest
     needs: lint
 
@@ -59,10 +57,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js ≥20
+      - name: Setup Node.js 20+
         uses: actions/setup-node@v3
         with:
           node-version: "20.x"
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -70,9 +69,17 @@ jobs:
       - name: Build Tailwind CSS
         run: npm run build:css
 
-      # ← This must be under "steps:", not at job-level!
-      - name: Upload compiled CSS
+      - name: Save compiled CSS
         uses: actions/upload-artifact@v3
         with:
           name: tailwind-css
           path: public/css/tailwind.css
+          
+      - name: Verify build output
+        run: |
+          if [ -f "public/css/tailwind.css" ]; then
+            echo "Tailwind CSS built successfully"
+          else
+            echo "Tailwind CSS build failed"
+            exit 1
+          fi
