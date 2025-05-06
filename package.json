@@ -27,8 +27,8 @@
     "tailwindcss": "^4.1.5"
   },
   "scripts": {
-    "build": "tailwindcss -i frontend/css/input.css -o app/asset/css/tailwind.css --minify",
-    "watch": "tailwindcss -i frontend/css/input.css -o app/asset/css/tailwind.css --watch",
+    "build": "tailwindcss -i frontend/css/input.css -o app/css/tailwind.css --minify",
+    "watch": "tailwindcss -i frontend/css/input.css -o app/css/tailwind.css --watch",
     "format:js":  "prettier --write \"**/*.js\"",
     "format:css": "prettier --write \"**/*.css\"",
     "format:php": "prettier --write \"**/*.php\"",

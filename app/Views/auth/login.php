@@ -38,8 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Cube Flow – Login</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Login in</title>
+  <link rel="stylesheet" href="../../css/tailwind.css">
 </head>
 <body class="min-h-screen bg-indigo-50 flex items-center justify-center">
   <div class="relative bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
