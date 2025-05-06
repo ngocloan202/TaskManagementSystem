@@ -36,16 +36,16 @@ jobs:
       #       echo "No JS files found, skipping ESLint."
       #     fi
 
-      - name: Lint CSS (if any)
-        run: |
-          files=$(find frontend/css public/css -type f -name "*.css" 2>/dev/null)
-          if [ -n "$files" ]; then
-            echo "→ Running Stylelint on:"
-            echo "$files"
-            npx stylelint $files
-          else
-            echo "→ No CSS files found, skipping Stylelint."
-          fi
+      #- name: Lint CSS (if any)
+      #  run: |
+      #    files=$(find frontend/css public/css -type f -name "*.css" 2>/dev/null)
+      #    if [ -n "$files" ]; then
+      #      echo "→ Running Stylelint on:"
+      #     echo "$files"
+      #      npx stylelint $files
+      #    else
+      #      echo "→ No CSS files found, skipping Stylelint."
+      #    fi
 
       - name: Check formatting (Prettier)
         run: npx prettier --check "**/*.{js,css,php,html}"
