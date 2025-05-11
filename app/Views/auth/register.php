@@ -42,7 +42,7 @@
     <div class="registerContainer bg-white rounded-lg relative">
         <!-- Logo -->
         <div class="logoContainer absolute -top-16 left-1/2" style="transform: translateX(-50%);">
-            <img src="../../images/cubeflow-logo.jpg" alt="Logo"
+            <img src="../../images/cubeflow-logo.png" alt="Logo"
                 class="w-24 h-24 rounded-full border-2 border-[#A6A9FC]">
         </div>
 
