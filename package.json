@@ -27,7 +27,6 @@
     "tailwindcss": "^4.1.5"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tailwindcss -i frontend/css/input.css -o public/css/tailwind.css --minify",
     "watch": "tailwindcss -i frontend/css/input.css -o public/css/tailwind.css --watch",
     "format:js":  "prettier --write \"**/*.js\"",
