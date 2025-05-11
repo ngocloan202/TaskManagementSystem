@@ -1,3 +1,4 @@
 /node_modules/
 /frontend/css/
 /app/css/tailwind.css
+/public/css/tailwind.css
