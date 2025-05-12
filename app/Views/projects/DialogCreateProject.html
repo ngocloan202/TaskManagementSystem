@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modal Thêm dự án</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen p-4">
+
+  <!-- Overlay + Modal Container -->
+  <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between bg-indigo-600 text-white px-6 py-4 rounded-t-2xl">
+        <h3 class="text-lg font-medium">Thêm dự án</h3>
+        <button class="hover:bg-indigo-500 p-1 rounded-full focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               class="h-5 w-5"
+               fill="none" viewBox="0 0 24 24"
+               stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body / Form -->
+      <form class="px-6 pb-6 pt-4 space-y-4">
+        <!-- Tên dự án -->
+        <div class="flex items-center bg-indigo-50 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-indigo-300">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               class="w-6 h-6 text-indigo-500 flex-shrink-0"
+               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12h6m-3-3v6m10-6a2 2 0 00-2-2h-3l-2-3H6L4 6H1a2 2 0 00-2 2v12a2 2 0 002 2h20a2 2 0 002-2V8z" />
+          </svg>
+          <input type="text" name="name" placeholder="Tên dự án"
+                 class="ml-3 w-full bg-transparent placeholder-gray-500 focus:outline-none text-gray-700"/>
+        </div>
+
+        <!-- Mô tả dự án -->
+        <div class="flex items-center bg-indigo-50 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-indigo-300">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               class="w-6 h-6 text-indigo-500 flex-shrink-0"
+               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 10h8m-8 4h8m-8-8h8M4 6h.01M4 18h.01M4 14h.01" />
+          </svg>
+          <input type="text" name="description" placeholder="Mô tả dự án"
+                 class="ml-3 w-full bg-transparent placeholder-gray-500 focus:outline-none text-gray-700"/>
+        </div>
+
+        <!-- Link ảnh dự án -->
+        <div class="flex items-center bg-indigo-50 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-indigo-300">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               class="w-6 h-6 text-indigo-500 flex-shrink-0"
+               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4 16l4-4 4 4 4-4 4 4M4 8h16M4 20h16" />
+          </svg>
+          <input type="url" name="image" placeholder="Link ảnh dự án"
+                 class="ml-3 w-full bg-transparent placeholder-gray-500 focus:outline-none text-gray-700"/>
+        </div>
+
+        <!-- Nút Thêm dự án -->
+        <button type="submit"
+                class="mt-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl py-3 transition">
+          Thêm dự án
+        </button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>
