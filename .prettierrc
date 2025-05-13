@@ -8,5 +8,7 @@
   "arrowParens": "avoid",
   "plugins": ["@prettier/plugin-php"], 
   "trailingComma": "none",
-  "endOfLine": "auto"
+  "endOfLine": "auto",
+  "singleAttributePerLine": true,
+  "htmlWhitespaceSensitivity": "css"
 }
