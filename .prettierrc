@@ -1,12 +1,14 @@
 {
-  "printWidth": 80,
+  "printWidth": 100,
   "tabWidth": 2,
   "useTabs": false,
   "semi": true,
-  "singleQuote": true,
-  "trailingComma": "es5",
+  "singleQuote": false,
   "bracketSpacing": true,
-  "arrowParens": "always",
-  "endOfLine": "lf",
-  "plugins": ["@prettier/plugin-php"]
+  "arrowParens": "avoid",
+  "plugins": ["@prettier/plugin-php"], 
+  "trailingComma": "none",
+  "endOfLine": "auto",
+  "singleAttributePerLine": true,
+  "htmlWhitespaceSensitivity": "css"
 }
