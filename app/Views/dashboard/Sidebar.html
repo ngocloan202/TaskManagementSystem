@@ -14,29 +14,28 @@
   </head>
 
   <body style="background-color: #d9d9d9">
+    <!-- sidebar.html: Partial including sidebar and topbar -->
     <div class="flex h-screen">
       <!-- Sidebar -->
-      <!-- sidebar.html: Partial for main sidebar -->
       <aside class="bg-white w-64 border-r text-black font-semibold flex flex-col">
         <!-- Branding -->
         <div class="px-6 py-2 flex items-center space-x-3 bg-indigo-600 text-white">
           <div class="w-10 h-10 rounded-full overflow-hidden">
             <img
-              src="../../images/cubeflow-logo.png"
+              src="/images/cubeflow-logo.png"
               alt="CubeFlow Logo"
               class="w-full h-full object-cover"
             />
           </div>
           <span class="text-xl font-semibold">CubeFlow</span>
         </div>
-
         <!-- Navigation Menu -->
-        <nav class="flex-1 mt-6 px-2">
-          <!-- Tổng quan -->
+        <nav class="flex-1 mt-6 px-2 space-y-2">
           <a
             href="#"
-            class="flex items-center w-full mb-4 px-4 py-3 rounded-lg bg-indigo-50 text-gray-800 hover:bg-indigo-100"
+            class="flex items-center w-full px-4 py-3 rounded-lg bg-indigo-50 text-gray-800 hover:bg-indigo-100"
           >
+            <!-- Home Icon -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
@@ -52,11 +51,11 @@
             </svg>
             <span>Tổng quan</span>
           </a>
-          <!-- Dự án -->
           <a
             href="#"
-            class="flex items-center w-full mb-4 px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-800"
+            class="flex items-center w-full px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-800"
           >
+            <!-- Projects Icon -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
@@ -75,11 +74,11 @@
             </svg>
             <span>Dự án</span>
           </a>
-          <!-- Hoạt động -->
           <a
             href="#"
-            class="flex items-center w-full mb-4 px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-800"
+            class="flex items-center w-full px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-800"
           >
+            <!-- Activity Icon -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
@@ -94,11 +93,11 @@
             </svg>
             <span>Hoạt động</span>
           </a>
-          <!-- Lịch trình -->
           <a
             href="#"
-            class="flex items-center w-full mb-4 px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-800"
+            class="flex items-center w-full px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-800"
           >
+            <!-- Schedule Icon -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
@@ -114,13 +113,13 @@
             <span>Lịch trình</span>
           </a>
         </nav>
-
         <!-- Settings -->
         <div class="px-6 mb-6">
           <a
             href="#"
             class="flex items-center w-full px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-800"
           >
+            <!-- Settings Icon -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
@@ -130,13 +129,83 @@
               <path
                 fill-rule="evenodd"
                 clip-rule="evenodd"
-                d="M11.828 2.25c-.916 0-1.699.663-1.85 1.567l-.091.549a.798.798 0 0 1-.517.608 7.45 7.45 0 0 0-.478.198.798.798 0 0 1-.796-.064l-.453-.324a1.875 1.875 0 0 0-2.416.2l-.243.243a1.875 1.875 0 0 0-.2 2.416l.324.453a.798.798 0 0 1 .064.796 7.448 7.448 0 0 0-.198.478.798.798 0 0 1-.608.517l-.55.092a1.875 1.875 0 0 0-1.566 1.849v.344c0 .916.663 1.699 1.567 1.85l.549.091c.281.047.508.25.608.517.06.162.127.321.198.478a.798.798 0 0 1-.064.796l-.324.453a1.875 1.875 0 0 0 .2 2.416l.243.243c.648.648 1.67.733 2.416.2l.453-.324a.798.798 0 0 1 .796-.064 7.462 7.462 0 0 0-.478-.198.798.798 0 0 1-.517-.608l.091-.55a1.875 1.875 0 0 0 1.849-1.566h.344c.916 0 1.699-.663 1.85-1.567l.091-.549a.798.798 0 0 1 .517-.608 7.507 7.507 0 0 0 .478-.198.798.798 0 0 1 .796.064l.453.324a1.875 1.875 0 0 0 2.416-.2l.243-.243a1.875 1.875 0 0 0 .2-2.416l-.324-.453a.798.798 0 0 1-.064-.796c.071-.157.137-.316.198-.478.1-.267.327-.47.608-.517l.55-.091a1.875 1.875 0 0 0 1.566-1.85v-.344c0-.916-.663-1.699-1.567-1.85l-.549-.091a.798.798 0 0 1-.608-.517 7.462 7.462 0 0 0-.198-.478.798.798 0 0 1 .064-.796l.324-.453a1.875 1.875 0 0 0-.2-2.416l-.243-.243a1.875 1.875 0 0 0-2.416-.2l-.453.324a.798.798 0 0 1-.796.064 7.46 7.46 0 0 0-.478-.198.798.798 0 0 1-.517-.608l-.091-.55a1.875 1.875 0 0 0-1.85-1.566h-.344ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"
+                d="M11.828 2.25c-.916 0-1.699.663-1.85 1.567l-.091.549a.798.798 0 0 1-.517.608 7.45 7.45 0 0 0-.478.198.798.798 0 0 1-.796-.064l-.453-.324a1.875 1.875 0 0 0-2.416.2l-.243.243a1.875 1.875 0 0 0-.2 2.416l.324.453a.798.798 0 0 1 .064.796 7.448 7.448 0 0 0-.198.478a.798.798 0 0 1-.608.517l-.55.092a1.875 1.875 0 0 0-1.566 1.849v.344c0 .916.663 1.699 1.567 1.85l.549.091c.281.047.508.25.608.517c.06.162.127.321.198.478a.798.798 0 0 1-.064.796l-.324.453a1.875 1.875 0 0 0 .2 2.416l.243.243c.648.648 1.67.733 2.416.2l.453-.324a.798.798 0 0 1 .796-.064 7.462 7.462 0 0 0-.478-.198a.798.798 0 0 1-.517-.608l.091-.55a1.875 1.875 0 0 0 1.849-1.566h.344c.916 0 1.699-.663 1.85-1.567l.091-.549a.798.798 0 0 1 .517-.608a7.507 7.507 0 0 0 .478-.198.798.798 0 0 1 .796.064l.453.324a1.875 1.875 0 0 0 2.416-.2l.243-.243a1.875 1.875 0 0 0-.2-2.416l-.324-.453a.798.798 0 0 1-.064-.796c.071-.157.137-.316.198-.478c.1-.267.327-.47.608-.517l.55-.091a1.875 1.875 0 0 0 1.566-1.85v-.344c0-.916-.663-1.699-1.567-1.85l-.549-.091a.798.798 0 0 1-.608-.517a7.46 7.46 0 0 0-.198-.478a.798.798 0 0 1 .064-.796l.324-.453a1.875 1.875 0 0 0-.2-2.416l-.243-.243a1.875 1.875 0 0 0-2.416-.2l-.453.324a.798.798 0 0 1-.796.064a7.46 7.46 0 0 0-.478-.198a.798.798 0 0 1-.517-.608l-.091-.55a1.875 1.875 0 0 0-1.85-1.566h-.344ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"
               />
             </svg>
             <span>Cài đặt</span>
           </a>
         </div>
       </aside>
+
+      <!-- Topbar next to sidebar -->
+      <header class="flex-1 bg-indigo-600 h-16 flex items-center px-3">
+        <div class="flex items-center space-x-4">
+          <!-- Back arrow -->
+          <button class="p-2 hover:bg-indigo-500 rounded-md text-white">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <!-- Search box -->
+          <div class="relative">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M8 4a4 4 0 104 4H8V4zm6.293 8.707l3.707 3.707a1 1 0 01-1.414 1.414L13.879 14.12A6 6 0 118 14a6 6 0 016.293-1.293z"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="Tìm kiếm"
+              class="pl-10 pr-4 py-2 rounded-lg w-80 focus:outline-none bg-white"
+            />
+          </div>
+        </div>
+        <div class="ml-auto flex items-center space-x-4">
+          <!-- Notifications -->
+          <button class="p-2 hover:bg-indigo-500 rounded-md text-white">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.916V4a2 2 0 10-4 0v1.084A6 6 0 004 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5m4 0v1a3 3 0 006 0v-1m-6 0h6"
+              />
+            </svg>
+          </button>
+          <!-- Profile -->
+          <button class="p-1 bg-white rounded-full border-2 border-white overflow-hidden">
+            <img
+              src="/images/user-avatar.png"
+              alt="User Avatar"
+              class="w-8 h-8 object-cover"
+            />
+          </button>
+        </div>
+      </header>
     </div>
   </body>
 </html>
