@@ -1,6 +1,6 @@
 <?php
-  $title = "Chi tiết dự án";
-  $currentPage = "projects";
+$title = "Chi tiết dự án";
+$currentPage = "projects";
 ?>
 
 <!DOCTYPE html>
@@ -25,10 +25,10 @@
 </head>
 <body style="background-color: #f0f2f5;">
     <div class="flex h-screen">
-      <?php include_once('../components/Sidebar.php'); ?>
+      <?php include_once "../components/Sidebar.php"; ?>
 
       <div class="flex-1 flex flex-col overflow-hidden">
-      <?php include_once('../components/Header.php'); ?>
+      <?php include_once "../components/Header.php"; ?>
       </div>
     </div>
 </body>

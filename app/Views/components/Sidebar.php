@@ -23,7 +23,9 @@
   <nav class="flex-1 mt-6 px-2 space-y-2">
     <a
       href="dashboard.php"
-      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === 'dashboard' ? 'bg-indigo-50 text-gray-800' : 'hover:bg-indigo-50 text-gray-800' ?>"
+      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "dashboard"
+        ? "bg-indigo-50 text-gray-800"
+        : "hover:bg-indigo-50 text-gray-800" ?>"
     >
       <!-- Home Icon -->
       <svg
@@ -43,7 +45,9 @@
     </a>
     <a
       href="projects.php"
-      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === 'projects' ? 'bg-indigo-50 text-gray-800' : 'hover:bg-indigo-50 text-gray-800' ?>"
+      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "projects"
+        ? "bg-indigo-50 text-gray-800"
+        : "hover:bg-indigo-50 text-gray-800" ?>"
     >
       <!-- Projects Icon -->
       <svg
@@ -66,7 +70,9 @@
     </a>
     <a
       href="activities.php"
-      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === 'activities' ? 'bg-indigo-50 text-gray-800' : 'hover:bg-indigo-50 text-gray-800' ?>"
+      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "activities"
+        ? "bg-indigo-50 text-gray-800"
+        : "hover:bg-indigo-50 text-gray-800" ?>"
     >
       <!-- Activity Icon -->
       <svg
@@ -85,7 +91,9 @@
     </a>
     <a
       href="schedule.php"
-      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === 'schedule' ? 'bg-indigo-50 text-gray-800' : 'hover:bg-indigo-50 text-gray-800' ?>"
+      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "schedule"
+        ? "bg-indigo-50 text-gray-800"
+        : "hover:bg-indigo-50 text-gray-800" ?>"
     >
       <!-- Schedule Icon -->
       <svg
@@ -107,7 +115,9 @@
   <nav class="mt-auto mb-6 w-full">
     <a 
       href="settings.php" 
-      class="menuItem hover:bg-[#E8E9FF] space-x-3 w-full <?= $currentPage === 'settings' ? 'bg-[#E8E9FF]' : '' ?>"
+      class="menuItem hover:bg-[#E8E9FF] space-x-3 w-full <?= $currentPage === "settings"
+        ? "bg-[#E8E9FF]"
+        : "" ?>"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
