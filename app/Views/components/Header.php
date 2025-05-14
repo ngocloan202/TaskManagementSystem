@@ -51,6 +51,7 @@
       />
     </div>
   </div>
+  </div>
   
   <!-- Right side icons -->
   <div class="ml-auto flex items-center space-x-4">
