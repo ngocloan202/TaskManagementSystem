@@ -6,6 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CubeFlow</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css" />
+        <style>
+      .menuItem {
+        margin-bottom: 2rem;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      .menuItem:last-child {
+        margin-bottom: 5px;
+      }
+    </style>
   </head>
 
   <body style="background-color: #d9d9d9">
