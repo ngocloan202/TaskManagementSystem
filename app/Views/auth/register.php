@@ -197,7 +197,7 @@
                 <p class="text-center mt-2 text-red-600 font-semibold"><?= $message ?></p>
             <?php endif; ?>
             <p class="text-center mt-4">
-                Bạn có tài khoản? <a href="login.php" class="hover:underline font-semibold" style="color: #2F42C0;">Đăng nhập tại đây</a>
+                Bạn có tài khoản? <a href="Login.php" class="hover:underline font-semibold" style="color: #2F42C0;">Đăng nhập tại đây</a>
             </p>
         </form>
     </div>
@@ -211,7 +211,7 @@
             <img src="../../images/cubeflow-logo.png" alt="Cube Flow" class="w-20 h-20 mx-auto mb-4">
             <h2 class="text-2xl font-bold text-[#2C77E8] mb-2">🎉 Đăng ký thành công!</h2>
             <p class="text-gray-700 mb-4">Tài khoản của bạn đã được tạo. Bạn có thể đăng nhập ngay bây giờ.</p>
-            <a href="login.php" class="inline-block bg-[#2C77E8] hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">Đi đến đăng nhập</a>
+            <a href="Login.php" class="inline-block bg-[#2C77E8] hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">Đi đến đăng nhập</a>
         </div>
     </div>
 </div>
