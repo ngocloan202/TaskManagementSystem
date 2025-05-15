@@ -54,9 +54,7 @@ if ($password_type === 'bcrypt') {
 function login_success($user) {
     session_regenerate_id(true);
     
-    $_SESSION['user_id'] = $user['UserID'];
     $_SESSION['username'] = $user['username'];
-    $_SESSION['role'] = $user['Role'];
     $_SESSION['last_activity'] = time();
     
     error_log("Successful login for user: {$user['username']} from IP: " . $_SERVER['REMOTE_ADDR']);
