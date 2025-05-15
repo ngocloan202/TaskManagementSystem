@@ -113,7 +113,7 @@
         if ($result->num_rows > 0) {
           $message = "Username hoặc Email đã tồn tại!";
         } else {
-          $hashed = password_hash($password, PASSWORD_DEFAULT);
+          $hashed = md5($password);
           $sql = "INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Address)
                     VALUES ('$username', '$hashed', '$email', 'USER', '$fullname', '', '')";
           if ($connect->query($sql) === true) {
