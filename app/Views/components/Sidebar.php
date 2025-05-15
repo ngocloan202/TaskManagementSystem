@@ -111,7 +111,7 @@
       <span>Lịch trình</span>
     </a>
   </nav>
-  <!-- HelpHelp -->
+  <!-- Help -->
   <nav class="mt-auto mb-6 w-full">
     <a 
       href="help.php" 
