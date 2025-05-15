@@ -22,7 +22,7 @@ function clean_input($data)
 function check_session()
 {
   if (!isset($_SESSION["user_id"])) {
-    header("Location: /app/Views/auth/Login.php");
+    header("Location: /app/Views/auth/login.php");
     exit();
   }
 
@@ -30,7 +30,7 @@ function check_session()
     session_unset();
     session_destroy();
     header(
-      "Location: /app/Views/auth/Login.php?error=" .
+      "Location: /app/Views/auth/login.php?error=" .
         urlencode("Phiên làm việc đã hết hạn, vui lòng đăng nhập lại")
     );
     exit();
