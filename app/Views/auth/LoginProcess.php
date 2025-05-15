@@ -2,12 +2,6 @@
 session_start();
 include_once "../../../config/database.php";
 
-// CSRF Protection
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== session_id()) {
-    header("Location: login.php?error=" . urlencode("Lỗi bảo mật, vui lòng thử lại"));
-    exit();
-}
-
 $username = trim($_POST["username"] ?? "");
 $password = trim($_POST["password"] ?? "");
 
