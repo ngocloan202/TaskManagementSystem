@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng nhập</title>
-    <!-- <script src="https://cdn.tailwindcss.com"></script>-->
     <link rel="stylesheet" href="../../../public/css/tailwind.css"> 
   </head>
   <body class="min-h-screen bg-[#EEF0FF] flex items-center justify-center px-4">
@@ -26,7 +25,7 @@
         </h2>
 
         <!-- Form -->
-        <form class="space-y-4">
+        <form action="LoginProcess.php" method="POST" class="space-y-4">
           <!-- Username -->
           <div class="flex items-center bg-[#9A94E5] rounded-xl h-12 px-4">
             <svg
@@ -94,7 +93,7 @@
         <!-- Register link -->
         <p class="mt-2 text-center text-gray-800 text-sm">
           Bạn chưa có tài khoản?
-          <a href="#" class="text-[#2970FF] font-semibold hover:underline">
+          <a href="register.php" class="text-[#2970FF] font-semibold hover:underline">
             Đăng ký tại đây
           </a>
         </p>
