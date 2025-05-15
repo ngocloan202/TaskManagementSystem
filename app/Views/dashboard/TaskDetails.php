@@ -11,6 +11,16 @@ $currentPage = "projects";
   <title><?= $title ?></title>
   <link rel="stylesheet" href="../../../public/css/tailwind.css" />
   <style>
+      .menuItem {
+        margin-bottom: 2rem;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      .menuItem:last-child {
+        margin-bottom: 5px;
+      }
     .custom-textarea {
       width: 100%;
       height: 200px; /* Điều chỉnh chiều cao theo ý muốn */
