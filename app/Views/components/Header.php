@@ -27,20 +27,7 @@
       </svg>
     </button>
     
-    <!-- Logo -->
-    <a href="#" class="flex items-center">
-      <div class="w-8 h-8 rounded-full overflow-hidden mr-2">
-        <img
-          src="../../images/cubeflow-logo.png"
-          alt="CubeFlow Logo"
-          class="w-full h-full object-cover"
-        />
-      </div>
-      <span class="text-white text-lg font-semibold">CubeFlow</span>
-    </a>
-  </div>
-  
-  <!-- Search Box - Centered -->
+    <!-- Search Box - Centered -->
   <div class="flex-grow flex justify-center mx-6">
     <div class="relative w-full max-w-xl">
       <svg
@@ -63,7 +50,6 @@
       />
     </div>
   </div>
-  
   <!-- Right side icons -->
   <div class="flex items-center space-x-3">
     <!-- Notifications -->
@@ -92,5 +78,6 @@
         class="w-9 h-9 object-cover"
       />
     </button>
+  </div>
   </div>
 </header> 
