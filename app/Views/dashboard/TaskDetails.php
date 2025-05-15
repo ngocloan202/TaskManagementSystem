@@ -11,15 +11,12 @@ $currentPage = "projects";
   <title><?= $title ?></title>
   <link rel="stylesheet" href="../../../public/css/tailwind.css" />
   <style>
-    .menuItem {
-      margin-bottom: 2rem;
-      padding: 1rem 1.5rem;
-      display: flex;
-      align-items: center;
+    .custom-textarea {
       width: 100%;
-    }
-    .menuItem:last-child {
-      margin-bottom: 5px;
+      height: 200px; /* Điều chỉnh chiều cao theo ý muốn */
+      border: 1px solid #e5e7eb; /* Màu viền */
+      border-radius: 0.5rem; /* Bo góc */
+      padding: 1rem; /* Khoảng cách bên trong */
     }
   </style>
 </head>
@@ -52,8 +49,8 @@ $currentPage = "projects";
               Quay lại
             </button>
             <div class="space-x-2">
-              <button class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold">Xóa</button>
-              <button class="bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold">Thay đổi</button>
+              <button class="bg-red-600 hover:bg-orange-200 text-white px-4 py-2 rounded-md font-semibold">Xóa</button>
+              <button class="bg-indigo-600 hover:bg-[#2970FF] text-white px-4 py-2 rounded-md font-semibold">Thay đổi</button>
             </div>
           </div>
           
@@ -82,7 +79,8 @@ $currentPage = "projects";
                 </div>
                 <div class="relative">
                   <select class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    <option>Trống</option>
+                    <option>Chọn</option>
+                    <option>Khẩn cấp</option>
                     <option>Cao</option>
                     <option>Trung bình</option>
                     <option>Thấp</option>
@@ -102,7 +100,9 @@ $currentPage = "projects";
                   </svg>
                   <span>Ngày</span>
                 </div>
-                <input type="text" value="04/05/2025 - 14/05/2025" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <input type="date" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <span class="mx-2">-</span>
+                <input type="date" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
               </div>
             </div>
             
@@ -125,7 +125,7 @@ $currentPage = "projects";
         <!-- Task Description -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 class="text-xl font-bold mb-4">Mô tả nhiệm vụ</h2>
-          <textarea class="w-full h-48 border border-gray-200 rounded-lg p-4">
+          <textarea class="custom-textarea">
           </textarea>
         </div>
         
