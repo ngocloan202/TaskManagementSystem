@@ -22,8 +22,8 @@
   <!-- Navigation Menu -->
   <nav class="flex-1 mt-6 px-2 space-y-2">
     <a
-      href="dashboard.php"
-      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "dashboard"
+      href="HomePage.php"
+      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "homepage"
         ? "bg-indigo-50 text-gray-800"
         : "hover:bg-indigo-50 text-gray-800" ?>"
     >
@@ -44,7 +44,7 @@
       <span>Tổng quan</span>
     </a>
     <a
-      href="projects.php"
+      href="ProjectDetail.php"
       class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "projects"
         ? "bg-indigo-50 text-gray-800"
         : "hover:bg-indigo-50 text-gray-800" ?>"
@@ -115,7 +115,7 @@
   <nav class="mt-auto mb-6 w-full">
     <a 
       href="help.php" 
-      class="menuItem hover:bg-[#E8E9FF] space-x-3 w-full <?= $currentPage === "helphelp"
+      class="menuItem hover:bg-[#E8E9FF] space-x-3 w-full <?= $currentPage === "help"
         ? "bg-[#E8E9FF]"
         : "" ?>"
     >

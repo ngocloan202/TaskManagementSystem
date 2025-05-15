@@ -38,40 +38,37 @@ $currentPage = "projects";
         <main class="flex-1 overflow-y-auto bg-gray-100 p-6">
           <!-- Breadcrumb -->
           <div class="mb-6 flex items-center text-gray-600">
-            <a href="#" class="text-indigo-600">Dự án</a>
+            <a href="#" class="text-indigo-600 font-bold">Dự án</a>
             <span class="mx-2">></span>
-            <span>Xây dựng quản lý website</span>
+            <span class="font-bold">Xây dựng quản lý website</span>
           </div>
 
           <!-- Project Details -->
           <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-              <h1 class="text-2xl font-bold">Xây dựng quản lý website</h1>
-              <button class="bg-indigo-600 text-white px-4 py-2 rounded-md">+ Thêm nhiệm vụ</button>
-            </div>
-            
-            <!-- Project Statistics -->
-            <div class="grid grid-cols-3 gap-6 mt-6">
-              <div class="bg-indigo-50 rounded-lg p-4">
-                <h3 class="text-lg font-semibold mb-2">Nhiệm vụ</h3>
-                <div class="flex justify-between">
-                  <span class="text-3xl font-bold text-indigo-600">12</span>
-                  <span class="text-sm text-gray-500">Tổng số</span>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <div class="flex items-center text-gray-600 mb-2">
+                  <span class="font-semibold text-xl text-black">Xây dựng quản lý website</span>
+                </div>
+                <div class="text-gray-500">Xây dựng website để quản lý</div>
+                <div class="flex items-center mt-2">
+                  <span class="font-semibold mr-2">Tiến độ: 68%</span>
+                  <div class="w-60 bg-gray-200 rounded-full h-2 mr-4">
+                    <div class="bg-green-500 h-2 rounded-full" style="width: 68%"></div>
+                  </div>
+                  <button class="bg-gray-200 text-indigo-700 px-3 py-1 rounded ml-2">Bảng</button>
                 </div>
               </div>
-              <div class="bg-green-50 rounded-lg p-4">
-                <h3 class="text-lg font-semibold mb-2">Hoàn thành</h3>
-                <div class="flex justify-between">
-                  <span class="text-3xl font-bold text-green-600">8</span>
-                  <span class="text-sm text-gray-500">66.7%</span>
+              <div class="flex items-center space-x-2">
+                <!-- Avatars -->
+                <div class="flex -space-x-2">
+                  <img src="..." class="w-8 h-8 rounded-full border-2 border-white bg-green-400" />
+                  <img src="..." class="w-8 h-8 rounded-full border-2 border-white bg-blue-400" />
+                  <img src="..." class="w-8 h-8 rounded-full border-2 border-white bg-purple-400" />
                 </div>
-              </div>
-              <div class="bg-red-50 rounded-lg p-4">
-                <h3 class="text-lg font-semibold mb-2">Trễ hạn</h3>
-                <div class="flex justify-between">
-                  <span class="text-3xl font-bold text-red-600">2</span>
-                  <span class="text-sm text-gray-500">16.7%</span>
-                </div>
+                <button id="btnMember" class="flex items-center bg-gray-200 px-3 py-2 rounded hover:bg-gray-300 ml-2">
+                  <svg class="w-5 h-5 mr-1" ...></svg> Quản lý thành viên
+                </button>
               </div>
             </div>
           </div>
@@ -83,6 +80,9 @@ $currentPage = "projects";
               <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold text-blue-600">CẦN LÀM</h2>
                 <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">4</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="size-6 ">
+  <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"></path>
+</svg>
               </div>
               
               <!-- Task Item -->
@@ -148,5 +148,16 @@ $currentPage = "projects";
         </main>
       </div>
     </div>
+
+    <script>
+      // Toggle dialog tạo task
+      document.querySelectorAll('.btn-add-task').forEach(btn => {
+        btn.onclick = () => document.getElementById('createTaskDialog').style.display = 'block';
+      });
+      // Toggle dialog quản lý thành viên
+      document.getElementById('btnMember').onclick = () => {
+        document.getElementById('memberDialog').style.display = 'block';
+      };
+    </script>
   </body>
 </html> 
