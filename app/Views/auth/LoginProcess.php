@@ -1,66 +1,54 @@
 <?php
+ini_set("display_errors", 1);
+ini_set("display_startup_errors", 1);
+error_reporting(E_ALL);
+
 session_start();
 include_once "../../../config/database.php";
+$message = "";
 
-$username = trim($_POST["username"] ?? "");
-$password = trim($_POST["password"] ?? "");
-
-if (empty($username) || empty($password)) {
-    header("Location: login.php?error=" . urlencode("Vui lòng nhập tài khoản và mật khẩu"));
-    exit();
+if (!$connect) {
+  die("Không kết nối được DB: " . $connect->connect_error);
 }
 
-$sql = $connect->prepare("SELECT * FROM users WHERE username = ?");
-$sql->bind_param("s", $username);
-$sql->execute();
-$result = $sql->get_result();
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $username = trim($_POST["username"] ?? "");
+  $password = $_POST["password"] ?? "";
 
-if ($result->num_rows == 0) {
-    error_log("Failed login attempt for username: $username from IP: " . $_SERVER['REMOTE_ADDR']);
-    
-    header("Location: login.php?error=" . urlencode("Tên đăng nhập hoặc mật khẩu không chính xác"));
-    exit();
-}
+  if ($username === "" || $password === "") {
+    $message = "Vui lòng nhập đầy đủ thông tin!";
+  } else {
+    // Truy vấn user (không dùng prepare)
+    $sql = "SELECT * FROM Users WHERE Username='$username'";
+    $result = $connect->query($sql);
 
-$user = $result->fetch_assoc();
-
-$password_type = $user['password_type'] ?? 'md5'; 
-
-if ($password_type === 'bcrypt') {
-    if (password_verify($password, $user['password'])) {
-        login_success($user);
+    if (!$result || $result->num_rows === 0) {
+      $message = "Tên đăng nhập hoặc mật khẩu không chính xác!";
     } else {
-        login_failed($username);
+      $user = $result->fetch_assoc();
+      // Kiểm tra mật khẩu hash (bcrypt)
+      if (md5($password) === $user["Password"]) {
+        // Đăng nhập thành công
+        $_SESSION["user_id"] = $user["UserID"];
+        $_SESSION["username"] = $user["Username"];
+        $_SESSION["role"] = $user["Role"];
+        $_SESSION["fullname"] = $user["FullName"];
+        $_SESSION["avatar"] = $user["Avatar"] ?? "/images/default-avatar.png";
+        $_SESSION["last_activity"] = time();
+        $_SESSION["success"] = "🎉 Đăng nhập thành công!";
+        header("Location: LoginSuccess.php");
+        exit();
+      } else {
+        $message = "Tên đăng nhập hoặc mật khẩu không chính xác!";
+      }
     }
-} else {
-    if (md5($password) === $user['password']) {
-        $secure_hash = password_hash($password, PASSWORD_DEFAULT);
-        $update = $connect->prepare("UPDATE users SET password = ?, password_type = 'bcrypt' WHERE username = ?");
-        $update->bind_param("ss", $secure_hash, $username);
-        $update->execute();
-        
-        login_success($user);
-    } else {
-        login_failed($username);
-    }
+  }
 }
 
-function login_success($user) {
-    session_regenerate_id(true);
-    
-    $_SESSION['username'] = $user['username'];
-    $_SESSION['last_activity'] = time();
-    
-    error_log("Successful login for user: {$user['username']} from IP: " . $_SERVER['REMOTE_ADDR']);
-    
-    header("Location: ../dashboard/HomePage.php");
+if ($message !== "") {
+    $_SESSION["login_error"] = $message;
+    header("Location: Login.php");
     exit();
 }
 
-function login_failed($username) {
-    error_log("Failed login attempt (wrong password) for username: $username from IP: " . $_SERVER['REMOTE_ADDR']);
-    
-    header("Location: login.php?error=" . urlencode("Tên đăng nhập hoặc mật khẩu không chính xác"));
-    exit();
-}
 ?>

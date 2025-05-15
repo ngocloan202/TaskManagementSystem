@@ -33,12 +33,12 @@ $currentPage = "projects";
 <body style="background-color: #f0f2f5;">
   <div class="flex h-screen">
     <!-- Include Sidebar -->
-    <?php include_once('../components/Sidebar.php'); ?>
+    <?php include_once "../components/Sidebar.php"; ?>
     
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Include Header/Topbar -->
-      <?php include_once('../components/Header.php'); ?>
+      <?php include_once "../components/Header.php"; ?>
       
       <!-- Task Details Content -->
       <main class="flex-1 overflow-y-auto bg-gray-100 p-6">

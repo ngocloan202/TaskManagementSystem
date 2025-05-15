@@ -7,12 +7,17 @@
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
   </head>
   <body class="min-h-screen bg-[#EEF0FF] flex items-center justify-center px-4">
-    <?php if (!empty($_GET['error'])): ?>
-      <div class="fixed top-4 left-1/2 -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        <?= htmlspecialchars($_GET['error']) ?>
-      </div>
-    <?php endif; ?>
-    
+      <?php
+      session_start();
+      if (!empty($_SESSION['login_error'])):
+      ?>
+        <div class="fixed top-4 left-1/2 -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <?= htmlspecialchars($_SESSION['login_error']) ?>
+        </div>
+      <?php
+        unset($_SESSION['login_error']); // Xóa để lần sau không hiện nữa
+      endif;
+      ?>
     <div class="relative w-full max-w-sm">
       <!-- Logo circle -->
       <div class="absolute left-1/2 -translate-x-1/2 -top-12">
@@ -32,9 +37,7 @@
         
         <!-- Form -->
         <form action="LoginProcess.php" method="POST" class="space-y-4">
-          <!-- CSRF Protection -->
-          <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(session_id()) ?>" />
-          
+        
           <!-- Username -->
           <div class="flex items-center bg-[#9A94E5] rounded-xl h-12 px-4">
             <svg
