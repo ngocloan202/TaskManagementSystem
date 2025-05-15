@@ -30,7 +30,7 @@
         <!-- Main Content -->
         <main class="flex-1 overflow-y-auto p-6">
           <div class="mb-6 flex items-center text-gray-600">
-            <a href="#" class="text-2xl font-bold" style="color: #3c40c6">Dự án</a>
+            <a href="#" class="text-2xl font-bold" style="color: #3c40c6">Dự án hiện tại</a>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-blue-600 rounded-lg flex items-center justify-center h-64">
