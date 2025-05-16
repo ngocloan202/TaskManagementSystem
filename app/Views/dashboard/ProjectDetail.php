@@ -1,174 +1,180 @@
 <?php
+// app/Views/dashboard/ProjectDetail.php
+session_start();
+require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../../config/SessionInit.php';
+
 $title = "Chi tiết dự án | CubeFlow";
 $currentPage = "projects";
-?>
 
+// 1) Lấy projectId từ URL
+$projectId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($projectId <= 0) {
+    die('Project ID không hợp lệ');
+}
+
+// 2) Query thông tin project + tính tiến độ
+//    tiến độ = completedTasks / totalTasks * 100
+$stmt = $connect->prepare("
+    SELECT 
+      p.ProjectName, 
+      p.ProjectDescription,
+      COUNT(t.TaskID) AS totalTasks,
+      SUM(t.TaskStatusID = 3) AS completedTasks
+    FROM Project p
+    LEFT JOIN Task t ON t.ProjectID = p.ProjectID
+    WHERE p.ProjectID = ?
+    GROUP BY p.ProjectID
+");
+$stmt->bind_param('i', $projectId);
+$stmt->execute();
+$proj = $stmt->get_result()->fetch_assoc();
+if (!$proj) {
+    die('Không tìm thấy dự án');
+}
+$progress = $proj['totalTasks']
+    ? round($proj['completedTasks'] / $proj['totalTasks'] * 100)
+    : 0;
+
+// 3) Query danh sách thành viên
+$mem = $connect->prepare("
+    SELECT u.Avatar 
+    FROM ProjectMembers pm
+    JOIN Users u ON u.UserID = pm.UserID
+    WHERE pm.ProjectID = ?
+    ORDER BY pm.RoleInProject = 'người sở hữu' DESC, pm.JoinedAt
+");
+$mem->bind_param('i', $projectId);
+$mem->execute();
+$members = $mem->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// 4) Query task theo trạng thái
+$taskStmt = $connect->prepare("
+    SELECT 
+      t.TaskID,
+      t.TaskTitle,
+      DATE_FORMAT(t.EndDate, '%d/%m/%Y') AS dueDate,
+      ts.StatusName,
+      CASE ts.StatusName
+        WHEN 'Cần làm' THEN 'bg-blue-600 text-white'
+        WHEN 'Đang làm' THEN 'bg-yellow-600 text-white'
+        WHEN 'Đã làm'  THEN 'bg-green-600 text-white'
+        ELSE 'bg-gray-400 text-white'
+      END AS badgeColor
+    FROM Task t
+    JOIN TaskStatus ts ON ts.TaskStatusID = t.TaskStatusID
+    WHERE t.ProjectID = ?
+    ORDER BY t.EndDate ASC
+");
+$taskStmt->bind_param('i', $projectId);
+$taskStmt->execute();
+$allTasks = $taskStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Phân nhóm
+$tasksByStatus = [
+  'Cần làm'  => [],
+  'Đang làm' => [],
+  'Đã làm'   => [],
+];
+foreach ($allTasks as $tk) {
+  $tasksByStatus[$tk['StatusName']][] = $tk;
+}
+?>
 <!doctype html>
 <html lang="vi">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><?= $title ?></title>
-  <link rel="stylesheet" href="../../../public/css/tailwind.css" />
-  <style>
-    .menuItem {
-      margin-bottom: 2rem;
-      padding: 1rem 1.5rem;
-      display: flex;
-      align-items: center;
-      width: 100%;
-    }
-
-    .menuItem:last-child {
-      margin-bottom: 5px;
-    }
-  </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title><?= htmlspecialchars($title) ?></title>
+  <link rel="stylesheet" href="../../../public/css/tailwind.css"/>
 </head>
-
-<body style="background-color: #f0f2f5">
+<body class="bg-gray-100">
   <div class="flex h-screen">
-    <!-- Include Sidebar -->
-    <?php include_once "../components/Sidebar.php"; ?>
-
-    <!-- Main Content -->
+    <?php include_once __DIR__ . '/components/Sidebar.php'; ?>
     <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Include Header/Topbar -->
-      <?php include_once "../components/Header.php"; ?>
+      <?php include_once __DIR__ . '/components/Header.php'; ?>
 
-      <!-- Main Content - như trong hình -->
-      <main class="flex-1 overflow-y-auto bg-gray-100 p-6">
+      <main class="flex-1 overflow-y-auto p-6">
         <!-- Breadcrumb -->
         <div class="mb-6 flex items-center text-gray-600">
-          <a href="#" class="text-indigo-600 font-bold">Dự án</a>
-          <span class="mx-2">></span>
-          <span class="font-bold">Xây dựng quản lý website</span>
+          <a href="HomePage.php" class="text-indigo-600 font-bold">Dự án</a>
+          <span class="mx-2">›</span>
+          <span class="font-bold"><?= htmlspecialchars($proj['ProjectName']) ?></span>
         </div>
 
-        <!-- Project Details -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <div class="flex items-center text-gray-600 mb-2">
-                <span class="font-semibold text-xl text-black">Xây dựng quản lý website</span>
+        <!-- Project Header -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6 flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-semibold mb-1"><?= htmlspecialchars($proj['ProjectName']) ?></h1>
+            <p class="text-gray-600 mb-3"><?= htmlspecialchars($proj['ProjectDescription']) ?></p>
+            <div class="flex items-center">
+              <span class="font-medium mr-2">Tiến độ: <?= $progress ?>%</span>
+              <div class="w-60 h-2 bg-gray-200 rounded-full mr-4">
+                <div class="h-2 bg-green-500 rounded-full" style="width: <?= $progress ?>%"></div>
               </div>
-              <div class="text-gray-500">Xây dựng website để quản lý</div>
-              <div class="flex items-center mt-2">
-                <span class="font-semibold mr-2">Tiến độ: 68%</span>
-                <div class="w-60 bg-gray-200 rounded-full h-2 mr-4">
-                  <div class="bg-green-500 h-2 rounded-full" style="width: 68%"></div>
-                </div>
-                <button class="bg-gray-200 text-indigo-700 px-3 py-1 rounded ml-2">Bảng</button>
-              </div>
+              <button class="px-3 py-1 bg-gray-200 text-indigo-700 rounded">Bảng</button>
             </div>
-            <div class="flex items-center space-x-2">
-              <!-- Avatars -->
-              <div class="flex -space-x-2">
-                <img src="..." class="w-8 h-8 rounded-full border-2 border-white bg-green-400" />
-                <img src="..." class="w-8 h-8 rounded-full border-2 border-white bg-blue-400" />
-                <img src="..." class="w-8 h-8 rounded-full border-2 border-white bg-purple-400" />
-              </div>
-              <button id="btnMember" class="flex items-center bg-gray-200 px-3 py-2 rounded hover:bg-gray-300 ml-2">
-                <svg class="w-5 h-5 mr-1" ...></svg> Quản lý thành viên
-              </button>
-            </div>
+          </div>
+          <div class="flex items-center -space-x-2">
+            <?php foreach ($members as $m): ?>
+              <img src="../../../public<?= htmlspecialchars($m['Avatar']) ?>"
+                   class="w-8 h-8 rounded-full border-2 border-white" />
+            <?php endforeach; ?>
+            <button id="btnMember"
+                    class="ml-4 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">
+              Quản lý thành viên
+            </button>
           </div>
         </div>
 
-        <!-- Task Lists -->
+        <!-- Task Columns -->
         <div class="grid grid-cols-3 gap-6">
-          <!-- CẦN LÀM -->
-          <div class="bg-white rounded-lg shadow-sm p-4">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-lg font-bold text-blue-600">CẦN LÀM</h2>
-              <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-sm">4</span>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
-                data-slot="icon" class="size-6 ">
-                <path fill-rule="evenodd"
-                  d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z"
-                  clip-rule="evenodd"></path>
-              </svg>
-            </div>
-
-            <!-- Task Item -->
-            <div
-              class="bg-white border border-gray-200 rounded-lg p-4 mb-3 hover:shadow-md transition-shadow cursor-pointer">
-              <h3 class="font-semibold">Viết giao diện Form đăng nhập</h3>
-              <div class="flex justify-between items-center mt-3">
-                <span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-full text-xs">Frontend</span>
-                <span class="text-sm text-gray-500">14/05/2025</span>
+          <?php 
+            $columns = [
+              'Cần làm'  => 'text-blue-600',
+              'Đang làm' => 'text-yellow-600',
+              'Đã làm'   => 'text-green-600',
+            ];
+            foreach ($columns as $status => $headingColor):
+          ?>
+            <div class="bg-white rounded-lg shadow-sm p-4">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold <?= $headingColor ?>"><?= $status ?></h2>
+                <span class="bg-<?= trim($headingColor, 'text-') ?>-100 <?= $headingColor ?> px-2 py-1 rounded text-sm">
+                  <?= count($tasksByStatus[$status]) ?>
+                </span>
+                <button class="text-gray-400 hover:text-gray-600">
+                  <!-- icon plus -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 4v16m8-8H4"/>
+                  </svg>
+                </button>
               </div>
+              <?php foreach ($tasksByStatus[$status] as $task): ?>
+                <div class="border border-gray-200 rounded-lg p-4 mb-3 hover:shadow transition cursor-pointer">
+                  <h3 class="font-semibold"><?= htmlspecialchars($task['TaskTitle']) ?></h3>
+                  <div class="flex justify-between items-center mt-2">
+                    <span class="px-2 py-1 rounded-full text-xs <?= $task['badgeColor'] ?>">
+                      <?= $status === 'Đã làm' ? 'Hoàn thành' : $status ?>
+                    </span>
+                    <span class="text-gray-500 text-sm"><?= $task['dueDate'] ?></span>
+                  </div>
+                </div>
+              <?php endforeach; ?>
             </div>
-
-            <div
-              class="bg-white border border-gray-200 rounded-lg p-4 mb-3 hover:shadow-md transition-shadow cursor-pointer">
-              <h3 class="font-semibold">Thiết kế database</h3>
-              <div class="flex justify-between items-center mt-3">
-                <span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full text-xs">Database</span>
-                <span class="text-sm text-gray-500">20/05/2025</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- ĐANG LÀM -->
-          <div class="bg-white rounded-lg shadow-sm p-4">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-lg font-bold text-yellow-600">ĐANG LÀM</h2>
-              <span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded text-sm">2</span>
-            </div>
-
-            <!-- Task Item -->
-            <div
-              class="bg-white border border-gray-200 rounded-lg p-4 mb-3 hover:shadow-md transition-shadow cursor-pointer">
-              <h3 class="font-semibold">Xây dựng API endpoints</h3>
-              <div class="flex justify-between items-center mt-3">
-                <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs">Backend</span>
-                <span class="text-sm text-gray-500">10/05/2025</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- HOÀN THÀNH -->
-          <div class="bg-white rounded-lg shadow-sm p-4">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-lg font-bold text-green-600">HOÀN THÀNH</h2>
-              <span class="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">6</span>
-            </div>
-
-            <!-- Task Item -->
-            <div
-              class="bg-white border border-gray-200 rounded-lg p-4 mb-3 hover:shadow-md transition-shadow cursor-pointer">
-              <h3 class="font-semibold">Wireframing</h3>
-              <div class="flex justify-between items-center mt-3">
-                <span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-full text-xs">Design</span>
-                <span class="text-sm text-gray-500">01/05/2025</span>
-              </div>
-            </div>
-
-            <div
-              class="bg-white border border-gray-200 rounded-lg p-4 mb-3 hover:shadow-md transition-shadow cursor-pointer">
-              <h3 class="font-semibold">Research & Planning</h3>
-              <div class="flex justify-between items-center mt-3">
-                <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs">Planning</span>
-                <span class="text-sm text-gray-500">28/04/2025</span>
-              </div>
-            </div>
-          </div>
+          <?php endforeach; ?>
         </div>
       </main>
     </div>
   </div>
 
   <script>
-    // Toggle dialog tạo task
-    document.querySelectorAll('.btn-add-task').forEach(btn => {
-      btn.onclick = () => document.getElementById('createTaskDialog').style.display = 'block';
+    // Khi click Quản lý thành viên thì show dialog (bạn tự thêm dialog HTML)
+    document.getElementById('btnMember').addEventListener('click', () => {
+      document.getElementById('memberDialog').classList.remove('hidden');
     });
-    // Toggle dialog quản lý thành viên
-    document.getElementById('btnMember').onclick = () => {
-      document.getElementById('memberDialog').style.display = 'block';
-    };
   </script>
 </body>
-
 </html>
