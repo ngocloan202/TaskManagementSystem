@@ -70,6 +70,9 @@ $taskStmt = $connect->prepare("
       t.TaskTitle,
       DATE_FORMAT(t.EndDate, '%d/%m/%Y') AS dueDate,
       ts.StatusName,
+      u.UserID,
+      u.FullName AS AssignedToName,
+      u.Avatar,
       CASE ts.StatusName
         WHEN 'Cần làm' THEN 'bg-blue-600 text-white'
         WHEN 'Đang làm' THEN 'bg-yellow-600 text-white'
@@ -78,9 +81,14 @@ $taskStmt = $connect->prepare("
       END AS badgeColor
     FROM Task t
     JOIN TaskStatus ts ON ts.TaskStatusID = t.TaskStatusID
+    LEFT JOIN TaskAssignment ta ON ta.TaskID = t.TaskID
+    LEFT JOIN Users u ON u.UserID = ta.UserID
     WHERE t.ProjectID = ?
     ORDER BY t.EndDate ASC
 ");
+if (!$taskStmt) {
+    die("Lỗi SQL: " . $connect->error);
+}
 $taskStmt->bind_param("i", $projectId);
 $taskStmt->execute();
 $allTasks = $taskStmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -149,7 +157,7 @@ foreach ($allTasks as $tk) {
           </div>
           <div class="flex items-center -space-x-2">
             <?php foreach ($members as $m): ?>
-              <img src="../../../public<?= htmlspecialchars($m["Avatar"]) ?>"
+              <img src="../../../<?= htmlspecialchars($m["Avatar"]) ?>"
                 class="w-8 h-8 rounded-full border-2 border-white" />
             <?php endforeach; ?>
             <button id="btnMember" class="ml-4 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">
@@ -182,19 +190,17 @@ foreach ($allTasks as $tk) {
 
               <!-- Tasks for this status -->
               <div class="space-y-2">
-                <?php foreach ($tasks as $task):
-                  if ($task["StatusName"] === $status): ?>
-                    <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
-                      <h4 class="font-medium"><?= htmlspecialchars($task["TaskName"]) ?></h4>
-                      <?php if ($task["AssignedTo"]): ?>
-                        <div class="mt-2 flex items-center text-sm text-gray-500">
-                          <img src="../../<?= htmlspecialchars($task["Avatar"]) ?>" class="w-6 h-6 rounded-full mr-2">
-                          <span><?= htmlspecialchars($task["AssignedToName"]) ?></span>
-                        </div>
-                      <?php endif; ?>
-                    </div>
-                  <?php endif;
-                endforeach; ?>
+                <?php foreach ($tasksByStatus[$status] as $task): ?>
+                  <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                    <h4 class="font-medium"><?= htmlspecialchars($task["TaskTitle"]) ?></h4>
+                    <?php if ($task["UserID"]): ?>
+                      <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <img src="../..<?= htmlspecialchars($task["Avatar"]) ?>" class="w-6 h-6 rounded-full mr-2">
+                        <span><?= htmlspecialchars($task["AssignedToName"]) ?></span>
+                      </div>
+                    <?php endif; ?>
+                  </div>
+                <?php endforeach; ?>
               </div>
             </div>
             <?php
