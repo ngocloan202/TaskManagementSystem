@@ -5,14 +5,29 @@ session_start();
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
-
 $title = "Chi tiết dự án | CubeFlow";
 $currentPage = "dashboard";
 
 // 1) Lấy projectId từ URL
-$projectId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$projectId = isset($_GET["id"]) ? intval($_GET["id"]) : 0;
 if ($projectId <= 0) {
-    die('Project ID không hợp lệ');
+  die("Project ID không hợp lệ");
+}
+
+// Add near the top of file after database connection
+$taskCounts = [];
+$stmt = $connect->prepare("
+    SELECT ts.StatusName, COUNT(t.TaskID) as TaskCount
+    FROM TaskStatus ts
+    LEFT JOIN Task t ON ts.TaskStatusID = t.TaskStatusID 
+    AND t.ProjectID = ?
+    GROUP BY ts.StatusName
+");
+$stmt->bind_param("i", $projectId);
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+  $taskCounts[$row["StatusName"]] = $row["TaskCount"];
 }
 
 // 2) Query thông tin project + tính tiến độ
@@ -28,15 +43,13 @@ $stmt = $connect->prepare("
     WHERE p.ProjectID = ?
     GROUP BY p.ProjectID
 ");
-$stmt->bind_param('i', $projectId);
+$stmt->bind_param("i", $projectId);
 $stmt->execute();
 $proj = $stmt->get_result()->fetch_assoc();
 if (!$proj) {
-    die('Không tìm thấy dự án');
+  die("Không tìm thấy dự án");
 }
-$progress = $proj['totalTasks']
-    ? round($proj['completedTasks'] / $proj['totalTasks'] * 100)
-    : 0;
+$progress = $proj["totalTasks"] ? round(($proj["completedTasks"] / $proj["totalTasks"]) * 100) : 0;
 
 // 3) Query danh sách thành viên
 $mem = $connect->prepare("
@@ -46,7 +59,7 @@ $mem = $connect->prepare("
     WHERE pm.ProjectID = ?
     ORDER BY pm.RoleInProject = 'người sở hữu' DESC, pm.JoinedAt
 ");
-$mem->bind_param('i', $projectId);
+$mem->bind_param("i", $projectId);
 $mem->execute();
 $members = $mem->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -68,59 +81,64 @@ $taskStmt = $connect->prepare("
     WHERE t.ProjectID = ?
     ORDER BY t.EndDate ASC
 ");
-$taskStmt->bind_param('i', $projectId);
+$taskStmt->bind_param("i", $projectId);
 $taskStmt->execute();
 $allTasks = $taskStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 // Phân nhóm
 $tasksByStatus = [
-  'Cần làm'  => [],
-  'Đang làm' => [],
-  'Đã làm'   => [],
+  "Cần làm" => [],
+  "Đang làm" => [],
+  "Đã làm" => [],
 ];
 foreach ($allTasks as $tk) {
-  $tasksByStatus[$tk['StatusName']][] = $tk;
+  $tasksByStatus[$tk["StatusName"]][] = $tk;
 }
 ?>
 <!doctype html>
 <html lang="vi">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title><?= htmlspecialchars($title) ?></title>
-  <link rel="stylesheet" href="../../../public/css/tailwind.css"/>
+  <link rel="stylesheet" href="../../../public/css/tailwind.css" />
   <style>
-      .menuItem {
-        margin-bottom: 2rem;
-        padding: 1rem 1.5rem;
-        display: flex;
-        align-items: center;
-        width: 100%;
-      }
-      .menuItem:last-child {
-        margin-bottom: 5px;
-      }
+    .menuItem {
+      margin-bottom: 2rem;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .menuItem:last-child {
+      margin-bottom: 5px;
+    }
   </style>
 </head>
+
 <body class="bg-gray-100">
   <div class="flex h-screen">
-    <?php include_once __DIR__ . '/../components/Sidebar.php'; ?>
+    <?php include_once __DIR__ . "/../components/Sidebar.php"; ?>
     <div class="flex-1 flex flex-col overflow-hidden">
-      <?php include_once __DIR__ . '/../components/Header.php'; ?>
+      <?php include_once __DIR__ . "/../components/Header.php"; ?>
 
       <main class="flex-1 overflow-y-auto p-6">
         <!-- Breadcrumb -->
         <div class="mb-6 flex items-center text-gray-600">
           <a href="HomePage.php" class="text-indigo-600 font-bold">Dự án</a>
           <span class="mx-2">›</span>
-          <span class="font-bold"><?= htmlspecialchars($proj['ProjectName']) ?></span>
+          <span class="font-bold"><?= htmlspecialchars($proj["ProjectName"]) ?></span>
         </div>
 
         <!-- Project Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6 flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-semibold mb-1"><?= htmlspecialchars($proj['ProjectName']) ?></h1>
-            <p class="text-gray-600 mb-3"><?= htmlspecialchars($proj['ProjectDescription']) ?></p>
+            <h1 class="text-2xl font-semibold mb-1"><?= htmlspecialchars(
+              $proj["ProjectName"]
+            ) ?></h1>
+            <p class="text-gray-600 mb-3"><?= htmlspecialchars($proj["ProjectDescription"]) ?></p>
             <div class="flex items-center">
               <span class="font-medium mr-2">Tiến độ: <?= $progress ?>%</span>
               <div class="w-60 h-2 bg-gray-200 rounded-full mr-4">
@@ -131,11 +149,10 @@ foreach ($allTasks as $tk) {
           </div>
           <div class="flex items-center -space-x-2">
             <?php foreach ($members as $m): ?>
-              <img src="../../../public<?= htmlspecialchars($m['Avatar']) ?>"
-                   class="w-8 h-8 rounded-full border-2 border-white" />
+              <img src="../../../public<?= htmlspecialchars($m["Avatar"]) ?>"
+                class="w-8 h-8 rounded-full border-2 border-white" />
             <?php endforeach; ?>
-            <button id="btnMember"
-                    class="ml-4 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">
+            <button id="btnMember" class="ml-4 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">
               Quản lý thành viên
             </button>
           </div>
@@ -143,52 +160,54 @@ foreach ($allTasks as $tk) {
 
         <!-- Task Columns -->
         <div class="grid grid-cols-3 gap-6">
-          <?php 
-            $columns = [
-              'Cần làm'  => 'text-blue-600',
-              'Đang làm' => 'text-yellow-600',
-              'Đã làm'   => 'text-green-600',
-            ];
-            foreach ($columns as $status => $headingColor):
-          ?>
+          <?php
+          $columns = [
+            "Cần làm" => ["color" => "text-blue-600", "bg" => "bg-blue-50"],
+            "Đang làm" => ["color" => "text-yellow-600", "bg" => "bg-yellow-50"],
+            "Đã làm" => ["color" => "text-green-600", "bg" => "bg-green-50"],
+          ];
+          foreach ($columns as $status => $styles):
+            $count = $taskCounts[$status] ?? 0; ?>
             <div class="bg-white rounded-lg shadow-sm p-4">
               <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold <?= $headingColor ?>"><?= $status ?></h2>
-                <span class="bg-<?= trim($headingColor, 'text-') ?>-100 <?= $headingColor ?> px-2 py-1 rounded text-sm">
-                  <?= count($tasksByStatus[$status]) ?>
-                </span>
-                <button class="text-gray-400 hover:text-gray-600">
-                  <!-- icon plus -->
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
-                       viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M12 4v16m8-8H4"/>
-                  </svg>
-                </button>
-              </div>
-              <?php foreach ($tasksByStatus[$status] as $task): ?>
-                <div class="border border-gray-200 rounded-lg p-4 mb-3 hover:shadow transition cursor-pointer">
-                  <h3 class="font-semibold"><?= htmlspecialchars($task['TaskTitle']) ?></h3>
-                  <div class="flex justify-between items-center mt-2">
-                    <span class="px-2 py-1 rounded-full text-xs <?= $task['badgeColor'] ?>">
-                      <?= $status === 'Đã làm' ? 'Hoàn thành' : $status ?>
-                    </span>
-                    <span class="text-gray-500 text-sm"><?= $task['dueDate'] ?></span>
-                  </div>
+                <div class="flex items-center">
+                  <h3 class="font-semibold <?= $styles["color"] ?>"><?= $status ?></h3>
+                  <span class="ml-2 px-2 py-0.5 rounded-full text-sm <?= $styles["bg"] ?> <?= $styles[
+                       "color"
+                     ] ?>">
+                    <?= $count ?>
+                  </span>
                 </div>
-              <?php endforeach; ?>
-            </div>
-          <?php endforeach; ?>
-        </div>
-      </main>
-    </div>
-  </div>
+              </div>
 
-  <script>
-    // Khi click Quản lý thành viên thì show dialog (bạn tự thêm dialog HTML)
-    document.getElementById('btnMember').addEventListener('click', () => {
-      document.getElementById('memberDialog').classList.remove('hidden');
-    });
-  </script>
+              <!-- Tasks for this status -->
+              <div class="space-y-2">
+                <?php foreach ($tasks as $task):
+                  if ($task["StatusName"] === $status): ?>
+                    <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                      <h4 class="font-medium"><?= htmlspecialchars($task["TaskName"]) ?></h4>
+                      <?php if ($task["AssignedTo"]): ?>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                          <img src="../../<?= htmlspecialchars($task["Avatar"]) ?>" class="w-6 h-6 rounded-full mr-2">
+                          <span><?= htmlspecialchars($task["AssignedToName"]) ?></span>
+                        </div>
+                      <?php endif; ?>
+                    </div>
+                  <?php endif;
+                endforeach; ?>
+              </div>
+            </div>
+            <?php
+          endforeach;
+          ?>
+        </div>
+
+        <script>
+          // Khi click Quản lý thành viên thì show dialog (bạn tự thêm dialog HTML)
+          document.getElementById('btnMember').addEventListener('click', () => {
+            document.getElementById('memberDialog').classList.remove('hidden');
+          });
+        </script>
 </body>
+
 </html>
