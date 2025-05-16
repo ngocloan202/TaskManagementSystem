@@ -116,7 +116,7 @@ if ($userId) {
                             <div class="text-gray-500 text-sm">Hiện không có hoạt động nào</div>
                         <?php else: ?>
                             <?php foreach ($activities as $activity): ?>
-                                <div class="flex items-start space-x-3">
+                                <div class="flex items-start space-x-3 bg-white rounded-xl shadow p-4 mb-2 hover:bg-gray-50 transition border-l-4 border-blue-500">
                                     <?php if ($activity['activityType'] === 'statusChange'): ?>
                                         <div class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
                                             <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
