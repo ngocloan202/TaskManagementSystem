@@ -2,7 +2,6 @@
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
-// Kiểm tra đăng nhập
 if (!isset($_SESSION["user_id"])) {
     header("Location: /app/Views/auth/login.php");
     exit();
@@ -14,14 +13,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $image = clean_input($_POST["image"] ?? "");
     $userId = $_SESSION["user_id"];
 
-    // Validate dữ liệu
     if (empty($projectName)) {
         $_SESSION["error"] = "Vui lòng nhập tên dự án!";
         header("Location: /app/Views/dashboard/HomePage.php");
         exit();
     }
 
-    // Kiểm tra tên dự án đã tồn tại chưa
     $checkSql = "SELECT ProjectID FROM Project WHERE ProjectName = ?";
     $checkStmt = $connect->prepare($checkSql);
     $checkStmt->bind_param("s", $projectName);
@@ -35,15 +32,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $checkStmt->close();
 
-    // Thêm dự án mới
     $sql = "INSERT INTO Project (ProjectName, ProjectDescription, CreatedBy, StartDate) VALUES (?, ?, ?, NOW())";
     $statement = $connect->prepare($sql);
     $statement->bind_param("ssi", $projectName, $description, $userId);
     
     if ($statement->execute()) {
         $projectId = $connect->insert_id;
-        
-        // Thêm người tạo vào ProjectMembers với vai trò người sở hữu
+    
         $memberSql = "INSERT INTO ProjectMembers (ProjectID, UserID, RoleInProject, JoinedAt) VALUES (?, ?, 'người sở hữu', NOW())";
         $memberStmt = $connect->prepare($memberSql);
         $memberStmt->bind_param("ii", $projectId, $userId);
