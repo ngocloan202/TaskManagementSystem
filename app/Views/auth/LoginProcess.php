@@ -1,9 +1,6 @@
 <?php
-ini_set("display_errors", 1);
-ini_set("display_startup_errors", 1);
-error_reporting(E_ALL);
+include_once "../../../config/SessionInit.php";
 
-session_start();
 include_once "../../../config/database.php";
 $message = "";
 
@@ -33,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION["username"] = $user["Username"];
         $_SESSION["role"] = $user["Role"];
         $_SESSION["fullname"] = $user["FullName"];
-        $_SESSION["avatar"] = $user["Avatar"] ?? "/images/default-avatar.png";
+        $_SESSION["avatar"] = $user["Avatar"] ?? "/public/images/default-avatar.png";
         $_SESSION["last_activity"] = time();
         $_SESSION["success"] = "🎉 Đăng nhập thành công!";
         header("Location: LoginSuccess.php");
@@ -46,9 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 if ($message !== "") {
-    $_SESSION["login_error"] = $message;
-    header("Location: login.php");
-    exit();
+  $_SESSION["login_error"] = $message;
+  header("Location: login.php");
+  exit();
 }
 
 ?>

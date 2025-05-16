@@ -9,22 +9,21 @@
   <body class="min-h-screen bg-[#EEF0FF] flex items-center justify-center px-4">
       <?php
       session_start();
-      if (!empty($_SESSION['login_error'])):
-      ?>
+      if (!empty($_SESSION["login_error"])): ?>
         <div class="fixed top-4 left-1/2 -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <?= htmlspecialchars($_SESSION['login_error']) ?>
+          <?= htmlspecialchars($_SESSION["login_error"]) ?>
         </div>
-      <?php
-        unset($_SESSION['login_error']); // Xóa để lần sau không hiện nữa
-      endif;
-      ?>
+      <?php unset($_SESSION["login_error"]);endif;
+
+// Xóa để lần sau không hiện nữa
+?>
     <div class="relative w-full max-w-sm">
       <!-- Logo circle -->
       <div class="absolute left-1/2 -translate-x-1/2 -top-12">
         <div
           class="w-24 h-24 bg-[#EEF0FF] rounded-full border-3 border-[#7C64F0] flex items-center justify-center shadow-md"
         >
-          <img src="../../images/cubeflow-logo.png" alt="Cube Flow" class="w-23 h-23 rounded-full" />
+          <img src="../../../public/images/cubeflow-logo.png" alt="Cube Flow" class="w-23 h-23 rounded-full" />
         </div>
       </div>
       

@@ -84,8 +84,8 @@
     $registerSuccess = false;
 
     if (!$connect) {
-      die("Không kết nối được DB: " . $connect -> connect_error);
-        exit();
+      die("Không kết nối được DB: " . $connect->connect_error);
+      exit();
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -114,7 +114,7 @@
           $message = "Username hoặc Email đã tồn tại!";
         } else {
           $hashed = md5($password);
-          $sql = "INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Address)
+          $sql = "INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Avatar)
                     VALUES ('$username', '$hashed', '$email', 'USER', '$fullname', '', '')";
           if ($connect->query($sql) === true) {
             $registerSuccess = true;
@@ -128,7 +128,7 @@
     <div class="registerContainer bg-white rounded-lg relative">
         <!-- Logo -->
         <div class="logoContainer absolute -top-16 left-1/2" style="transform: translateX(-50%);">
-            <img src="../../images/cubeflow-logo.png" alt="Logo"
+            <img src="../../../public/images/cubeflow-logo.png" alt="Logo"
                 class="w-24 h-24 rounded-full border-2 border-[#A6A9FC]">
         </div>
 
