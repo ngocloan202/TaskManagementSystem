@@ -109,6 +109,19 @@ function getActivityIcon($type) {
 </svg>';
     }
 }
+
+function getStatusColor($status) {
+    switch (mb_strtolower($status)) {
+        case 'cần làm':
+            return 'text-blue-600';
+        case 'đang làm':
+            return 'text-yellow-600';
+        case 'đã làm':
+            return 'text-green-600';
+        default:
+            return 'text-gray-600';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -153,8 +166,12 @@ function getActivityIcon($type) {
                                                 <span class="font-semibold"><?= htmlspecialchars($activity['FullName']) ?></span>
                                                 đã thay đổi trạng thái của nhiệm vụ
                                                 <span class="font-semibold"><?= htmlspecialchars($activity['TaskTitle']) ?></span>
-                                                từ <span class="text-gray-600"><?= htmlspecialchars($activity['OldStatus']) ?></span>
-                                                thành <span class="text-gray-600"><?= htmlspecialchars($activity['NewStatus']) ?></span>
+                                                từ <span class="font-bold <?= getStatusColor($activity['OldStatus']) ?>">
+                                                    <?= htmlspecialchars($activity['OldStatus']) ?>
+                                                </span>
+                                                thành <span class="font-bold <?= getStatusColor($activity['NewStatus']) ?>">
+                                                    <?= htmlspecialchars($activity['NewStatus']) ?>
+                                                </span>
                                             </p>
                                             <p class="text-xs text-gray-500 mt-1">
                                                 <?= date('d/m/Y H:i', strtotime($activity['ChangedAt'])) ?>
