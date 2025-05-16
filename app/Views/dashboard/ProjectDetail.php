@@ -87,7 +87,7 @@ $taskStmt = $connect->prepare("
     ORDER BY t.EndDate ASC
 ");
 if (!$taskStmt) {
-    die("Lỗi SQL: " . $connect->error);
+  die("Lỗi SQL: " . $connect->error);
 }
 $taskStmt->bind_param("i", $projectId);
 $taskStmt->execute();
@@ -186,6 +186,14 @@ foreach ($allTasks as $tk) {
                     <?= $count ?>
                   </span>
                 </div>
+                <button
+                  class="p-1 rounded-full <?= $styles["bg"] ?> <?= $styles["color"] ?> hover:opacity-75 transition-opacity"
+                  onclick="addTask('<?= $status ?>')">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
               </div>
 
               <!-- Tasks for this status -->
