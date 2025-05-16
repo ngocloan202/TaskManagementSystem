@@ -1,4 +1,7 @@
-<?php $currentPage = "dashboard"; ?>
+<?php
+require_once '../../../config/SessionInit.php';
+$currentPage = "dashboard";
+?>
 <!doctype html>
 <html lang="vi">
   <head>

@@ -1,11 +1,3 @@
-<?php
-/**
- * Sidebar Component
- * 
- * @param string $currentPage Trang hiện tại để highlight menu tương ứng
- */
-?>
-
 <!-- Sidebar -->
 <aside class="bg-white w-64 border-r text-black font-semibold flex flex-col">
   <!-- Branding -->
