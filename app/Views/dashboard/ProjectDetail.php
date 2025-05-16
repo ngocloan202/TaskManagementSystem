@@ -1,11 +1,13 @@
 <?php
 // app/Views/dashboard/ProjectDetail.php
 session_start();
-require_once __DIR__ . '/../../../config/database.php';
-require_once __DIR__ . '/../../../config/SessionInit.php';
+
+require_once "../../../config/SessionInit.php";
+require_once "../../../config/database.php";
+
 
 $title = "Chi tiết dự án | CubeFlow";
-$currentPage = "projects";
+$currentPage = "dashboard";
 
 // 1) Lấy projectId từ URL
 $projectId = isset($_GET['id']) ? intval($_GET['id']) : 0;

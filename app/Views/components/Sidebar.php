@@ -86,7 +86,7 @@ if ($userId) {
       <ul id="projectList" class="ml-6 mt-1 space-y-1 hidden">
         <?php foreach ($projects as $p): ?>
           <li>
-            <a href="../projects/ProjectDetail.php?id=<?= $p["ProjectID"] ?>"
+            <a href="../dashboard/ProjectDetail.php?id=<?= $p["ProjectID"] ?>"
                class="block px-4 py-2 rounded hover:bg-[#FFE2D2] text-gray-700">
                 <svg xmlns="http://www.w3.org/2000/svg"
                viewBox="0 0 24 24"
