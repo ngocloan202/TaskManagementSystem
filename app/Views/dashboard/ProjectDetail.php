@@ -89,6 +89,18 @@ foreach ($allTasks as $tk) {
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title><?= htmlspecialchars($title) ?></title>
   <link rel="stylesheet" href="../../../public/css/tailwind.css"/>
+  <style>
+      .menuItem {
+        margin-bottom: 2rem;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      .menuItem:last-child {
+        margin-bottom: 5px;
+      }
+  </style>
 </head>
 <body class="bg-gray-100">
   <div class="flex h-screen">
