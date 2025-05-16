@@ -64,14 +64,14 @@ if ($userId) {
                         ORDER BY ta.AssignedAt DESC
                         LIMIT 5";
 
-        $stmt = $connect->prepare($assignmentQuery);
-        $stmt->bind_param($types, ...$projectIds);
-        $stmt->execute();
-        $assignmentResult = $stmt->get_result();
+        $statement = $connect->prepare($assignmentQuery);
+        $statement->bind_param($types, ...$projectIds);
+        $statement->execute();
+        $assignmentResult = $statement->get_result();
         while ($row = $assignmentResult->fetch_assoc()) {
             $activities[] = $row;
         }
-        $stmt->close();
+        $statement->close();
 
         // Sort all activities by date
         usort($activities, function($a, $b) {
