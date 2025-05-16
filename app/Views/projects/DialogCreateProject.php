@@ -23,7 +23,7 @@
   </div>
 
   <!-- Body / Form -->
-  <form action="/CreateProjectProcess.php" method="POST" class="px-6 pb-6 pt-4 space-y-4">
+  <form action="/app/Views/projects/CreateProjectProcess.php" method="POST" class="px-6 pb-6 pt-4 space-y-4">
     <!-- Tên dự án -->
     <div class="flex items-center bg-indigo-50 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-indigo-300">
       <svg
