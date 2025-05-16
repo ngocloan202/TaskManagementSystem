@@ -92,9 +92,9 @@ foreach ($allTasks as $tk) {
 </head>
 <body class="bg-gray-100">
   <div class="flex h-screen">
-    <?php include_once __DIR__ . '/components/Sidebar.php'; ?>
+    <?php include_once __DIR__ . '/../components/Sidebar.php'; ?>
     <div class="flex-1 flex flex-col overflow-hidden">
-      <?php include_once __DIR__ . '/components/Header.php'; ?>
+      <?php include_once __DIR__ . '/../components/Header.php'; ?>
 
       <main class="flex-1 overflow-y-auto p-6">
         <!-- Breadcrumb -->
