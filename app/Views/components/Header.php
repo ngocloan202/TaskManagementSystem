@@ -39,7 +39,9 @@
     <!-- Avatar/Profile button with dropdown -->
     <div class="relative inline-block text-left">
       <button id="profileBtn" class="flex items-center focus:outline-none">
-        <img src="<?= htmlspecialchars($_SESSION["avatar"] ?? "/public/images/default-avatar.png") ?>" alt="Avatar"
+        <img src="<?= htmlspecialchars(
+          $_SESSION["avatar"] ?? "/public/images/default-avatar.png"
+        ) ?>" alt="Avatar"
           class="w-9 h-9 object-cover rounded-full border-2 border-white" />
       </button>
 
@@ -150,7 +152,9 @@
     <div class="h-28 flex items-center justify-center bg-indigo-200">
       <div class="w-20 h-20 rounded-full border-4 border-black flex items-center justify-center bg-[#EEF0FF] shadow-md">
         <img id="profileAvatar"
-          src="<?= htmlspecialchars($_SESSION["avatar"] ?? "/public/images/default-avatar.png") ?>" alt="Avatar"
+          src="<?= htmlspecialchars(
+            $_SESSION["avatar"] ?? "/public/images/default-avatar.png"
+          ) ?>" alt="Avatar"
           class="object-cover w-full h-full rounded-full" />
       </div>
     </div>
@@ -176,16 +180,12 @@
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="email">Email</label>
-          <input id="email" type="email" value="<?= htmlspecialchars(
-            $_SESSION["email"] ?? ""
-          ) ?>"
+          <input id="email" type="email" value="<?= htmlspecialchars($_SESSION["email"] ?? "") ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="phone">Số điện thoại</label>
-          <input id="phone" type="tel" value="<?= htmlspecialchars(
-            $_SESSION["phone"] ?? ""
-          ) ?>"
+          <input id="phone" type="tel" value="<?= htmlspecialchars($_SESSION["phone"] ?? "") ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
