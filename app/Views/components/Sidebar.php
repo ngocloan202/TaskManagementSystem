@@ -1,7 +1,30 @@
+<?php
+require_once "../../../config/SessionInit.php";
+require_once "../../../config/Database.php";
+
+$userId = $_SESSION["user_id"] ?? null;
+$projects = [];
+if ($userId) {
+  // Fetch projects this user is a member of
+  $statement = $connect->prepare(
+    "SELECT p.ProjectID, p.ProjectName
+         FROM ProjectMembers pm, Project p
+         WHERE pm.ProjectID = p.ProjectID and pm.UserID = ?"
+  );
+  $statement->bind_param("i", $userId);
+  $statement->execute();
+  $result = $statement->get_result();
+  while ($row = $result->fetch_assoc()) {
+    $projects[] = $row;
+  }
+  $statement->close();
+}
+?>
+
 <!-- Sidebar -->
 <aside class="bg-white w-64 border-r text-black font-semibold flex flex-col">
   <!-- Branding -->
-  <div class="px-6 py-2 flex items-center space-x-3 bg-[#3C40C6] text-white h-14">
+  <div class="px-6 py-2 flex items-center space-x-3 bg-[#0A1A44] text-white h-14">
     <div class="w-10 h-10 rounded-full overflow-hidden">
       <img
         src="../../../public/images/cubeflow-logo.png"
@@ -17,12 +40,12 @@
       href="HomePage.php"
       class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "homepage"
         ? "bg-indigo-50 text-gray-800"
-        : "hover:bg-indigo-50 text-gray-800" ?>"
+        : "hover:bg-indigo-200 text-gray-800" ?>"
     >
       <!-- Home Icon -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
+        class="w-6 h-6 mr-3 flex-shrink-0" style="color: #0A1A44;"
         fill="currentColor"
         viewBox="0 0 24 24"
       >
@@ -35,16 +58,13 @@
       </svg>
       <span>Tổng quan</span>
     </a>
-    <a
-      href="ProjectDetail.php"
-      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "projects"
-        ? "bg-indigo-50 text-gray-800"
-        : "hover:bg-indigo-50 text-gray-800" ?>"
-    >
-      <!-- Projects Icon -->
-      <svg
+
+    <!-- Collapsible "Dự án" -->
+    <div>
+      <button id="projectToggle" class="flex items-center w-full px-4 py-3 rounded-lg hover:bg-indigo-200 text-gray-800 focus:outline-none">
+        <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
+        class="w-6 h-6 mr-3 flex-shrink-0" style="color: #0A1A44;"
         fill="currentColor"
         viewBox="0 0 24 24"
       >
@@ -59,17 +79,44 @@
         />
       </svg>
       <span>Dự án</span>
-    </a>
+        <svg id="projectArrow" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 ml-3 text-indigo-600 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <ul id="projectList" class="ml-6 mt-1 space-y-1 hidden">
+        <?php foreach ($projects as $p): ?>
+          <li>
+            <a href="../projects/ProjectDetail.php?id=<?= $p["ProjectID"] ?>"
+               class="block px-4 py-2 rounded hover:bg-[#FFE2D2] text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24"
+               fill="currentColor"
+               class="w-5 h-5 flex-shrink-0 mr-2"
+               aria-hidden="true"
+               data-slot="icon"
+               style="color: #F15A29">
+            <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z"/>
+          </svg>
+              <?= htmlspecialchars($p["ProjectName"]) ?>
+            </a>
+          </li>
+        <?php endforeach; ?>
+        <?php if (empty($projects)): ?>
+          <li class="px-4 py-2 text-gray-500">Chưa có dự án</li>
+        <?php endif; ?>
+      </ul>
+    </div>
+
     <a
       href="activities.php"
       class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "activities"
         ? "bg-indigo-50 text-gray-800"
-        : "hover:bg-indigo-50 text-gray-800" ?>"
+        : "hover:bg-indigo-200 text-gray-800" ?>"
     >
       <!-- Activity Icon -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
+        class="w-6 h-6 mr-3 flex-shrink-0" style="color: #0A1A44;"
         fill="currentColor"
         viewBox="0 0 24 24"
       >
@@ -85,12 +132,12 @@
       href="schedule.php"
       class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "schedule"
         ? "bg-indigo-50 text-gray-800"
-        : "hover:bg-indigo-50 text-gray-800" ?>"
+        : "hover:bg-indigo-200 text-gray-800" ?>"
     >
       <!-- Schedule Icon -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
+        class="w-6 h-6 mr-3 flex-shrink-0" style="color: #0A1A44;"
         fill="currentColor"
         viewBox="0 0 24 24"
       >
@@ -107,14 +154,26 @@
   <nav class="mt-auto mb-6 w-full">
     <a 
       href="help.php" 
-      class="menuItem hover:bg-[#E8E9FF] space-x-3 w-full <?= $currentPage === "help"
-        ? "bg-[#E8E9FF]"
+      class="menuItem hover:bg-[#A8B5D6] space-x-3 w-full <?= $currentPage === "help"
+        ? "bg-[#A8B5D6]"
         : "" ?>"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="w-6 h-6 mr-3 flex-shrink-0" style="color: #0A1A44;">
   <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 0 1-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 0 1-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 0 1-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584ZM12 18a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd"></path>
 </svg>
       <span>Trợ giúp</span>
     </a>
   </nav>
 </aside> 
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('projectToggle');
+    const list = document.getElementById('projectList');
+    const arrow = document.getElementById('projectArrow');
+    btn.addEventListener('click', function(){
+      list.classList.toggle('hidden');
+      arrow.classList.toggle('rotate-180');
+    });
+  });
+</script>
