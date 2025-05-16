@@ -8,17 +8,17 @@
     <style>
         body {
             background-color: #E8E9FE;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
         }
 
         .registerContainer {
+            margin: 7rem auto;
             width: 100%;
             max-width: 400px;
-            height: 450px;
+            padding: 1rem 0;
             box-shadow: 0 16px 32px 0 rgba(1, 3, 41, 0.1);
+            position: relative;
+            z-index: 10;
         }
 
         .mainTitle {
@@ -35,10 +35,96 @@
         .registerButton:hover{
             background-color: #bddef5;
         }
+
+        .register-input-group {
+            padding: 6px;
+            height: 45px;
+        }
+
+        .hidden { display: none !important; }
+
+        #successModal{
+            position:fixed;
+            top:0;
+            right:0;
+            bottom:0;
+            left:0;
+            background-color: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        #successModal.hidden { display: none !important; }
+
+        #successModal-container{
+            background-color: #fff;
+            width: 100%;
+            max-width: 500px;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            position: relative;
+            animation: modalFadeIn ease 0.4s;
+
+        }
     </style>
+    
 </head>
 
 <body>
+    <?php
+    ini_set("display_errors", 1);
+    ini_set("display_startup_errors", 1);
+    error_reporting(E_ALL);
+
+    session_start();
+    include_once "../../../config/database.php";
+    $message = "";
+    $registerSuccess = false;
+
+    if (!$connect) {
+      die("Không kết nối được DB: " . $connect -> connect_error);
+        exit();
+    }
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+      $fullname = trim($_POST["fullname"]);
+      $username = trim($_POST["username"]);
+      $email = trim($_POST["email"]);
+      $password = $_POST["password"];
+      $confirm = $_POST["confirm-password"];
+
+      if ($username == "" || $email == "" || $password == "" || $confirm == "" || $fullname == "") {
+        $message = "Vui lòng nhập đầy đủ thông tin!";
+      } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = "Email không hợp lệ!";
+      } elseif (strlen($password) < 6) {
+        $message = "Mật khẩu phải có ít nhất 6 ký tự!";
+      } elseif (strlen($username) < 3 || strlen($username) > 20) {
+        $message = "Tên người dùng phải từ 3 đến 20 ký tự!";
+      } elseif (strlen($fullname) < 3 || strlen($fullname) > 100) {
+        $message = "Họ và tên phải từ 3 đến 100 ký tự!";
+      } elseif ($password !== $confirm) {
+        $message = "Mật khẩu không khớp!";
+      } else {
+        $sql = "SELECT * FROM Users WHERE Username='$username' OR Email='$email'";
+        $result = $connect->query($sql);
+        if ($result->num_rows > 0) {
+          $message = "Username hoặc Email đã tồn tại!";
+        } else {
+          $hashed = md5($password);
+          $sql = "INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Address)
+                    VALUES ('$username', '$hashed', '$email', 'USER', '$fullname', '', '')";
+          if ($connect->query($sql) === true) {
+            $registerSuccess = true;
+          } else {
+            $message = "Lỗi đăng ký: " . $connect->error;
+          }
+        }
+      }
+    }
+    ?>
     <div class="registerContainer bg-white rounded-lg relative">
         <!-- Logo -->
         <div class="logoContainer absolute -top-16 left-1/2" style="transform: translateX(-50%);">
@@ -48,7 +134,17 @@
 
         <h2 class="mainTitle text-center text-2xl font-bold">Cube Flow</h2>
         <form action="" method="POST" class="px-10">
-            <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4">
+            <!-- Full Name field -->
+            <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4 register-input-group">
+                <span class="text-gray-600 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                        <path fill-rule="evenodd" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+                <input class="outline-none font-semibold" type="text" id="fullname" name="fullname" placeholder="Họ và tên">
+            </div>
+            <!-- Email field -->
+            <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4 register-input-group">
                 <span class="text-gray-600 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
                         <path
@@ -58,10 +154,10 @@
                     </svg>
 
                 </span>
-                <input class="font-semibold" type="email" id="email" name="email" placeholder="Email">
+                <input class="outline-none font-semibold" type="email" id="email" name="email" placeholder="Email">
             </div>
 
-            <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4">
+            <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4 register-input-group">
                 <span class="text-gray-600 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
                         <path fill-rule="evenodd"
@@ -70,10 +166,10 @@
                     </svg>
 
                 </span>
-                <input class="font-semibold" type="text" id="username" name="username" placeholder="Tên người dùng">
+                <input class="outline-none font-semibold" type="text" id="username" name="username" placeholder="Tên người dùng">
             </div>
 
-            <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4">
+            <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4 register-input-group">
                 <span class="text-gray-600 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
                         <path fill-rule="evenodd"
@@ -82,10 +178,10 @@
                     </svg>
 
                 </span>
-                <input class="font-semibold" type="password" id="password" name="password" placeholder="Mật khẩu">
+                <input class="outline-none font-semibold" type="password" id="password" name="password" placeholder="Mật khẩu">
             </div>
 
-            <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4">
+            <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4 register-input-group">
                 <span class="text-gray-600 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
                         <path fill-rule="evenodd"
@@ -93,15 +189,42 @@
                             clip-rule="evenodd" />
                     </svg>
                 </span>
-                <input class="font-semibold" type="password" id="confirm-password" name="confirm-password" placeholder="Xác nhận mật khẩu">
+                <input class="outline-none font-semibold" type="password" id="confirm-password" name="confirm-password" placeholder="Xác nhận mật khẩu">
             </div>
 
             <button type="submit" class="registerButton w-full px-2 py-2 rounded-lg font-semibold text-white">Đăng ký</button>
+            <?php if (!empty($message)): ?>
+                <p class="text-center mt-2 text-red-600 font-semibold"><?= $message ?></p>
+            <?php endif; ?>
             <p class="text-center mt-4">
-                Bạn có tài khoản? <a href="/login" class="hover:underline font-semibold" style="color: #2F42C0;">Đăng nhập tại đây</a>
+                Bạn có tài khoản? <a href="login.php" class="hover:underline font-semibold" style="color: #2F42C0;">Đăng nhập tại đây</a>
             </p>
         </form>
     </div>
+
+    
+        <!-- Modal Success -->
+<div id="successModal" class="hidden">
+    <div id="successModal-container">
+        <div class="bg-white rounded-xl shadow-lg border border-[#A6A9FC] text-center relative p-6">
+            <button onclick="document.getElementById('successModal').classList.add('hidden')" class="absolute top-2 right-2 text-2xl font-bold text-gray-400 hover:text-gray-700">&times;</button>
+            <img src="../../images/cubeflow-logo.png" alt="Cube Flow" class="w-20 h-20 mx-auto mb-4">
+            <h2 class="text-2xl font-bold text-[#2C77E8] mb-2">🎉 Đăng ký thành công!</h2>
+            <p class="text-gray-700 mb-4">Tài khoản của bạn đã được tạo. Bạn có thể đăng nhập ngay bây giờ.</p>
+            <a href="login.php" class="inline-block bg-[#2C77E8] hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">Đi đến đăng nhập</a>
+        </div>
+    </div>
+</div>
+        
+    <?php if ($registerSuccess): ?>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("successModal");
+    modal.classList.remove("hidden");
+    document.querySelector('form').reset();
+  });
+</script>
+<?php endif; ?>
 </body>
 
 </html>
