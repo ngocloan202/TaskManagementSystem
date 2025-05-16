@@ -170,9 +170,9 @@ foreach ($allTasks as $tk) {
         <div class="grid grid-cols-3 gap-6">
           <?php
           $columns = [
-            "Cần làm" => ["color" => "text-blue-600", "bg" => "bg-blue-50"],
-            "Đang làm" => ["color" => "text-yellow-600", "bg" => "bg-yellow-50"],
-            "Đã làm" => ["color" => "text-green-600", "bg" => "bg-green-50"],
+            "Cần làm" => ["color" => "text-blue-600", "bg" => "bg-blue-50", 'hover' => 'hover:bg-blue-100'],
+            "Đang làm" => ["color" => "text-yellow-600", "bg" => "bg-yellow-50", 'hover' => 'hover:bg-yellow-100'],
+            "Đã làm" => ["color" => "text-green-600", "bg" => "bg-green-50", 'hover' => 'hover:bg-green-100']
           ];
           foreach ($columns as $status => $styles):
             $count = $taskCounts[$status] ?? 0; ?>
@@ -180,7 +180,7 @@ foreach ($allTasks as $tk) {
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
                   <h3 class="font-semibold <?= $styles["color"] ?>"><?= $status ?></h3>
-                  <span class="ml-2 px-2 py-0.5 rounded-full text-sm <?= $styles["bg"] ?> <?= $styles[
+                  <span class="ml-2 px-2 py-0.5 rounded-full text-sm font-medium <?= $styles["bg"] ?> <?= $styles[
                        "color"
                      ] ?>">
                     <?= $count ?>
@@ -191,7 +191,7 @@ foreach ($allTasks as $tk) {
               <!-- Tasks for this status -->
               <div class="space-y-2">
                 <?php foreach ($tasksByStatus[$status] as $task): ?>
-                  <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                  <div class="p-3 bg-gray-50 rounded-lg <?= $styles['hover'] ?>">
                     <h4 class="font-medium"><?= htmlspecialchars($task["TaskTitle"]) ?></h4>
                     <?php if ($task["UserID"]): ?>
                       <div class="mt-2 flex items-center text-sm text-gray-500">
