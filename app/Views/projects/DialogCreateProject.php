@@ -2,7 +2,7 @@
     <!-- Dialog Thêm dự án -->
 <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
   <!-- Header -->
-  <div class="flex items-center justify-between bg-[#3C40C6] text-white px-6 py-4 rounded-t-2xl">
+  <div class="flex items-center justify-between bg-[#0A1A44] text-white px-6 py-4 rounded-t-2xl">
     <h3 class="text-lg font-medium">Thêm dự án</h3>
     <button id="closeProjectModalBtn" class="hover:bg-indigo-500 p-1 rounded-full focus:outline-none">
       <svg
@@ -99,7 +99,7 @@
     <!-- Nút Thêm dự án -->
     <button
       type="submit"
-      class="mt-2 w-full bg-[#3C40C6] hover:bg-indigo-400 text-white font-semibold rounded-xl py-3 transition"
+      class="mt-2 w-full bg-[#0A1A44] hover:bg-indigo-400 text-white font-semibold rounded-xl py-3 transition"
     >
       Thêm dự án
     </button>
