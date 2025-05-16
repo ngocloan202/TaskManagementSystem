@@ -195,7 +195,7 @@ foreach ($allTasks as $tk) {
                     <h4 class="font-medium"><?= htmlspecialchars($task["TaskTitle"]) ?></h4>
                     <?php if ($task["UserID"]): ?>
                       <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <img src="../..<?= htmlspecialchars($task["Avatar"]) ?>" class="w-6 h-6 rounded-full mr-2">
+                        <img src="../../..<?= htmlspecialchars($task["Avatar"]) ?>" class="w-6 h-6 rounded-full mr-2">
                         <span><?= htmlspecialchars($task["AssignedToName"]) ?></span>
                       </div>
                     <?php endif; ?>
