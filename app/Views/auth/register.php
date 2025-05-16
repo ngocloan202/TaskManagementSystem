@@ -114,8 +114,8 @@
           $message = "Username hoặc Email đã tồn tại!";
         } else {
           $hashed = md5($password);
-          $sql = "INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Address, Avatar)
-                    VALUES ('$username', '$hashed', '$email', 'USER', '$fullname', '', '', '')";
+          $sql = "INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Avatar)
+                    VALUES ('$username', '$hashed', '$email', 'USER', '$fullname', '', '')";
           if ($connect->query($sql) === true) {
             $registerSuccess = true;
           } else {

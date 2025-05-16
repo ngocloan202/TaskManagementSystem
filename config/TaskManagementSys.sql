@@ -13,7 +13,6 @@ CREATE TABLE Users (
     Role VARCHAR(5) NOT NULL,
     FullName VARCHAR(255) NOT NULL,
     PhoneNumber VARCHAR(10),
-    Address VARCHAR(255),
     Avatar VARCHAR(255) DEFAULT '/images/default-avatar.png'
 );
 
@@ -110,12 +109,12 @@ INSERT INTO TaskStatus (TaskStatusID, StatusName) VALUES
 (2, 'Đang làm'),
 (3, 'Đã làm');
 
-INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Address, Avatar) VALUES
-('admin', MD5('admin123'), 'admin@example.com', 'ADMIN', 'Nguyễn Quản Trị', '0901234567', 'Hà Nội', '/public/images/admin.png'),
-('manager',MD5('manager123'), 'manager@example.com', 'USER', 'Trần Quản Lý', '0912345678', 'Hồ Chí Minh', '/public/images/manager.png'),
-('dev1', MD5('dev123'), 'dev1@example.com', 'USER', 'Lê Phát Triển', '0923456789', 'Đà Nẵng', '/public/images/dev1.png'),
-('dev2', MD5('dev123'), 'dev2@example.com', 'USER', 'Phạm Lập Trình','0934567890', 'Cần Thơ', '/public/images/dev2.png'),
-('tester', MD5('tester123'), 'tester@example.com', 'USER', 'Hoàng Kiểm Thử', '0945678901', 'Hải Phòng', '/public/images/tester.png');
+INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Avatar) VALUES
+('admin', MD5('admin123'), 'admin@example.com', 'ADMIN', 'Nguyễn Quản Trị', '0901234567', '/public/images/admin.png'),
+('manager',MD5('manager123'), 'manager@example.com', 'USER', 'Trần Quản Lý', '0912345678', '/public/images/manager.png'),
+('dev1', MD5('dev123'), 'dev1@example.com', 'USER', 'Lê Phát Triển', '0923456789', '/public/images/dev1.png'),
+('dev2', MD5('dev123'), 'dev2@example.com', 'USER', 'Phạm Lập Trình','0934567890', '/public/images/dev2.png'),
+('tester', MD5('tester123'), 'tester@example.com', 'USER', 'Hoàng Kiểm Thử', '0945678901', '/public/images/tester.png');
 
 INSERT INTO Project (ProjectName, ProjectDescription, CreatedBy, StartDate, EndDate) VALUES
 ('Hệ thống quản lý thông tin', 'Xây dựng hệ thống quản lý thông tin cho trường học', 1, '2023-01-10 08:00:00', '2023-06-30 17:00:00'),
