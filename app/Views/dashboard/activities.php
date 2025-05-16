@@ -78,7 +78,6 @@ if ($userId) {
             return strtotime($b['ChangedAt']) - strtotime($a['ChangedAt']);
         });
 
-        // Take only the 10 most recent activities
         $activities = array_slice($activities, 0, 10);
     }
 }
