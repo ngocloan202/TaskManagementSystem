@@ -1,3 +1,26 @@
+<?php
+require_once "../../../config/SessionInit.php";
+require_once "../../../config/Database.php";
+
+$userId = $_SESSION["user_id"] ?? null;
+$projects = [];
+if ($userId) {
+  // Fetch projects this user is a member of
+  $statement = $connect->prepare(
+    "SELECT p.ProjectID, p.ProjectName
+         FROM ProjectMembers pm, Project p
+         WHERE pm.ProjectID = p.ProjectID and pm.UserID = ?"
+  );
+  $statement->bind_param("i", $userId);
+  $statement->execute();
+  $result = $statement->get_result();
+  while ($row = $result->fetch_assoc()) {
+    $projects[] = $row;
+  }
+  $statement->close();
+}
+?>
+
 <!-- Sidebar -->
 <aside class="bg-white w-64 border-r text-black font-semibold flex flex-col">
   <!-- Branding -->
@@ -35,16 +58,13 @@
       </svg>
       <span>Tổng quan</span>
     </a>
-    <a
-      href="ProjectDetail.php"
-      class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "projects"
-        ? "bg-indigo-50 text-gray-800"
-        : "hover:bg-indigo-50 text-gray-800" ?>"
-    >
-      <!-- Projects Icon -->
-      <svg
+
+    <!-- Collapsible "Dự án" -->
+    <div>
+      <button id="projectToggle" class="flex items-center w-full px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-800 focus:outline-none">
+        <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0"
+        class="w-6 h-6 mr-3 text-indigo-600 flex-shrink-0"
         fill="currentColor"
         viewBox="0 0 24 24"
       >
@@ -59,7 +79,33 @@
         />
       </svg>
       <span>Dự án</span>
-    </a>
+        <svg id="projectArrow" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 ml-3 text-indigo-600 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <ul id="projectList" class="ml-6 mt-1 space-y-1 hidden">
+        <?php foreach ($projects as $p): ?>
+          <li>
+            <a href="../projects/ProjectDetail.php?id=<?= $p["ProjectID"] ?>"
+               class="block px-4 py-2 rounded hover:bg-indigo-100 text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24"
+               fill="currentColor"
+               class="w-5 h-5 flex-shrink-0 mr-2 text-indigo-600"
+               aria-hidden="true"
+               data-slot="icon">
+            <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z"/>
+          </svg>
+              <?= htmlspecialchars($p["ProjectName"]) ?>
+            </a>
+          </li>
+        <?php endforeach; ?>
+        <?php if (empty($projects)): ?>
+          <li class="px-4 py-2 text-gray-500">Chưa có dự án</li>
+        <?php endif; ?>
+      </ul>
+    </div>
+
     <a
       href="activities.php"
       class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "activities"
@@ -118,3 +164,15 @@
     </a>
   </nav>
 </aside> 
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('projectToggle');
+    const list = document.getElementById('projectList');
+    const arrow = document.getElementById('projectArrow');
+    btn.addEventListener('click', function(){
+      list.classList.toggle('hidden');
+      arrow.classList.toggle('rotate-180');
+    });
+  });
+</script>

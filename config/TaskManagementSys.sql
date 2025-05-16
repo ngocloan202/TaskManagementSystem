@@ -116,25 +116,29 @@ INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Avata
 ('dev2', MD5('dev123'), 'dev2@example.com', 'USER', 'Phạm Lập Trình','0934567890', '/public/images/dev2.png'),
 ('tester', MD5('tester123'), 'tester@example.com', 'USER', 'Hoàng Kiểm Thử', '0945678901', '/public/images/tester.png');
 
+-- Project table (không còn CreatedBy = 1)
 INSERT INTO Project (ProjectName, ProjectDescription, CreatedBy, StartDate, EndDate) VALUES
-('Hệ thống quản lý thông tin', 'Xây dựng hệ thống quản lý thông tin cho trường học', 1, '2023-01-10 08:00:00', '2023-06-30 17:00:00'),
-('Website bán hàng trực tuyến', 'Phát triển website bán hàng trực tuyến với đầy đủ tính năng', 2, '2023-02-15 08:00:00', '2023-08-15 17:00:00'),
-('Ứng dụng di động đặt đồ ăn', 'Xây dựng ứng dụng đặt đồ ăn trên di động', 1, '2023-03-01 08:00:00', '2023-09-30 17:00:00'),
-('Hệ thống quản lý nhân sự', 'Phát triển hệ thống quản lý nhân sự cho doanh nghiệp', 2, '2023-04-10 08:00:00', '2023-10-31 17:00:00'),
-('Ứng dụng học tập trực tuyến', 'Xây dựng nền tảng học tập trực tuyến', 1, '2023-05-15 08:00:00', '2023-12-15 17:00:00');
+('Hệ thống quản lý thông tin', 'Xây dựng hệ thống quản lý thông tin cho trường học', 2, '2023-01-10 08:00:00', '2023-06-30 17:00:00'), -- manager
+('Website bán hàng trực tuyến', 'Phát triển website bán hàng trực tuyến với đầy đủ tính năng', 3, '2023-02-15 08:00:00', '2023-08-15 17:00:00'), -- dev1
+('Ứng dụng di động đặt đồ ăn', 'Xây dựng ứng dụng đặt đồ ăn trên di động', 4, '2023-03-01 08:00:00', '2023-09-30 17:00:00'), -- dev2
+('Hệ thống quản lý nhân sự', 'Phát triển hệ thống quản lý nhân sự cho doanh nghiệp', 5, '2023-04-10 08:00:00', '2023-10-31 17:00:00'), -- tester
+('Ứng dụng học tập trực tuyến', 'Xây dựng nền tảng học tập trực tuyến', 2, '2023-05-15 08:00:00', '2023-12-15 17:00:00'); -- manager
 
+-- ProjectMembers table (không còn user 1, chỉ 2,3,4,5)
 INSERT INTO ProjectMembers (ProjectID, UserID, RoleInProject, JoinedAt) VALUES
-(1, 1, 'người sở hữu', '2023-01-10 08:00:00'),
+(1, 2, 'người sở hữu', '2023-01-10 08:00:00'), -- manager là chủ project 1
 (1, 3, 'thành viên', '2023-01-11 09:00:00'),
-(1, 5, 'thành viên', '2023-01-12 10:00:00'),
-(2, 2, 'người sở hữu', '2023-02-15 08:00:00'),
-(2, 4, 'thành viên', '2023-02-16 09:00:00'),
-(3, 1, 'người sở hữu', '2023-03-01 08:00:00'),
-(3, 3, 'thành viên', '2023-03-02 09:00:00'),
-(3, 4, 'thành viên', '2023-03-03 10:00:00'),
-(4, 2, 'người sở hữu', '2023-04-10 08:00:00'),
-(5, 1, 'người sở hữu', '2023-05-15 08:00:00'),
-(2, 4, 'thành viên', '2023-02-17 10:00:00');
+(1, 4, 'thành viên', '2023-01-12 10:00:00'),
+(2, 3, 'người sở hữu', '2023-02-15 08:00:00'), -- dev1 là chủ project 2
+(2, 2, 'thành viên', '2023-02-16 09:00:00'),
+(2, 4, 'thành viên', '2023-02-17 10:00:00'),
+(3, 4, 'người sở hữu', '2023-03-01 08:00:00'), -- dev2 là chủ project 3
+(3, 2, 'thành viên', '2023-03-02 09:00:00'),
+(3, 5, 'thành viên', '2023-03-03 10:00:00'),
+(4, 5, 'người sở hữu', '2023-04-10 08:00:00'), -- tester là chủ project 4
+(4, 2, 'thành viên', '2023-04-11 09:00:00'),
+(5, 2, 'người sở hữu', '2023-05-15 08:00:00'), -- manager là chủ project 5
+(5, 3, 'thành viên', '2023-05-16 09:00:00');
 
 INSERT INTO Task (TaskTitle, TaskDescription, TaskStatusID, Priority, StartDate, EndDate, ProjectID, ParentTaskID) VALUES
 ('Thiết lập cấu trúc thư mục PHP', '', 1, 'Cao', '2023-01-12 08:00:00', '2023-01-20 17:00:00', 1, NULL),
