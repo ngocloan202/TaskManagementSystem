@@ -69,7 +69,7 @@
 <div class="relative inline-block text-left">
   <button id="profileBtn" class="flex items-center focus:outline-none">
     <img
-      src="/public/images/default-avatar.png"
+      src="<?= htmlspecialchars($_SESSION["avatar"] ?? "/public/images/default-avatar.png") ?>"
       alt="Avatar"
       class="w-9 h-9 object-cover rounded-full border-2 border-white"
     />
@@ -135,7 +135,40 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('profileModal').addEventListener('click', function(e) {
     if (e.target === this) this.classList.add('hidden');
   });
+
+  document.getElementById('avatarInput').addEventListener('change', function() {
+    const form = document.getElementById('avatarForm');
+    const data = new FormData(form);
+
+    fetch(form.action, { method: 'POST', body: data })
+      .then(res => res.json())
+      .then(json => {
+        if (json.success) {
+          // Chỉ cập nhật ảnh trong modal preview
+          document.getElementById('profileAvatar').src = json.avatar;
+          // Lưu đường dẫn ảnh mới vào một biến ẩn để sử dụng khi ấn nút Lưu
+          document.getElementById('newAvatarPath').value = json.avatar;
+        } else {
+          alert('Upload thất bại: ' + (json.error || 'Lỗi không xác định'));
+        }
+      })
+      .catch(() => alert('Lỗi mạng!'));
+  });
+
+  // Xử lý khi ấn nút Lưu
+  document.querySelector('form button[type="submit"]').addEventListener('click', function(e) {
+    e.preventDefault();
+    const newAvatarPath = document.getElementById('newAvatarPath').value;
+    if (newAvatarPath) {
+      // Cập nhật ảnh đại diện trên header
+      document.querySelector('#profileBtn img').src = newAvatarPath;
+      // Xóa đường dẫn tạm
+      document.getElementById('newAvatarPath').value = '';
+    }
+    // TODO: Thêm code lưu các thông tin khác ở đây
+  });
 });
+
 </script>
 
 <!-- Modal Profile -->
@@ -153,10 +186,12 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </div>
     <!-- Nút upload avatar -->
-    <form id="avatarForm" enctype="multipart/form-data" class="flex flex-col items-center mt-2">
+    <form id="avatarForm" action="../../Controllers/UploadAvatar.php"
+      method="POST" enctype="multipart/form-data" class="mt-2 text-center">
+      <input type="hidden" id="newAvatarPath" value="">
       <label class="cursor-pointer text-indigo-600 hover:underline text-sm">
         Đổi ảnh đại diện
-        <input type="file" name="avatar" id="avatarInput" accept="image/*" class="hidden" />
+        <input type="file" name="avatar" id="avatarInput" accept="image/*" class="hidden"/>
       </label>
     </form>
     <!-- Nội dung form -->
