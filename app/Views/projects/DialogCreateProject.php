@@ -1,12 +1,4 @@
-<!doctype html>
-<html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Modal Thêm dự án</title>
-    <link rel="stylesheet" href="../../../public/css/tailwind.css" />
-  </head>
-  <body class="bg-gray-100 flex items-center justify-center h-screen p-4">
+
     <!-- Dialog Thêm dự án -->
 <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
   <!-- Header -->
@@ -113,5 +105,4 @@
     </button>
   </form>
 </div>
-  </body>
-</html>
+
