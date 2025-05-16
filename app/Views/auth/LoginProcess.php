@@ -30,8 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION["username"] = $user["Username"];
         $_SESSION["role"] = $user["Role"];
         $_SESSION["fullname"] = $user["FullName"];
-        $avatarPathInDb = $user["Avatar"] ?? "/images/default-avatar.png";
-        // Ghép đường dẫn public lên trước
+        $_SESSION["avatar"] = $user["Avatar"] ?? "/public/images/default-avatar.png";
         $_SESSION["last_activity"] = time();
         $_SESSION["success"] = "🎉 Đăng nhập thành công!";
         header("Location: LoginSuccess.php");
