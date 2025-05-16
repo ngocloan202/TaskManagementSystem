@@ -21,7 +21,7 @@
         <div
           class="w-24 h-24 bg-[#EEF0FF] rounded-full border-3 border-[#7C64F0] flex items-center justify-center shadow-md"
         >
-          <img src="../../images/cubeflow-logo.png" alt="Cube Flow" class="w-23 h-23 rounded-full" />
+          <img src="../../../public/images/cubeflow-logo.png" alt="Cube Flow" class="w-23 h-23 rounded-full" />
         </div>
       </div>
       
