@@ -51,13 +51,12 @@ if ($userId) {
         }
         $statement->close();
 
-        // Get task assignments
         $assignmentQuery = "SELECT 
                             ta.AssignmentID,
                             ta.AssignedAt as ChangedAt,
                             t.TaskTitle,
                             u.FullName,
-                            'assignment' as activity_type
+                            'assignment' as activityType
                         FROM TaskAssignment ta
                         JOIN Task t ON ta.TaskID = t.TaskID
                         JOIN Users u ON ta.AssignedBy = u.UserID
