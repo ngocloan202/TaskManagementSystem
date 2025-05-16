@@ -163,3 +163,14 @@ INSERT INTO TaskStatusHistory (TaskID, OldStatusID, NewStatusID, ChangedBy, Chan
 (3, 1, 2, 4, '2023-02-05 14:20:00'),
 (5, 1, 2, 4, '2023-02-20 09:15:00'),
 (1, 1, 3, 3, '2023-01-19 16:45:00');
+
+-- Thêm Task mẫu ở trạng thái 'Đã làm' để có dữ liệu cho cột hoàn thành
+INSERT INTO Task (TaskTitle, TaskDescription, TaskStatusID, Priority, StartDate, EndDate, ProjectID, ParentTaskID) VALUES
+  ('Hoàn tất kiểm thử unit', 'Viết unit test cho các module chính', 3, 'Trung Bình', '2023-02-25 08:00:00', '2023-03-05 17:00:00', 1, NULL),
+  ('Triển khai môi trường staging', 'Deploy code lên server staging', 3, 'Cao', '2023-03-06 08:00:00', '2023-03-07 17:00:00', 1, NULL),
+  ('Kiểm thử tích hợp', 'Test end-to-end toàn bộ luồng nghiệp vụ', 3, 'Khẩn cấp', '2023-03-08 08:00:00', '2023-03-10 17:00:00', 1, NULL);
+
+-- Nếu bạn muốn thêm cho các project khác, chỉ cần đổi ProjectID
+INSERT INTO Task (TaskTitle, TaskDescription, TaskStatusID, Priority, StartDate, EndDate, ProjectID, ParentTaskID) VALUES
+  ('Hoàn thiện thiết kế UI', 'Chốt giao diện cuối cùng', 3, 'Cao', '2023-02-20 08:00:00', '2023-02-22 17:00:00', 2, NULL),
+  ('Kiểm thử chức năng thanh toán', 'Test mọi kịch bản thanh toán', 3, 'Trung Bình', '2023-03-16 08:00:00', '2023-03-20 17:00:00', 2, NULL);

@@ -108,5 +108,6 @@ $currentPage = "dashboard";
         }
       });
     </script>
+    </div>
   </body>
 </html>
