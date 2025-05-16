@@ -4,7 +4,7 @@
   <div class="px-6 py-2 flex items-center space-x-3 bg-[#3C40C6] text-white h-14">
     <div class="w-10 h-10 rounded-full overflow-hidden">
       <img
-        src="../../images/cubeflow-logo.png"
+        src="../../../public/images/cubeflow-logo.png"
         alt="CubeFlow Logo"
         class="w-full h-full object-cover"
       />
