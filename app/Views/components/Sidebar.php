@@ -40,7 +40,7 @@ if ($userId) {
       href="HomePage.php"
       class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "homepage"
         ? "bg-indigo-50 text-gray-800"
-        : "hover:bg-indigo-50 text-gray-800" ?>"
+        : "hover:bg-indigo-200 text-gray-800" ?>"
     >
       <!-- Home Icon -->
       <svg
@@ -61,7 +61,7 @@ if ($userId) {
 
     <!-- Collapsible "Dự án" -->
     <div>
-      <button id="projectToggle" class="flex items-center w-full px-4 py-3 rounded-lg hover:bg-indigo-50 text-gray-800 focus:outline-none">
+      <button id="projectToggle" class="flex items-center w-full px-4 py-3 rounded-lg hover:bg-indigo-200 text-gray-800 focus:outline-none">
         <svg
         xmlns="http://www.w3.org/2000/svg"
         class="w-6 h-6 mr-3 flex-shrink-0" style="color: #0A1A44;"
@@ -111,7 +111,7 @@ if ($userId) {
       href="activities.php"
       class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "activities"
         ? "bg-indigo-50 text-gray-800"
-        : "hover:bg-indigo-50 text-gray-800" ?>"
+        : "hover:bg-indigo-200 text-gray-800" ?>"
     >
       <!-- Activity Icon -->
       <svg
@@ -132,7 +132,7 @@ if ($userId) {
       href="schedule.php"
       class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "schedule"
         ? "bg-indigo-50 text-gray-800"
-        : "hover:bg-indigo-50 text-gray-800" ?>"
+        : "hover:bg-indigo-200 text-gray-800" ?>"
     >
       <!-- Schedule Icon -->
       <svg
@@ -154,8 +154,8 @@ if ($userId) {
   <nav class="mt-auto mb-6 w-full">
     <a 
       href="help.php" 
-      class="menuItem hover:bg-[#E8E9FF] space-x-3 w-full <?= $currentPage === "help"
-        ? "bg-[#E8E9FF]"
+      class="menuItem hover:bg-[#A8B5D6] space-x-3 w-full <?= $currentPage === "help"
+        ? "bg-[#A8B5D6]"
         : "" ?>"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="w-6 h-6 mr-3 flex-shrink-0" style="color: #0A1A44;">
