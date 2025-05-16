@@ -1,5 +1,5 @@
 <!-- Header -->
-<header class="bg-[#3C40C6] h-14 flex items-center px-6 shadow-md">
+<header class="bg-[#0A1A44] h-14 flex items-center px-6 shadow-md">
   <!-- Logo and back button section -->
   <div class="flex items-center space-x-4">
     <!-- Back button -->
