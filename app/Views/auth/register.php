@@ -84,8 +84,8 @@
     $registerSuccess = false;
 
     if (!$connect) {
-      die("Không kết nối được DB: " . $connect -> connect_error);
-        exit();
+      die("Không kết nối được DB: " . $connect->connect_error);
+      exit();
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {

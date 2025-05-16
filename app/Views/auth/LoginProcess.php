@@ -46,9 +46,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 if ($message !== "") {
-    $_SESSION["login_error"] = $message;
-    header("Location: login.php");
-    exit();
+  $_SESSION["login_error"] = $message;
+  header("Location: login.php");
+  exit();
 }
 
 ?>
