@@ -1,4 +1,6 @@
 <?php
+require_once "../../../config/SessionInit.php";
+require_once __DIR__ . '/../../../config/database.php';   
 include __DIR__ . "../../../Controllers/LoadUserData.php";
 ?>
 <!-- Modal Profile -->

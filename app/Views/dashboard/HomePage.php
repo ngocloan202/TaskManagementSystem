@@ -1,5 +1,9 @@
 <?php
 require_once "../../../config/SessionInit.php";
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /app/Views/auth/login.php');
+    exit;
+}
 $currentPage = "dashboard";
 ?>
 <!doctype html>

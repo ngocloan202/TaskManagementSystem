@@ -1,15 +1,11 @@
 <?php
-session_start();
+require_once "../../../config/SessionInit.php";
 
 // 1. Kết nối database
 require_once __DIR__ . '../../../config/database.php';   
 
 // 2. Kiểm tra session
-if (!isset($_SESSION['UserID'])) {
-    header('Location: login.php');
-    exit;
-}
-$userId = (int) $_SESSION['UserID'];
+$userId = (int) $_SESSION['user_id'];
 
 // 3. Lấy thông tin cơ bản của user
 $stmt = $connect->prepare("
