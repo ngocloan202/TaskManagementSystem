@@ -5,7 +5,7 @@ require_once "../../../config/Database.php";
 $userId = $_SESSION["user_id"] ?? null;
 $projects = [];
 if ($userId) {
-  // Fetch projects this user is a member of
+
   $statement = $connect->prepare(
     "SELECT p.ProjectID, p.ProjectName
          FROM ProjectMembers pm, Project p
