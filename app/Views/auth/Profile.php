@@ -58,6 +58,9 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
           <button id="btnProfileSave" type="submit"
             class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition hidden">Lưu
           </button>
+          <button id="btnProfileCancel" type="button"
+            class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg transition hidden">Hủy
+          </button>
         </div>
       </form>
     </div>
@@ -70,6 +73,25 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
           clip-rule="evenodd"></path>
       </svg>
     </button>
+  </div>
+</div>
+
+<!-- Modal xác nhận lưu -->
+<div id="confirmSaveModal"  style="background-color: rgba(0, 0, 0, 0.4);" class="fixed inset-0 flex items-center justify-center bg-opacity-40 z-[10000] hidden">
+  <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-xs text-center">
+    <div class="mb-4 text-lg font-semibold text-gray-800">Bạn có muốn lưu những thay đổi này không?</div>
+    <div class="flex justify-center gap-4 mt-4">
+      <button id="btnConfirmSave" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">Có</button>
+      <button id="btnCancelSave" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition">Không</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal lưu thành công -->
+<div id="profileSuccessModal" style="background-color: rgba(0, 0, 0, 0.4);" class="fixed inset-0 flex items-center justify-center bg-opacity-40 z-[10000] hidden">
+  <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-xs text-center">
+    <div class="mb-4 text-2xl font-bold text-green-600">✔️ Lưu thành công!</div>
+    <button id="closeProfileSuccessModal" class="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">Đóng</button>
   </div>
 </div>
 
