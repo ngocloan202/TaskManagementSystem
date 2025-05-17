@@ -2,9 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("profileModal");
   const form = document.getElementById("profileForm");
   const inputs = form.querySelectorAll('input:not([type="hidden"])');
-  const openBtn = document.getElementById("openProfile");
-  const editBtn = document.getElementById("btnProfileEdit");
-  const saveBtn = document.getElementById("btnProfileSave");
+  const btnOpen = document.getElementById("openProfile");
+  const btnEdit = document.getElementById("btnProfileEdit");
+  const btnSave = document.getElementById("btnProfileSave");
   const closeBtn = document.getElementById("closeProfileModal");
 
   // 1. Định nghĩa hàm đóng modal
@@ -15,8 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
       i.readOnly = true;
       i.classList.add("bg-gray-50", "cursor-not-allowed");
     });
-    editBtn.classList.remove("hidden");
-    saveBtn.classList.add("hidden");
+    btnEdit.classList.remove("hidden");
+    btnSave.classList.add("hidden");
   }
 
   // 2. Hàm reset trạng thái form (readonly + nút)
@@ -25,8 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
       input.readOnly = true;
       input.classList.add("bg-gray-50", "cursor-not-allowed");
     });
-    editBtn.classList.remove("hidden");
-    saveBtn.classList.add("hidden");
+    btnEdit.classList.remove("hidden");
+    btnSave.classList.add("hidden");
   }
 
   // 3. Initialize
@@ -36,20 +36,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // 4. Mở modal
-  openBtn.addEventListener("click", e => {
+  btnOpen.addEventListener("click", e => {
     e.preventDefault();
     modal.classList.remove("hidden");
     resetState();
   });
 
   // 5. Nhấn Sửa
-  editBtn.addEventListener("click", () => {
+  btnEdit.addEventListener("click", () => {
     inputs.forEach(i => {
       i.readOnly = false;
       i.classList.remove("bg-gray-50", "cursor-not-allowed");
     });
-    editBtn.classList.add("hidden");
-    saveBtn.classList.remove("hidden");
+    btnEdit.classList.add("hidden");
+    btnSave.classList.remove("hidden");
   });
 
   // 6. Đóng modal khi bấm nút X

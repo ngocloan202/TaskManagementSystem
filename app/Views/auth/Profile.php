@@ -27,27 +27,27 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
     <!-- Nội dung form -->
     <div class="px-6 pb-8 pt-4">
       <h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">Thông tin người dùng</h2>
-      <form id="profileForm" class="space-y-4">
+      <form id="profileForm" class="space-y-4" action="../../Controllers/UploadAvatar" method="POST">
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="username">Tên người dùng</label>
-          <input id="username" name="username" type="text" value="<?= htmlspecialchars(
+          <input id="username" name="fullname" type="text" value="<?= htmlspecialchars(
             $_SESSION["fullname"] ?? ""
           ) ?>" readonly
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="email">Email</label>
-          <input id="email" type="email" value="<?= htmlspecialchars($_SESSION["email"] ?? "") ?>"
+          <input id="email" name="email" type="email" value="<?= htmlspecialchars($_SESSION["email"] ?? "") ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="phone">Số điện thoại</label>
-          <input id="phone" type="tel" value="<?= htmlspecialchars($_SESSION["phone"] ?? "") ?>"
+          <input id="phone" name="phone" type="tel" value="<?= htmlspecialchars($_SESSION["phone"] ?? "") ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="projects">Số dự án</label>
-          <input id="projects" type="number" value="<?= htmlspecialchars(
+          <input id="projects" name="project_count" type="number" value="<?= htmlspecialchars(
             $_SESSION["project_count"] ?? 0
           ) ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
