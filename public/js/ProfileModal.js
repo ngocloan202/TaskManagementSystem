@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("profileModal");
   const form = document.getElementById("profileForm");
-  const inputs = form.querySelectorAll('input:not([type="hidden"])');
-  const btnOpen = document.getElementById("openProfile");
+  const inputs = form.querySelectorAll('input:not([type="hidden"]):not([name="project_count"])');  const btnOpen = document.getElementById("openProfile");
   const btnEdit = document.getElementById("btnProfileEdit");
   const btnSave = document.getElementById("btnProfileSave");
   const closeBtn = document.getElementById("closeProfileModal");
