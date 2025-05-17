@@ -1,6 +1,5 @@
 <?php
 // app/Views/dashboard/ProjectDetail.php
-session_start();
 
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
