@@ -40,3 +40,9 @@ $res2 = $stmt2->get_result();
 $row2 = $res2->fetch_assoc();
 $projectCount = $row2['cnt'];
 $stmt2->close();
+
+$_SESSION['fullname'] = $fullname;
+$_SESSION['email'] = $email;
+$_SESSION['phone'] = $phone;
+$_SESSION['avatar'] = $avatar;
+$_SESSION['project_count'] = $projectCount;
