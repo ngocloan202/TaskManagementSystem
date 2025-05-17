@@ -1,5 +1,8 @@
 <?php
 require_once "../../../config/SessionInit.php";
+$flashSuccess = $_SESSION["success"] ?? null;
+$flashError = $_SESSION["error"] ?? null;
+unset($_SESSION["success"], $_SESSION["error"]);
 $currentPage = "dashboard";
 ?>
 <!doctype html>
@@ -38,7 +41,35 @@ $currentPage = "dashboard";
     </style>
   </head>
 
-  <body style="background-color: #d9d9d9">
+<body style="background-color: #d9d9d9">
+  <?php if ($flashSuccess): ?>
+    <div id="flashModal" class="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50"  style="background-color: rgba(0, 0, 0, 0.4);">
+    <div class="bg-white p-6 rounded-xl text-center shadow-xl">
+      <svg class="w-12 h-12 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <p class="font-semibold text-gray-800"><?= htmlspecialchars($flashSuccess) ?></p>
+    </div>
+  </div>
+  <script>
+    setTimeout(()=> document.getElementById('flashModal').remove(), 2000);
+  </script>
+  <?php endif; ?>
+
+  <?php if ($flashError): ?>
+  <div id="flashModal" class="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50" style="background-color: rgba(0, 0, 0, 0.4);">
+    <div class="bg-white p-6 rounded-xl text-center shadow-xl">
+      <svg class="w-12 h-12 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+      <p class="font-semibold text-gray-800"><?= htmlspecialchars($flashError) ?></p>
+    </div>
+  </div>
+  <script>
+    setTimeout(()=> document.getElementById('flashModal').remove(), 2000);
+  </script>
+  <?php endif; ?>
+
     <div class="flex h-screen">
       <?php include "../components/Sidebar.php"; ?>
 

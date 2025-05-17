@@ -2,7 +2,7 @@
     <!-- Dialog Thêm dự án -->
 <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
   <!-- Header -->
-  <div class="flex items-center justify-between bg-[#3C40C6] text-white px-6 py-4 rounded-t-2xl">
+  <div class="flex items-center justify-between bg-[#0A1A44] text-white px-6 py-4 rounded-t-2xl">
     <h3 class="text-lg font-medium">Thêm dự án</h3>
     <button id="closeProjectModalBtn" class="hover:bg-indigo-500 p-1 rounded-full focus:outline-none">
       <svg
@@ -23,7 +23,7 @@
   </div>
 
   <!-- Body / Form -->
-  <form action="/CreateProjectProcess.php" method="POST" class="px-6 pb-6 pt-4 space-y-4">
+  <form action="/app/Views/projects/CreateProjectProcess.php" method="POST" class="px-6 pb-6 pt-4 space-y-4">
     <!-- Tên dự án -->
     <div class="flex items-center bg-indigo-50 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-indigo-300">
       <svg
@@ -31,6 +31,7 @@
         viewBox="0 0 24 24"
         fill="currentColor"
         class="w-6 h-6 text-indigo-500 flex-shrink-0 fill-current"
+        style="color: #0A1A44"
       >
         <path
           d="M11.644 1.59a.75.75 0 0 1 .712 0l9.75 5.25a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.712 0l-9.75-5.25a.75.75 0 0 1 0-1.32l9.75-5.25Z"
@@ -56,7 +57,8 @@
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
-        class="w-6 h-6 text-indigo-500 flex-shrink-0 fill-current"
+        class="w-6 h-6 flex-shrink-0 fill-current"
+        style="color: #0A1A44"
       >
         <path
           fill-rule="evenodd"
@@ -79,7 +81,8 @@
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
-        class="w-6 h-6 text-indigo-500 flex-shrink-0 fill-current"
+        class="w-6 h-6 flex-shrink-0 fill-current"
+        style="color: #0A1A44"
       >
         <path
           fill-rule="evenodd"
@@ -99,7 +102,7 @@
     <!-- Nút Thêm dự án -->
     <button
       type="submit"
-      class="mt-2 w-full bg-[#3C40C6] hover:bg-indigo-400 text-white font-semibold rounded-xl py-3 transition"
+      class="mt-2 w-full bg-[#0A1A44] hover:bg-indigo-400 text-white font-semibold rounded-xl py-3 transition"
     >
       Thêm dự án
     </button>
