@@ -15,7 +15,7 @@
       <!-- Modal container -->
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <!-- Header -->
-        <div class="flex justify-end bg-[#3C40C6] text-white px-6 py-4 rounded-t-2xl">
+        <div class="flex justify-end bg-[#0A1A44] text-white px-6 py-4 rounded-t-2xl">
           <button class="hover:bg-indigo-500 p-1 rounded-full focus:outline-none">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -108,7 +108,7 @@
           <!-- Nút Thêm nhiệm vụ -->
           <button
             type="submit"
-            class="mt-4 w-full bg-[#3C40C6] hover:bg-blue-300 text-white font-semibold rounded-xl py-3 transition"
+            class="mt-4 w-full bg-[#0A1A44] hover:bg-blue-300 text-white font-semibold rounded-xl py-3 transition"
           >
             Thêm nhiệm vụ
           </button>
