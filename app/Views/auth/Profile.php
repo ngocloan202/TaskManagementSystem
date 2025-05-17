@@ -1,3 +1,8 @@
+<?php
+require_once "../../../config/SessionInit.php";
+require_once __DIR__ . '/../../../config/database.php';   
+include __DIR__ . "../../../Controllers/LoadUserData.php";
+?>
 <!-- Modal Profile -->
 <div id="profileModal" style="background-color: rgba(0, 0, 0, 0.4);"
   class="fixed inset-0 bg-opacity-40 flex items-center justify-center z-[9999] hidden">
@@ -5,9 +10,11 @@
     <!-- Avatar user -->
     <div class="h-28 flex items-center justify-center bg-indigo-200">
       <div class="w-20 h-20 rounded-full border-4 border-black flex items-center justify-center bg-[#EEF0FF] shadow-md">
-        <img id="profileAvatar" src="<?= htmlspecialchars(
-          $_SESSION["avatar"] ?? "/public/images/default-avatar.png"
-        ) ?>" alt="Avatar" class="object-cover w-full h-full rounded-full" />
+        <img id="profileAvatar"
+          src="<?= htmlspecialchars(
+            $_SESSION["avatar"] ?? "/public/images/default-avatar.png"
+          ) ?>" alt="Avatar"
+          class="object-cover w-full h-full rounded-full" />
       </div>
     </div>
     <!-- Nút upload avatar -->
