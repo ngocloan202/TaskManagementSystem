@@ -171,19 +171,19 @@ foreach ($allTasks as $tk) {
               "color" => "text-blue-600",
               "bg" => "bg-blue-50",
               "hover" => "hover:bg-blue-100",
-              "border" => "border-l-4 border-blue-500"
+              "border" => "border-l-4 border-blue-500",
             ],
             "Đang làm" => [
               "color" => "text-yellow-600",
               "bg" => "bg-yellow-50",
               "hover" => "hover:bg-yellow-100",
-              "border" => "border-l-4 border-yellow-500"
+              "border" => "border-l-4 border-yellow-500",
             ],
             "Đã làm" => [
               "color" => "text-green-600",
               "bg" => "bg-green-50",
               "hover" => "hover:bg-green-100",
-              "border" => "border-l-4 border-green-500"
+              "border" => "border-l-4 border-green-500",
             ],
           ];
           foreach ($columns as $status => $styles):
@@ -198,9 +198,10 @@ foreach ($allTasks as $tk) {
                     <?= $count ?>
                   </span>
                 </div>
-                <button class="p-1 rounded-full <?= $styles["bg"] ?> <?= $styles[
-                     "color"
-                   ] ?> hover:opacity-75 transition-opacity" onclick="addTask('<?= $status ?>')">
+                <button class="p-2 rounded-full <?= $styles["bg"] ?> <?= $styles["color"] ?>
+                  hover:bg-opacity-90 transition transform hover:scale-110" onclick="addTask('<?= $status ?>')"
+                  title="Thêm nhiệm vụ mới (<?= $status ?>)"
+                  id="btnAddTask">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -236,6 +237,10 @@ foreach ($allTasks as $tk) {
             document.getElementById('memberDialog').classList.remove('hidden');
           });
         </script>
-</body>
 
+        <!-- Create Task Dialog -->
+        <div id="createTaskDialog" class="hidden">
+          <?php include_once "CreateTaskDialog.php"; ?>
+        </div>
+</body>
 </html>
