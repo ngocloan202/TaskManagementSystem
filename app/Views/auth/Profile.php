@@ -1,6 +1,6 @@
 <?php
 require_once "../../../config/SessionInit.php";
-require_once __DIR__ . '/../../../config/database.php';   
+require_once __DIR__ . '/../../../config/database.php';
 include __DIR__ . "../../../Controllers/LoadUserData.php";
 ?>
 <!-- Modal Profile -->
@@ -10,11 +10,9 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
     <!-- Avatar user -->
     <div class="h-28 flex items-center justify-center bg-indigo-200">
       <div class="w-20 h-20 rounded-full border-4 border-black flex items-center justify-center bg-[#EEF0FF] shadow-md">
-        <img id="profileAvatar"
-          src="<?= htmlspecialchars(
-            $_SESSION["avatar"] ?? "/public/images/default-avatar.png"
-          ) ?>" alt="Avatar"
-          class="object-cover w-full h-full rounded-full" />
+        <img id="profileAvatar" src="<?= htmlspecialchars(
+          $_SESSION["avatar"] ?? "/public/images/default-avatar.png"
+        ) ?>" alt="Avatar" class="object-cover w-full h-full rounded-full" />
       </div>
     </div>
     <!-- Nút upload avatar -->
@@ -29,36 +27,37 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
     <!-- Nội dung form -->
     <div class="px-6 pb-8 pt-4">
       <h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">Thông tin người dùng</h2>
-      <form class="space-y-4">
+      <form id="profileForm" class="space-y-4" action="../../Controllers/UploadAvatar" method="POST">
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="username">Tên người dùng</label>
-          <input id="username" type="text" value="<?= htmlspecialchars(
+          <input id="username" name="fullname" type="text" value="<?= htmlspecialchars(
             $_SESSION["fullname"] ?? ""
-          ) ?>"
+          ) ?>" readonly
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="email">Email</label>
-          <input id="email" type="email" value="<?= htmlspecialchars($_SESSION["email"] ?? "") ?>"
+          <input id="email" name="email" type="email" value="<?= htmlspecialchars($_SESSION["email"] ?? "") ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="phone">Số điện thoại</label>
-          <input id="phone" type="tel" value="<?= htmlspecialchars($_SESSION["phone"] ?? "") ?>"
+          <input id="phone" name="phone" type="tel" value="<?= htmlspecialchars($_SESSION["phone"] ?? "") ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
-          <label class="block text-gray-700 mb-1 font-medium" for="projects">Số dự án</label>
-          <input id="projects" type="number" value="<?= htmlspecialchars(
-            $_SESSION["project_count"] ?? 0
-          ) ?>"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
+          <label class="block text-gray-700 mb-1 font-medium" for="projects">Số dự án tham gia</label>
+          <input id="projects" name="project_count" type="text"
+            value="<?= htmlspecialchars($_SESSION['project_count'] ?? '0') ?>" readonly
+            class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed text-gray-600" />
         </div>
         <div class="flex justify-center space-x-4 mt-6">
-          <button type="button"
-            class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg transition">Sửa</button>
-          <button type="submit"
-            class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition">Lưu</button>
+          <button id="btnProfileEdit" type="button"
+            class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg transition">Sửa
+          </button>
+          <button id="btnProfileSave" type="submit"
+            class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition hidden">Lưu
+          </button>
         </div>
       </form>
     </div>
@@ -74,52 +73,4 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
   </div>
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Mở modal khi click "Thông tin cá nhân"
-    document.getElementById('openProfile').addEventListener('click', function (e) {
-      e.preventDefault();
-      document.getElementById('profileModal').classList.remove('hidden');
-    });
-
-    // Đóng modal khi click nút đóng hoặc nền tối
-    document.getElementById('closeProfileModal').addEventListener('click', function () {
-      document.getElementById('profileModal').classList.add('hidden');
-    });
-    document.getElementById('profileModal').addEventListener('click', function (e) {
-      if (e.target === this) this.classList.add('hidden');
-    });
-
-    document.getElementById('avatarInput').addEventListener('change', function () {
-      const form = document.getElementById('avatarForm');
-      const data = new FormData(form);
-
-      fetch(form.action, { method: 'POST', body: data })
-        .then(res => res.json())
-        .then(json => {
-          if (json.success) {
-            // Chỉ cập nhật ảnh trong modal preview
-            document.getElementById('profileAvatar').src = json.avatar;
-            // Lưu đường dẫn ảnh mới vào một biến ẩn để sử dụng khi ấn nút Lưu
-            document.getElementById('newAvatarPath').value = json.avatar;
-          } else {
-            alert('Upload thất bại: ' + (json.error || 'Lỗi không xác định'));
-          }
-        })
-        .catch(() => alert('Lỗi mạng!'));
-    });
-
-    // Xử lý khi ấn nút Lưu
-    document.querySelector('#profileModal form button[type="submit"]').addEventListener('click', function (e) {
-      e.preventDefault();
-      const newAvatarPath = document.getElementById('newAvatarPath').value;
-      if (newAvatarPath) {
-        // Cập nhật ảnh đại diện trên header
-        document.querySelector('#profileBtn img').src = newAvatarPath;
-        // Xóa đường dẫn tạm
-        document.getElementById('newAvatarPath').value = '';
-      }
-      // TODO: Thêm code lưu các thông tin khác ở đây
-    });
-  });
-</script>
+<script src="../../../public/js/ProfileModal.js"></script>
