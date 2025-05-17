@@ -5,11 +5,9 @@
     <!-- Avatar user -->
     <div class="h-28 flex items-center justify-center bg-indigo-200">
       <div class="w-20 h-20 rounded-full border-4 border-black flex items-center justify-center bg-[#EEF0FF] shadow-md">
-        <img id="profileAvatar"
-          src="<?= htmlspecialchars(
-            $_SESSION["avatar"] ?? "/public/images/default-avatar.png"
-          ) ?>" alt="Avatar"
-          class="object-cover w-full h-full rounded-full" />
+        <img id="profileAvatar" src="<?= htmlspecialchars(
+          $_SESSION["avatar"] ?? "/public/images/default-avatar.png"
+        ) ?>" alt="Avatar" class="object-cover w-full h-full rounded-full" />
       </div>
     </div>
     <!-- Nút upload avatar -->
@@ -50,9 +48,9 @@
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div class="flex justify-center space-x-4 mt-6">
-          <button type="button"
+          <button id="btnProfileEdit" type="button"
             class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg transition">Sửa</button>
-          <button type="submit"
+          <button id="btnProfileSave" type="submit"
             class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition">Lưu</button>
         </div>
       </form>
@@ -71,50 +69,57 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Mở modal khi click "Thông tin cá nhân"
+    const profileModal = document.getElementById('profileModal');
+    const saveBtn = document.getElementById('btnProfileSave');
+    const editBtn = document.getElementById('btnProfileEdit');
+    const inputs = document.querySelectorAll('#profileForm input:not([type="hidden"])');
+
+    // Open profile modal
     document.getElementById('openProfile').addEventListener('click', function (e) {
       e.preventDefault();
-      document.getElementById('profileModal').classList.remove('hidden');
+      profileModal.classList.remove('hidden');
+
+      // Disable save button and inputs initially
+      saveBtn.classList.add('hidden');
+      editBtn.classList.remove('hidden');
+      inputs.forEach(input => input.disabled = true);
     });
 
-    // Đóng modal khi click nút đóng hoặc nền tối
-    document.getElementById('closeProfileModal').addEventListener('click', function () {
-      document.getElementById('profileModal').classList.add('hidden');
-    });
-    document.getElementById('profileModal').addEventListener('click', function (e) {
-      if (e.target === this) this.classList.add('hidden');
-    });
-
-    document.getElementById('avatarInput').addEventListener('change', function () {
-      const form = document.getElementById('avatarForm');
-      const data = new FormData(form);
-
-      fetch(form.action, { method: 'POST', body: data })
-        .then(res => res.json())
-        .then(json => {
-          if (json.success) {
-            // Chỉ cập nhật ảnh trong modal preview
-            document.getElementById('profileAvatar').src = json.avatar;
-            // Lưu đường dẫn ảnh mới vào một biến ẩn để sử dụng khi ấn nút Lưu
-            document.getElementById('newAvatarPath').value = json.avatar;
-          } else {
-            alert('Upload thất bại: ' + (json.error || 'Lỗi không xác định'));
-          }
-        })
-        .catch(() => alert('Lỗi mạng!'));
+    // Handle edit button click
+    editBtn.addEventListener('click', function () {
+      saveBtn.classList.remove('hidden');
+      editBtn.classList.add('hidden');
+      inputs.forEach(input => input.disabled = false);
     });
 
-    // Xử lý khi ấn nút Lưu
-    document.querySelector('#profileModal form button[type="submit"]').addEventListener('click', function (e) {
-      e.preventDefault();
-      const newAvatarPath = document.getElementById('newAvatarPath').value;
-      if (newAvatarPath) {
-        // Cập nhật ảnh đại diện trên header
-        document.querySelector('#profileBtn img').src = newAvatarPath;
-        // Xóa đường dẫn tạm
-        document.getElementById('newAvatarPath').value = '';
+    // Close modal when clicking outside
+    profileModal.addEventListener('click', function (e) {
+      if (e.target === profileModal) {
+        profileModal.classList.add('hidden');
+        // Reset state
+        saveBtn.classList.add('hidden');
+        editBtn.classList.remove('hidden');
+        inputs.forEach(input => input.disabled = true);
       }
-      // TODO: Thêm code lưu các thông tin khác ở đây
+    });
+
+    const closeBtn = document.getElementById('closeProfileModal');
+
+    function closeModal() {
+      profileModal.classList.add('hidden');
+      saveBtn.classList.add('hidden');
+      editBtn.classList.remove('hidden');
+      inputs.forEach(input => input.disabled = true);
+    }
+
+    // Close button handler
+    closeBtn.addEventListener('click', closeModal);
+
+    // Outside click handler
+    profileModal.addEventListener('click', function (e) {
+      if (e.target === profileModal) {
+        closeModal();
+      }
     });
   });
 </script>
