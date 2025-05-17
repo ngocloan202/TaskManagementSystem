@@ -1,40 +1,55 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const profileModal = document.getElementById('profileModal');
-    const saveBtn = document.getElementById('btnProfileSave');
-    const editBtn = document.getElementById('btnProfileEdit');
-    const inputs = document.querySelectorAll('#profileForm input:not([type="hidden"])');
-    const closeBtn = document.getElementById('closeProfileModal');
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("profileModal");
+  const form = document.getElementById("profileForm");
+  const inputs = form.querySelectorAll('input:not([type="hidden"])');
+  const openBtn = document.getElementById("openProfile");
+  const editBtn = document.getElementById("btnProfileEdit");
+  const saveBtn = document.getElementById("btnProfileSave");
+  const closeBtn = document.getElementById("closeProfileModal");
 
-    function closeModal() {
-        profileModal.classList.add('hidden');
-        saveBtn.classList.add('hidden');
-        editBtn.classList.remove('hidden');
-        inputs.forEach(input => input.disabled = true);
+  // Set initial readonly state
+  function initializeForm() {
+    inputs.forEach(input => {
+      input.readOnly = true;
+      input.classList.add("bg-gray-50", "cursor-not-allowed");
+    });
+  }
+
+  // Reset state function
+  function resetState() {
+    inputs.forEach(input => {
+      input.readOnly = true;
+      input.classList.add("bg-gray-50", "cursor-not-allowed");
+    });
+    editBtn.classList.remove("hidden");
+    saveBtn.classList.add("hidden");
+  }
+
+  // Initialize form when page loads
+  initializeForm();
+
+  // Open modal
+  openBtn.addEventListener("click", e => {
+    e.preventDefault();
+    modal.classList.remove("hidden");
+    resetState();
+  });
+
+  // Edit button click
+  editBtn.addEventListener("click", () => {
+    inputs.forEach(input => {
+      input.readOnly = false;
+      input.classList.remove("bg-gray-50", "cursor-not-allowed");
+    });
+    editBtn.classList.add("hidden");
+    saveBtn.classList.remove("hidden");
+  });
+
+  closeBtn.addEventListener("click", closeModal);
+
+  profileModal.addEventListener("click", function (e) {
+    if (e.target === profileModal) {
+      closeModal();
     }
-
-    // Open profile modal
-    document.getElementById('openProfile').addEventListener('click', function (e) {
-        e.preventDefault();
-        profileModal.classList.remove('hidden');
-        saveBtn.classList.add('hidden');
-        editBtn.classList.remove('hidden');
-        inputs.forEach(input => input.disabled = true);
-    });
-
-    // Handle edit button click
-    editBtn.addEventListener('click', function () {
-        saveBtn.classList.remove('hidden');
-        editBtn.classList.add('hidden');
-        inputs.forEach(input => input.disabled = false);
-    });
-
-    // Close button handler
-    closeBtn.addEventListener('click', closeModal);
-
-    // Outside click handler
-    profileModal.addEventListener('click', function (e) {
-        if (e.target === profileModal) {
-            closeModal();
-        }
-    });
+  });
 });
