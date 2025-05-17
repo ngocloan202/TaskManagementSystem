@@ -1,3 +1,6 @@
+<?php
+include __DIR__ . "../../../Controllers/LoadUserData.php";
+?>
 <!-- Modal Profile -->
 <div id="profileModal" style="background-color: rgba(0, 0, 0, 0.4);"
   class="fixed inset-0 bg-opacity-40 flex items-center justify-center z-[9999] hidden">
