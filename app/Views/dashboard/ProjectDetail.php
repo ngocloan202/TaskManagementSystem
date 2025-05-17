@@ -1,5 +1,4 @@
 <?php
-// app/Views/dashboard/ProjectDetail.php
 
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
@@ -7,7 +6,6 @@ require_once "../../../config/database.php";
 $title = "Chi tiết dự án | CubeFlow";
 $currentPage = "dashboard";
 
-// 1) Lấy projectId từ URL
 $projectId = isset($_GET["id"]) ? intval($_GET["id"]) : 0;
 if ($projectId <= 0) {
   die("Project ID không hợp lệ");
