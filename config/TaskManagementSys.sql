@@ -118,6 +118,11 @@ INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Avata
 ('dev1', MD5('dev123'), 'dev1@example.com', 'USER', 'Lê Phát Triển', '0923456789', '/public/images/dev1.png'),
 ('dev2', MD5('dev123'), 'dev2@example.com', 'USER', 'Phạm Lập Trình','0934567890', '/public/images/dev2.png'),
 ('tester', MD5('tester123'), 'tester@example.com', 'USER', 'Hoàng Kiểm Thử', '0945678901', '/public/images/tester.png');
+('mavis',   MD5('user123'), 'mavis@example.com',   'USER', 'Mavis Khang', '0981000001', ''),
+('freeda',     MD5('user123'), 'freeda@example.com',     'USER', 'Freeda Trương','0981000002', ''),
+('lemon', MD5('user123'), 'lemon@example.com', 'USER', 'Lemon Châu',  '0981000003', ''),
+('chris',   MD5('user123'), 'chris@example.com',   'USER', 'Chris Huống', '0981000004', ''),
+('twinkle',     MD5('user123'), 'twinkle@example.com',     'USER', 'twinkle Giản', '0981000005', '');
 
 -- Project table (không còn CreatedBy = 1)
 INSERT INTO Project (ProjectName, ProjectDescription, CreatedBy, StartDate, EndDate, BackgroundUrl) VALUES

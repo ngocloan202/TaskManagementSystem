@@ -4,12 +4,16 @@ require_once "../../../config/database.php";
 require_once "../components/Notification.php";
 
 if (!isset($_SESSION["user_id"])) {
-  header('Content-Type: application/json');
-  echo json_encode(['status' => 'error', 'message' => 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.']);
+  header("Content-Type: application/json");
+  echo json_encode([
+    "status" => "error",
+    "message" => "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+  ]);
   exit();
 }
 
-function clean_input($data) {
+function clean_input($data)
+{
   $data = trim($data);
   $data = stripslashes($data);
   $data = htmlspecialchars($data);
@@ -18,36 +22,36 @@ function clean_input($data) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   // Get form data
-  $projectID = isset($_POST["projectId"]) ? (int)$_POST["projectId"] : 0;
-  $userID = isset($_POST["userId"]) ? (int)$_POST["userId"] : 0;
-  $roleId = isset($_POST["roleId"]) ? (int)$_POST["roleId"] : 2; // Default to member (2)
+  $projectID = isset($_POST["projectId"]) ? (int) $_POST["projectId"] : 0;
+  $userID = isset($_POST["userId"]) ? (int) $_POST["userId"] : 0;
+  $roleId = isset($_POST["roleId"]) ? (int) $_POST["roleId"] : 2; // Default to member (2)
   $currentUserID = $_SESSION["user_id"];
-  
+
   // Convert roleId to RoleInProject string
   $roleInProject = $roleId == 1 ? "người sở hữu" : "thành viên";
-  
+
   // Validate form data
   if ($projectID <= 0 || $userID <= 0) {
-    header('Content-Type: application/json');
-    echo json_encode(['status' => 'error', 'message' => 'Dữ liệu không hợp lệ! Vui lòng thử lại.']);
+    header("Content-Type: application/json");
+    echo json_encode(["status" => "error", "message" => "Dữ liệu không hợp lệ! Vui lòng thử lại."]);
     exit();
   }
-  
+
   // Check if current user has permissions to add members (must be an owner)
   $checkOwnerStmt = $connect->prepare("
     SELECT COUNT(*) AS isOwner 
     FROM ProjectMembers 
     WHERE ProjectID = ? AND UserID = ? AND RoleInProject = 'người sở hữu'
   ");
-  $checkOwnerStmt->bind_param('ii', $projectID, $currentUserID);
+  $checkOwnerStmt->bind_param("ii", $projectID, $currentUserID);
   $checkOwnerStmt->execute();
   $ownerResult = $checkOwnerStmt->get_result()->fetch_assoc();
-  
+
   // If not an owner, only allow adding as a regular member
-  if ($ownerResult['isOwner'] == 0) {
+  if ($ownerResult["isOwner"] == 0) {
     $roleInProject = "thành viên";
   }
-  
+
   // Check if the user is already a member of the project
   $checkMemberStmt = $connect->prepare("
     SELECT COUNT(*) AS isMember, u.Username as FullName 
@@ -55,52 +59,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     JOIN Users u ON u.ID = pm.UserID 
     WHERE pm.ProjectID = ? AND pm.UserID = ?
   ");
-  $checkMemberStmt->bind_param('ii', $projectID, $userID);
+  $checkMemberStmt->bind_param("ii", $projectID, $userID);
   $checkMemberStmt->execute();
   $memberResult = $checkMemberStmt->get_result()->fetch_assoc();
-  
-  if ($memberResult['isMember'] > 0) {
-    header('Content-Type: application/json');
-    echo json_encode(['status' => 'error', 'message' => "Người dùng {$memberResult['FullName']} đã là thành viên của dự án!"]);
+
+  if ($memberResult["isMember"] > 0) {
+    header("Content-Type: application/json");
+    echo json_encode([
+      "status" => "error",
+      "message" => "Người dùng {$memberResult["FullName"]} đã là thành viên của dự án!",
+    ]);
     exit();
   }
-  
+
   // Get user's name for the success message
   $userStmt = $connect->prepare("SELECT Username as FullName FROM Users WHERE ID = ?");
-  $userStmt->bind_param('i', $userID);
+  $userStmt->bind_param("i", $userID);
   $userStmt->execute();
-  $userName = $userStmt->get_result()->fetch_assoc()['FullName'] ?? 'Người dùng';
-  
+  $userName = $userStmt->get_result()->fetch_assoc()["FullName"] ?? "Người dùng";
+
   // Add the member to the project
-  $currentDateTime = date('Y-m-d H:i:s');
+  $currentDateTime = date("Y-m-d H:i:s");
   $addMemberStmt = $connect->prepare("
     INSERT INTO ProjectMembers (ProjectID, UserID, RoleInProject, JoinedAt) 
     VALUES (?, ?, ?, ?)
   ");
-  $addMemberStmt->bind_param('iiss', $projectID, $userID, $roleInProject, $currentDateTime);
-  
+  $addMemberStmt->bind_param("iiss", $projectID, $userID, $roleInProject, $currentDateTime);
+
   $success = $addMemberStmt->execute();
   $successMsg = "Đã thêm {$userName} vào dự án với vai trò {$roleInProject}!";
   $errorMsg = "Có lỗi xảy ra khi thêm thành viên! Chi tiết: " . $connect->error;
-  
+
   // Return JSON response
-  header('Content-Type: application/json');
+  header("Content-Type: application/json");
   if ($success) {
     echo json_encode([
-      'status' => 'success',
-      'message' => $successMsg
+      "status" => "success",
+      "message" => $successMsg,
     ]);
   } else {
     echo json_encode([
-      'status' => 'error', 
-      'message' => $errorMsg
+      "status" => "error",
+      "message" => $errorMsg,
     ]);
   }
   exit();
 }
 
 // If not a POST request
-header('Content-Type: application/json');
-echo json_encode(['status' => 'error', 'message' => 'Phương thức không hợp lệ.']);
+header("Content-Type: application/json");
+echo json_encode(["status" => "error", "message" => "Phương thức không hợp lệ."]);
 exit();
 ?> 

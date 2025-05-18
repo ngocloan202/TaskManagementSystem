@@ -1,38 +1,39 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../../config/database.php';
-$conn = $connect; 
-$projectID = isset($_GET['projectID']) ? (int)$_GET['projectID'] : 0;
+require_once __DIR__ . "/../../../config/database.php";
+$conn = $connect;
+$projectID = isset($_GET["projectID"]) ? (int) $_GET["projectID"] : 0;
 $currentUserID = $_SESSION["user_id"] ?? 0;
-$isEmbedded = isset($_GET['embed']) && $_GET['embed'] == '1';
+$isEmbedded = isset($_GET["embed"]) && $_GET["embed"] == "1";
 
 // Kiểm tra vai trò của người dùng hiện tại trong dự án
-$userRoleStmt = $conn->prepare("SELECT RoleInProject FROM ProjectMembers WHERE ProjectID = ? AND UserID = ?");
-$userRoleStmt->bind_param('ii', $projectID, $currentUserID);
+$userRoleStmt = $conn->prepare(
+  "SELECT RoleInProject FROM ProjectMembers WHERE ProjectID = ? AND UserID = ?"
+);
+$userRoleStmt->bind_param("ii", $projectID, $currentUserID);
 $userRoleStmt->execute();
 $userRoleResult = $userRoleStmt->get_result();
 $isOwner = false;
 
 if ($userRoleResult->num_rows > 0) {
-    $userRole = $userRoleResult->fetch_assoc()["RoleInProject"];
-    $isOwner = ($userRole === 'người sở hữu');
+  $userRole = $userRoleResult->fetch_assoc()["RoleInProject"];
+  $isOwner = $userRole === "người sở hữu";
 }
 
 $projectStmt = $conn->prepare("SELECT ProjectName FROM Project WHERE ProjectID=?");
-$projectStmt->bind_param('i', $projectID);
+$projectStmt->bind_param("i", $projectID);
 $projectStmt->execute();
-$projectName = $projectStmt->get_result()->fetch_assoc()['ProjectName'] ?? 'Dự án không xác định';
+$projectName = $projectStmt->get_result()->fetch_assoc()["ProjectName"] ?? "Dự án không xác định";
 
 $memberStmt = $conn->prepare("SELECT pm.ProjectMembersID, u.UserID, u.FullName, u.Username, u.Avatar, pm.RoleInProject, pm.JoinedAt
     FROM ProjectMembers pm JOIN Users u ON pm.UserID=u.UserID WHERE pm.ProjectID=?");
-$memberStmt->bind_param('i', $projectID);
+$memberStmt->bind_param("i", $projectID);
 $memberStmt->execute();
 $members = $memberStmt->get_result();
 $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullName");
 
 // Only output the full HTML structure if not embedded
-if (!$isEmbedded):
-?>
+if (!$isEmbedded): ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -84,11 +85,14 @@ if (!$isEmbedded):
   </style>
 </head>
 <body class="font-sans">
-<?php endif; ?>
+<?php endif;
+?>
 
 <div class="py-4">
   <div class="rounded-corners">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">Quản lý thành viên: <?= htmlspecialchars($projectName) ?></h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Quản lý thành viên: <?= htmlspecialchars(
+      $projectName
+    ) ?></h1>
     <div class="flex flex-col md:flex-row items-center justify-between mb-4">
       <div class="flex w-full md:w-1/2 mb-4 md:mb-0">
         <input id="searchMember" type="text" placeholder="Tìm kiếm thành viên..."
@@ -125,21 +129,28 @@ if (!$isEmbedded):
           <?php while ($row = $members->fetch_assoc()): ?>
           <tr class="hover:bg-gray-50">
             <td class="px-4 py-2">
-              <?php if ($row['Avatar']): ?>
-                <img src="<?= htmlspecialchars($row['Avatar']) ?>" alt="Avatar" class="w-8 h-8 rounded-full">
+              <?php if ($row["Avatar"]): ?>
+                <img src="<?= htmlspecialchars(
+                  $row["Avatar"]
+                ) ?>" alt="Avatar" class="w-8 h-8 rounded-full">
               <?php else: ?>
                 <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
               <?php endif; ?>
             </td>
-            <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row['FullName']) ?></td>
-            <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row['Username']) ?></td>
-            <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row['RoleInProject']) ?></td>
-            <td class="px-4 py-2 text-gray-700"><?= date('d/m/Y H:i', strtotime($row['JoinedAt'])) ?></td>
+            <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row["FullName"]) ?></td>
+            <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row["Username"]) ?></td>
+            <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row["RoleInProject"]) ?></td>
+            <td class="px-4 py-2 text-gray-700"><?= date(
+              "d/m/Y H:i",
+              strtotime($row["JoinedAt"])
+            ) ?></td>
             <td class="px-4 py-2 space-x-2">
-              <?php if ($isOwner && $currentUserID != $row['UserID']): ?>
-              <button onclick="deleteMember(<?= $row['ProjectMembersID'] ?>, '<?= htmlspecialchars($row['FullName']) ?>')"
-                      data-id="<?= $row['ProjectMembersID'] ?>"
-                      data-member-id="<?= $row['ProjectMembersID'] ?>"
+              <?php if ($isOwner && $currentUserID != $row["UserID"]): ?>
+              <button onclick="deleteMember(<?= $row["ProjectMembersID"] ?>, '<?= htmlspecialchars(
+  $row["FullName"]
+) ?>')"
+                      data-id="<?= $row["ProjectMembersID"] ?>"
+                      data-member-id="<?= $row["ProjectMembersID"] ?>"
                       class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">Xóa</button>
               <?php endif; ?>
             </td>
@@ -197,13 +208,18 @@ if (!$isEmbedded):
           <option value="">-- Chọn người dùng --</option>
           <?php
           // Lấy danh sách user chưa là thành viên của project
-          $userQuery = "SELECT UserID, FullName FROM Users WHERE UserID NOT IN (SELECT UserID FROM ProjectMembers WHERE ProjectID = ?) ORDER BY FullName";
+          $userQuery =
+            "SELECT UserID, FullName FROM Users WHERE UserID NOT IN (SELECT UserID FROM ProjectMembers WHERE ProjectID = ?) ORDER BY FullName";
           $stmt = $connect->prepare($userQuery);
           $stmt->bind_param("i", $projectID);
           $stmt->execute();
           $result = $stmt->get_result();
           while ($row = $result->fetch_assoc()) {
-            echo "<option value='" . $row['UserID'] . "'>" . htmlspecialchars($row['FullName']) . "</option>";
+            echo "<option value='" .
+              $row["UserID"] .
+              "'>" .
+              htmlspecialchars($row["FullName"]) .
+              "</option>";
           }
           ?>
         </select>

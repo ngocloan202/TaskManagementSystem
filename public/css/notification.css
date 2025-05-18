@@ -18,12 +18,12 @@
 }
 
 .notification-success {
-  background-color: #10B981;
+  background-color: #10b981;
   color: white;
 }
 
 .notification-error {
-  background-color: #EF4444;
+  background-color: #ef4444;
   color: white;
 }
 
@@ -46,4 +46,4 @@
   top: 0.5rem;
   right: 0.5rem;
   cursor: pointer;
-} 
+}

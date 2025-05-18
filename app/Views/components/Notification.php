@@ -1,38 +1,39 @@
 <?php
 /**
  * Helper function to set notification messages
- * 
+ *
  * @param string $type Type of notification ('success' or 'error')
  * @param string $message The message to display
  * @param bool $redirect Whether to redirect after setting the message
  * @param string $redirectUrl URL to redirect to (optional)
  * @return void
  */
-function setNotification($type, $message, $redirect = false, $redirectUrl = '') {
-    if ($type === 'success') {
-        $_SESSION['success'] = $message;
-    } else if ($type === 'error') {
-        $_SESSION['error'] = $message;
-    }
-    
-    if ($redirect && !empty($redirectUrl)) {
-        header("Location: " . $redirectUrl);
-        exit();
-    }
+function setNotification($type, $message, $redirect = false, $redirectUrl = "")
+{
+  if ($type === "success") {
+    $_SESSION["success"] = $message;
+  } elseif ($type === "error") {
+    $_SESSION["error"] = $message;
+  }
+
+  if ($redirect && !empty($redirectUrl)) {
+    header("Location: " . $redirectUrl);
+    exit();
+  }
 }
 
 // Extract any success or error messages from session
-$successMessage = '';
-$errorMessage = '';
+$successMessage = "";
+$errorMessage = "";
 
-if (isset($_SESSION['success'])) {
-    $successMessage = $_SESSION['success'];
-    unset($_SESSION['success']);
+if (isset($_SESSION["success"])) {
+  $successMessage = $_SESSION["success"];
+  unset($_SESSION["success"]);
 }
 
-if (isset($_SESSION['error'])) {
-    $errorMessage = $_SESSION['error'];
-    unset($_SESSION['error']);
+if (isset($_SESSION["error"])) {
+  $errorMessage = $_SESSION["error"];
+  unset($_SESSION["error"]);
 }
 ?>
 
