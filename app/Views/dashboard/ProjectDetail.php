@@ -65,6 +65,8 @@ $taskStmt = $connect->prepare("
     SELECT 
       t.TaskID,
       t.TaskTitle,
+      t.TagName,
+      t.TagColor,
       DATE_FORMAT(t.EndDate, '%d/%m/%Y') AS dueDate,
       ts.StatusName,
       u.UserID,
@@ -139,7 +141,7 @@ foreach ($allTasks as $tk) {
 
         <!-- Project Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6 flex items-center justify-between">
-          <div>
+          <div id="projectDetailPage" class="relative z-0">
             <h1 class="text-2xl font-semibold mb-1"><?= htmlspecialchars(
               $proj["ProjectName"]
             ) ?></h1>
@@ -166,26 +168,26 @@ foreach ($allTasks as $tk) {
         <!-- Task Columns -->
         <div class="grid grid-cols-3 gap-6">
           <?php
-         $columns = [
-          "Cần làm" => [
-            "color" => "text-blue-600",
-            "bg" => "bg-blue-50",
-            "hover" => "hover:bg-blue-100",
-            "border" => "border-l-4 border-blue-500"
-          ],
-          "Đang làm" => [
-            "color" => "text-yellow-600",
-            "bg" => "bg-yellow-50",
-            "hover" => "hover:bg-yellow-100",
-            "border" => "border-l-4 border-yellow-500"
-          ],
-          "Đã làm" => [
-            "color" => "text-green-600",
-            "bg" => "bg-green-50",
-            "hover" => "hover:bg-green-100",
-            "border" => "border-l-4 border-green-500"
-          ],
-        ];
+          $columns = [
+            "Cần làm" => [
+              "color" => "text-blue-600",
+              "bg" => "bg-blue-50",
+              "hover" => "hover:bg-blue-100",
+              "border" => "border-l-4 border-blue-500",
+            ],
+            "Đang làm" => [
+              "color" => "text-yellow-600",
+              "bg" => "bg-yellow-50",
+              "hover" => "hover:bg-yellow-100",
+              "border" => "border-l-4 border-yellow-500",
+            ],
+            "Đã làm" => [
+              "color" => "text-green-600",
+              "bg" => "bg-green-50",
+              "hover" => "hover:bg-green-100",
+              "border" => "border-l-4 border-green-500",
+            ],
+          ];
           foreach ($columns as $status => $styles):
             $count = $taskCounts[$status] ?? 0; ?>
             <div class="bg-white rounded-lg shadow-sm p-4">
@@ -198,11 +200,10 @@ foreach ($allTasks as $tk) {
                     <?= $count ?>
                   </span>
                 </div>
-                <button
-                  class="p-1 rounded-full <?= $styles["bg"] ?> <?= $styles[
-   "color"
- ] ?> hover:opacity-75 transition-opacity"
-                  onclick="addTask('<?= $status ?>')">
+                <button class="p-2 rounded-full <?= $styles["bg"] ?> <?= $styles["color"] ?>
+                  hover:bg-opacity-90 transition transform hover:scale-110" onclick="addTask('<?= $status ?>')"
+                  title="Thêm nhiệm vụ mới (<?= $status ?>)"
+                  id="btnAddTask">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -215,11 +216,15 @@ foreach ($allTasks as $tk) {
                 <?php foreach ($tasksByStatus[$status] as $task): ?>
                   <div class="p-3 <?= $styles["bg"] ?> rounded-lg <?= $styles["hover"] ?> <?= $styles["border"] ?>">
                     <h4 class="font-medium"><?= htmlspecialchars($task["TaskTitle"]) ?></h4>
+                    <?php if (!empty($task['TagName'])): ?>
+                      <span class="inline-block px-2 py-1 rounded text-white text-xs font-semibold mb-1"
+                            style="background-color: <?= htmlspecialchars($task['TagColor']) ?>">
+                        <?= htmlspecialchars($task['TagName']) ?>
+                      </span>
+                    <?php endif; ?>
                     <?php if ($task["UserID"]): ?>
                       <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <img src="../../..<?= htmlspecialchars(
-                          $task["Avatar"]
-                        ) ?>" class="w-6 h-6 rounded-full mr-2">
+                        <img src="../../..<?= htmlspecialchars($task["Avatar"]) ?>" class="w-6 h-6 rounded-full mr-2">
                         <span><?= htmlspecialchars($task["AssignedToName"]) ?></span>
                       </div>
                     <?php endif; ?>
@@ -237,7 +242,32 @@ foreach ($allTasks as $tk) {
           document.getElementById('btnMember').addEventListener('click', () => {
             document.getElementById('memberDialog').classList.remove('hidden');
           });
-        </script>
-</body>
 
+          function addTask(statusName) {
+            document.getElementById('createTaskDialog').classList.remove('hidden');
+            document.getElementById('statusField').value = statusName;
+          }
+          
+          // Đóng dialog khi nhấn nút đóng
+          document.addEventListener('DOMContentLoaded', function() {
+            // Tìm nút đóng trong dialog
+            const closeButton = document.querySelector('#createTaskDialog button[class*="hover:bg-indigo-500"]');
+            if (closeButton) {
+              closeButton.addEventListener('click', function() {
+                document.getElementById('createTaskDialog').classList.add('hidden');
+              });
+            }
+          });
+        </script>
+
+        <!-- Create Task Dialog -->
+        <div id="createTaskDialog" class="hidden">
+          <?php 
+          $projectId = $projectId; // Ensure projectId is available
+          include_once "../tasks/CreateTaskDialog.php"; 
+          ?>
+        </div>
+      </main>
+    </div>
+</body>
 </html>
