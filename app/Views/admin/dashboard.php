@@ -9,6 +9,53 @@ $flashSuccess = $_SESSION["success"] ?? null;
 $flashError = $_SESSION["error"] ?? null;
 unset($_SESSION["success"], $_SESSION["error"]);
 $currentPage = "admin_dashboard";
+
+// Xác định tab hiện tại
+$activeTab = $_GET['tab'] ?? 'overview';
+
+// Lấy danh sách người dùng nếu đang ở tab users
+$users = [];
+if ($activeTab == 'users') {
+    $usersQuery = "SELECT * FROM Users ORDER BY UserID DESC LIMIT 10";
+    $usersResult = $connect->query($usersQuery);
+    if ($usersResult) {
+        while ($row = $usersResult->fetch_assoc()) {
+            $users[] = $row;
+        }
+    }
+}
+
+// Lấy danh sách dự án nếu đang ở tab projects
+$projects = [];
+if ($activeTab == 'projects') {
+    $projectsQuery = "SELECT p.*, u.Username, u.FullName, 
+                     (SELECT COUNT(*) FROM ProjectMembers WHERE ProjectID = p.ProjectID) as MemberCount,
+                     (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID) as TaskCount,
+                     (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID AND TaskStatusID = 3) as CompletedTaskCount
+                     FROM Project p
+                     LEFT JOIN Users u ON p.CreatedBy = u.UserID
+                     ORDER BY p.ProjectID DESC
+                     LIMIT 10";
+    $projectsResult = $connect->query($projectsQuery);
+    if ($projectsResult) {
+        while ($row = $projectsResult->fetch_assoc()) {
+            $projects[] = $row;
+        }
+    }
+}
+
+// Đếm tổng số dự án, người dùng và công việc
+$totalProjectsQuery = "SELECT COUNT(*) as total FROM Project";
+$totalUsersQuery = "SELECT COUNT(*) as total FROM Users";
+$totalTasksQuery = "SELECT COUNT(*) as total FROM Task";
+
+$totalProjectsResult = $connect->query($totalProjectsQuery);
+$totalUsersResult = $connect->query($totalUsersQuery);
+$totalTasksResult = $connect->query($totalTasksQuery);
+
+$totalProjects = $totalProjectsResult ? $totalProjectsResult->fetch_assoc()['total'] : 0;
+$totalUsers = $totalUsersResult ? $totalUsersResult->fetch_assoc()['total'] : 0;
+$totalTasks = $totalTasksResult ? $totalTasksResult->fetch_assoc()['total'] : 0;
 ?>
 <!doctype html>
 <html lang="vi">
@@ -27,6 +74,24 @@ $currentPage = "admin_dashboard";
         }
         .menuItem:last-child {
             margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-value {
+            height: 100%;
+            background-color: #3b82f6;
+            border-radius: 4px;
+        }
+        
+        .tab-active {
+            color: #4f46e5;
+            border-bottom: 2px solid #4f46e5;
         }
     </style>
 </head>
@@ -47,7 +112,7 @@ $currentPage = "admin_dashboard";
             <?php include "../components/Header.php"; ?>
             
             <!-- Main Content -->
-            <main class="flex-1 p-6">
+            <main class="flex-1 p-6 overflow-auto">
                 <div class="max-w-7xl mx-auto">
                     <h1 class="text-2xl font-semibold text-gray-900 mb-6">Admin Dashboard</h1>
                     
@@ -56,52 +121,52 @@ $currentPage = "admin_dashboard";
                         <!-- Total Users -->
                         <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-medium text-gray-700">Tổng số người dùng</h3>
-                            <p class="text-3xl font-bold text-indigo-600 mt-2" id="userCount">
-                                <!-- Số liệu sẽ được điền vào bởi JavaScript -->
-                                <span class="text-gray-400">Đang tải...</span>
+                            <p class="text-3xl font-bold text-indigo-600 mt-2">
+                                <?= number_format($totalUsers) ?>
                             </p>
                         </div>
                         
                         <!-- Total Projects -->
                         <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-medium text-gray-700">Tổng số dự án</h3>
-                            <p class="text-3xl font-bold text-indigo-600 mt-2" id="projectCount">
-                                <!-- Số liệu sẽ được điền vào bởi JavaScript -->
-                                <span class="text-gray-400">Đang tải...</span>
+                            <p class="text-3xl font-bold text-indigo-600 mt-2">
+                                <?= number_format($totalProjects) ?>
                             </p>
                         </div>
                         
                         <!-- Total Tasks -->
                         <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-medium text-gray-700">Tổng số công việc</h3>
-                            <p class="text-3xl font-bold text-indigo-600 mt-2" id="taskCount">
-                                <!-- Số liệu sẽ được điền vào bởi JavaScript -->
-                                <span class="text-gray-400">Đang tải...</span>
+                            <p class="text-3xl font-bold text-indigo-600 mt-2">
+                                <?= number_format($totalTasks) ?>
                             </p>
                         </div>
                     </div>
                     
-                    <!-- Quản lý hệ thống -->
-                    <div class="bg-white rounded-lg shadow p-6 mb-6">
-                        <h2 class="text-xl font-semibold mb-6">Quản lý hệ thống</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Quản lý người dùng -->
-                            <a href="Users.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
-                                <h3 class="text-lg font-medium text-blue-700 mb-1">Quản lý người dùng</h3>
-                                <p class="text-sm text-gray-600">Xem và quản lý tất cả người dùng trong hệ thống</p>
-                            </a>
-                            
-                            <!-- Quản lý dự án -->
-                            <a href="projects.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
-                                <h3 class="text-lg font-medium text-blue-700 mb-1">Quản lý dự án</h3>
-                                <p class="text-sm text-gray-600">Xem và quản lý tất cả dự án trong hệ thống</p>
-                            </a>
-                            
-                            <!-- Cài đặt hệ thống -->
-                            <a href="settings.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
-                                <h3 class="text-lg font-medium text-blue-700 mb-1">Cài đặt hệ thống</h3>
-                                <p class="text-sm text-gray-600">Cấu hình và quản lý cài đặt hệ thống</p>
-                            </a>
+                    <!-- Tabs -->
+                    <div class="bg-white rounded-lg shadow mb-6">
+                        <div class="p-6">
+                            <!-- Quản lý hệ thống -->
+                            <h2 class="text-xl font-semibold mb-6">Quản lý hệ thống</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Quản lý người dùng -->
+                                <a href="Users.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
+                                    <h3 class="text-lg font-medium text-blue-700 mb-1">Quản lý người dùng</h3>
+                                    <p class="text-sm text-gray-600">Xem và quản lý tất cả người dùng trong hệ thống</p>
+                                </a>
+                                
+                                <!-- Quản lý dự án -->
+                                <a href="Projects.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
+                                    <h3 class="text-lg font-medium text-blue-700 mb-1">Quản lý dự án</h3>
+                                    <p class="text-sm text-gray-600">Xem và quản lý tất cả dự án trong hệ thống</p>
+                                </a>
+                                
+                                <!-- Cài đặt hệ thống -->
+                                <a href="settings.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
+                                    <h3 class="text-lg font-medium text-blue-700 mb-1">Cài đặt hệ thống</h3>
+                                    <p class="text-sm text-gray-600">Cấu hình và quản lý cài đặt hệ thống</p>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -109,47 +174,64 @@ $currentPage = "admin_dashboard";
         </div>
     </div>
     
-    <!-- Import các file JavaScript tách riêng -->
-    <!-- Core functionality -->
-    <script src="js/DashboardInitializer.js"></script>
-    <script src="js/NotificationManager.js"></script>
-    <script src="js/ThemeManager.js"></script>
-    
-    <!-- Data fetching and statistics -->
-    <script src="js/UserStatisticsManager.js"></script>
-    <script src="js/ProjectStatisticsManager.js"></script>
-    <script src="js/TaskStatisticsManager.js"></script>
-    
-    <!-- UI Interactions -->
-    <script src="js/SystemManagementInteractions.js"></script>
-    
-    <!-- Đảm bảo xóa nút theme-toggle -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Xóa nút theme-toggle nếu tồn tại
-            const themeToggleButton = document.getElementById('theme-toggle');
-            if (themeToggleButton) {
-                themeToggleButton.remove();
-            }
-            
-            // Theo dõi DOM để xóa nút nếu được tạo sau này
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.addedNodes) {
-                        mutation.addedNodes.forEach(function(node) {
-                            if (node.id === 'theme-toggle') {
-                                node.remove();
-                            }
-                        });
-                    }
+            // Hover effect for management cards
+            const cards = document.querySelectorAll('.management-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.classList.add('bg-blue-100');
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.classList.remove('bg-blue-100');
                 });
             });
             
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
+            // Show flash messages
+            const flashSuccess = document.getElementById('flash-success');
+            const flashError = document.getElementById('flash-error');
+            
+            if (flashSuccess && flashSuccess.textContent.trim() !== '') {
+                showNotification(flashSuccess.textContent, 'success');
+            }
+            
+            if (flashError && flashError.textContent.trim() !== '') {
+                showNotification(flashError.textContent, 'error');
+            }
+            
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 ${
+                    type === 'success' ? 'bg-green-100 border-l-4 border-green-500 text-green-700' : 
+                    'bg-red-100 border-l-4 border-red-500 text-red-700'
+                }`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('opacity-0', 'translate-x-full');
+                    notification.style.transition = 'opacity 0.5s, transform 0.5s';
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 500);
+                }, 5000);
+            }
         });
+        
+        // Xác nhận xóa người dùng
+        function confirmDelete(userId, username) {
+            if (confirm(`Bạn có chắc chắn muốn xóa người dùng "${username}" không?`)) {
+                window.location.href = `Users.php?action=delete&id=${userId}`;
+            }
+        }
+        
+        // Xác nhận xóa dự án
+        function confirmDeleteProject(projectId, projectName) {
+            if (confirm(`Bạn có chắc chắn muốn xóa dự án "${projectName}" không?`)) {
+                window.location.href = `Projects.php?action=delete&id=${projectId}`;
+            }
+        }
     </script>
 </body>
 </html> 

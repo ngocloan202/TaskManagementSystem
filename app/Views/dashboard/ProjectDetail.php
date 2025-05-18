@@ -6,9 +6,29 @@ require_once "../../../config/database.php";
 $title = "Chi tiết dự án | CubeFlow";
 $currentPage = "dashboard";
 
+// Kiểm tra nếu user là admin hoặc là thành viên của dự án
 $projectId = isset($_GET["id"]) ? intval($_GET["id"]) : 0;
+$userID = $_SESSION['user_id'] ?? 0;
+$isAdmin = $_SESSION['role'] === 'ADMIN';
+
 if ($projectId <= 0) {
   die("Project ID không hợp lệ");
+}
+
+// Nếu không phải admin, kiểm tra xem người dùng có phải là thành viên của dự án không
+if (!$isAdmin) {
+  $memberCheckStmt = $connect->prepare("
+    SELECT COUNT(*) as isMember 
+    FROM ProjectMembers 
+    WHERE ProjectID = ? AND UserID = ?
+  ");
+  $memberCheckStmt->bind_param("ii", $projectId, $userID);
+  $memberCheckStmt->execute();
+  $isMemberResult = $memberCheckStmt->get_result()->fetch_assoc();
+  
+  if (!$isMemberResult || $isMemberResult['isMember'] == 0) {
+    die("Bạn không có quyền xem dự án này");
+  }
 }
 
 // Add near the top of file after database connection
