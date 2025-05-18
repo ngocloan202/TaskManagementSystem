@@ -87,7 +87,13 @@ $sortDirectionDB = strtoupper($sortDirection) === 'DESC' ? 'DESC' : 'ASC';
 $baseQuery = "SELECT p.*, u.Username, u.FullName, 
              (SELECT COUNT(*) FROM ProjectMembers WHERE ProjectID = p.ProjectID) as MemberCount,
              (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID) as TaskCount,
-             (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID AND TaskStatusID = 3) as CompletedTaskCount
+             (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID AND TaskStatusID = 3) as CompletedTaskCount,
+             (CASE 
+                WHEN (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID) > 0 
+                THEN ROUND(((SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID AND TaskStatusID = 3) / 
+                            (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID)) * 100)
+                ELSE 0
+             END) as Progress
              FROM Project p
              LEFT JOIN Users u ON p.CreatedBy = u.UserID";
 
