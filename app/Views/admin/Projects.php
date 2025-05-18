@@ -1,15 +1,32 @@
 <?php
-// Kết nối đến cơ sở dữ liệu và khởi tạo phiên
-require_once '../../../config/database.php';
+// Projects.php - Đã cải thiện xử lý dữ liệu
 require_once '../../../config/SessionInit.php';
+require_once '../../../config/database.php';
+check_role("ADMIN");  // chỉ cho ADMIN truy cập
 
-// Khởi tạo kết nối
-$connect = $GLOBALS['connect'];
+// Chuẩn bị truy vấn lấy danh sách dự án kèm tên người tạo và số thành viên, task
+$projectsQuery = "
+  SELECT 
+    p.ProjectID, 
+    p.ProjectName, 
+    p.ProjectDescription,
+    DATE_FORMAT(p.StartDate, '%d/%m/%Y') AS StartDate,
+    DATE_FORMAT(p.EndDate, '%d/%m/%Y')   AS EndDate,
+    u.FullName       AS Creator,
+    (SELECT COUNT(*) FROM ProjectMembers pm WHERE pm.ProjectID = p.ProjectID) AS MemberCount,
+    (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID)             AS TaskCount,
+    (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID AND TaskStatusID = 3) AS CompletedCount
+  FROM Project p
+  LEFT JOIN Users u ON p.CreatedBy = u.UserID
+  ORDER BY p.ProjectID DESC
+";
 
-// Kiểm tra đăng nhập và vai trò
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ADMIN') {
-    header("Location: ../login.php");
-    exit();
+$projectsResult = $connect->query($projectsQuery);
+$projects = [];
+if ($projectsResult) {
+    while ($row = $projectsResult->fetch_assoc()) {
+        $projects[] = $row;
+    }
 }
 
 // Xử lý thông báo
@@ -73,7 +90,7 @@ $sortDirection = isset($_GET['order']) ? $_GET['order'] : 'desc';
 $sortMapping = [
     'id' => 'p.ProjectID',
     'name' => 'p.ProjectName',
-    'creator' => 'u.FullName',
+    'creator' => 'Creator',
     'members' => 'MemberCount',
     'tasks' => 'TaskCount'
 ];
@@ -83,75 +100,59 @@ $sortColumnDB = isset($sortMapping[$sortColumn]) ? $sortMapping[$sortColumn] : '
 // Đảm bảo hướng sắp xếp hợp lệ
 $sortDirectionDB = strtoupper($sortDirection) === 'DESC' ? 'DESC' : 'ASC';
 
-// Xây dựng truy vấn cơ sở
-$baseQuery = "SELECT p.*, u.Username, u.FullName, 
-             (SELECT COUNT(*) FROM ProjectMembers WHERE ProjectID = p.ProjectID) as MemberCount,
-             (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID) as TaskCount,
-             (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID AND TaskStatusID = 3) as CompletedTaskCount,
-             (CASE 
-                WHEN (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID) > 0 
-                THEN ROUND(((SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID AND TaskStatusID = 3) / 
-                            (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID)) * 100)
-                ELSE 0
-             END) as Progress
-             FROM Project p
-             LEFT JOIN Users u ON p.CreatedBy = u.UserID";
-
-// Đếm tổng số lượng dự án
-$countQuery = "SELECT COUNT(*) as total FROM Project p LEFT JOIN Users u ON p.CreatedBy = u.UserID WHERE 1=1";
-
-// Tìm kiếm và lọc
-$whereConditions = [];
-$params = [];
-$types = "";
-
-// Xử lý tìm kiếm
-if (isset($_GET['search']) && !empty($_GET['search'])) {
-    $search = "%" . $_GET['search'] . "%";
-    $whereConditions[] = "(p.ProjectName LIKE ? OR p.ProjectDescription LIKE ? OR u.FullName LIKE ?)";
-    $params[] = $search;
-    $params[] = $search;
-    $params[] = $search;
-    $types .= "sss";
+// Xây dựng truy vấn cho tìm kiếm
+if (!empty($search)) {
+    // Thêm điều kiện tìm kiếm vào truy vấn
+    $sql = "
+      SELECT 
+        p.ProjectID, 
+        p.ProjectName, 
+        p.ProjectDescription,
+        DATE_FORMAT(p.StartDate, '%d/%m/%Y') AS StartDate,
+        DATE_FORMAT(p.EndDate, '%d/%m/%Y')   AS EndDate,
+        u.FullName       AS Creator,
+        (SELECT COUNT(*) FROM ProjectMembers pm WHERE pm.ProjectID = p.ProjectID) AS MemberCount,
+        (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID)             AS TaskCount,
+        (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID AND TaskStatusID = 3) AS CompletedCount
+      FROM Project p
+      LEFT JOIN Users u ON p.CreatedBy = u.UserID
+      WHERE p.ProjectName LIKE '%$search%' OR p.ProjectDescription LIKE '%$search%' OR u.FullName LIKE '%$search%'
+      ORDER BY $sortColumnDB $sortDirectionDB
+      LIMIT $perPage OFFSET $offset
+    ";
+    
+    // Truy vấn đếm tổng số dự án thỏa mãn điều kiện tìm kiếm
+    $countQuery = "
+      SELECT COUNT(*) as total 
+      FROM Project p
+      LEFT JOIN Users u ON p.CreatedBy = u.UserID
+      WHERE p.ProjectName LIKE '%$search%' OR p.ProjectDescription LIKE '%$search%' OR u.FullName LIKE '%$search%'
+    ";
+    
+    $countResult = $connect->query($countQuery);
+    $totalProjects = $countResult->fetch_assoc()['total'];
+} else {
+    // Sắp xếp và phân trang cho kết quả ban đầu
+    $sql = $projectsQuery . " ORDER BY $sortColumnDB $sortDirectionDB LIMIT $perPage OFFSET $offset";
+    
+    // Đếm tổng số dự án
+    $countQuery = "SELECT COUNT(*) as total FROM Project";
+    $countResult = $connect->query($countQuery);
+    $totalProjects = $countResult->fetch_assoc()['total'];
 }
 
-// Hoàn thiện câu truy vấn
-if (!empty($whereConditions)) {
-    $whereClause = " WHERE " . implode(" AND ", $whereConditions);
-    $baseQuery .= $whereClause;
-    $countQuery .= $whereClause;
+// Thực thi truy vấn đã chỉnh sửa nếu cần
+if (!empty($search) || $sortColumn != 'id' || $sortDirection != 'desc') {
+    $result = $connect->query($sql);
+    $projects = [];
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $projects[] = $row;
+        }
+    }
 }
 
-// Lấy tổng số dự án
-$stmt = $connect->prepare($countQuery);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
-$stmt->execute();
-$totalProjects = $stmt->get_result()->fetch_assoc()['total'];
 $totalPages = ceil($totalProjects / $perPage);
-
-// Sắp xếp và phân trang
-$baseQuery .= " ORDER BY $sortColumnDB $sortDirectionDB LIMIT ? OFFSET ?";
-$params[] = $perPage;
-$params[] = $offset;
-$types .= "ii";
-
-// Chuẩn bị và thực thi truy vấn
-$stmt = $connect->prepare($baseQuery);
-
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
-
-$stmt->execute();
-$result = $stmt->get_result();
-$projects = [];
-
-while ($row = $result->fetch_assoc()) {
-    $projects[] = $row;
-}
-
 $currentPage = "projects";
 ?>
 
@@ -163,10 +164,44 @@ $currentPage = "projects";
     <title>CubeFlow - Quản lý dự án</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
     <link rel="stylesheet" href="../../../public/css/admin.css">
+    <style>
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-value {
+            height: 100%;
+            background-color: #3b82f6;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen">
+        <!-- Lưu trữ tạm thời các biến này để tránh ghi đè -->
+        <?php 
+        $temp_projects = $projects;
+        $temp_totalProjects = $totalProjects;
+        $temp_totalPages = $totalPages;
+        $temp_flashSuccess = $flashSuccess;
+        $temp_flashError = $flashError;
+        $temp_connect = $connect;
+        ?>
+        
         <?php include "../components/Sidebar.php"; ?>
+        
+        <?php 
+        // Khôi phục các biến sau khi include
+        $projects = $temp_projects;
+        $totalProjects = $temp_totalProjects;
+        $totalPages = $temp_totalPages;
+        $flashSuccess = $temp_flashSuccess;
+        $flashError = $temp_flashError;
+        $connect = $temp_connect;
+        ?>
         
         <div class="flex-1 flex flex-col">
             <?php include "../components/Header.php"; ?>
@@ -248,64 +283,59 @@ $currentPage = "projects";
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
-                                    <?php $rowNumber = $offset + 1; // Khởi tạo biến đánh số thứ tự ?>
-                                    <?php foreach ($projects as $project): ?>
-                                        <?php 
-                                        // Tính toán phần trăm hoàn thành
-                                        $progress = 0;
-                                        if ($project['TaskCount'] > 0) {
-                                            $progress = round(($project['CompletedTaskCount'] / $project['TaskCount']) * 100);
-                                        }
-                                        ?>
-                                        <tr class="hover-row">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= $project['ProjectID'] ?></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?= htmlspecialchars($project['ProjectName']) ?></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($project['FullName']) ?></td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="w-24 mr-2">
-                                                        <div class="progress-bar">
-                                                            <div class="progress-value" style="width: <?= $progress ?>%"></div>
+                                    <?php if (count($projects) > 0): ?>
+                                        <?php foreach ($projects as $project): ?>
+                                            <?php 
+                                            // Tính toán phần trăm hoàn thành
+                                            $progress = 0;
+                                            if ($project['TaskCount'] > 0) {
+                                                $progress = round(($project['CompletedCount'] / $project['TaskCount']) * 100);
+                                            }
+                                            ?>
+                                            <tr class="hover-row">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= $project['ProjectID'] ?></td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?= htmlspecialchars($project['ProjectName']) ?></td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($project['Creator']) ?></td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="w-24 mr-2">
+                                                            <div class="progress-bar">
+                                                                <div class="progress-value" style="width: <?= $progress ?>%"></div>
+                                                            </div>
                                                         </div>
+                                                        <span class="text-sm text-gray-500"><?= $progress ?>%</span>
                                                     </div>
-                                                    <span class="text-sm text-gray-500"><?= $progress ?>%</span>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= $project['MemberCount'] ?></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                <?php 
-                                                $startDate = date('d/m/Y', strtotime($project['StartDate']));
-                                                $endDate = date('d/m/Y', strtotime($project['EndDate']));
-                                                echo "$startDate - $endDate"; 
-                                                ?>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <div class="flex items-center space-x-2">
-                                                    <a href="ViewProject.php?id=<?= $project['ProjectID'] ?>" class="text-indigo-600 hover:text-indigo-900 flex items-center" title="Xem">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span class="ml-1">Xem</span>
-                                                    </a>
-                                                    <a href="EditProject.php?id=<?= $project['ProjectID'] ?>" class="text-indigo-600 hover:text-indigo-900 flex items-center" title="Sửa">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                                        </svg>
-                                                        <span class="ml-1">Sửa</span>
-                                                    </a>
-                                                    <a href="javascript:void(0)" class="text-red-600 hover:text-red-900 flex items-center" onclick="showDeleteConfirm(<?= $project['ProjectID'] ?>, '<?= htmlspecialchars($project['ProjectName']) ?>')" title="Xóa">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span class="ml-1">Xóa</span>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                    
-                                    <?php if (count($projects) === 0): ?>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= $project['MemberCount'] ?></td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    <?= $project['StartDate'] ?> - <?= $project['EndDate'] ?>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <div class="flex items-center space-x-2">
+                                                        <a href="ViewProject.php?id=<?= $project['ProjectID'] ?>" class="text-indigo-600 hover:text-indigo-900 flex items-center" title="Xem">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            <span class="ml-1">Xem</span>
+                                                        </a>
+                                                        <a href="EditProject.php?id=<?= $project['ProjectID'] ?>" class="text-indigo-600 hover:text-indigo-900 flex items-center" title="Sửa">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                            </svg>
+                                                            <span class="ml-1">Sửa</span>
+                                                        </a>
+                                                        <a href="javascript:void(0)" class="text-red-600 hover:text-red-900 flex items-center" onclick="showDeleteConfirm(<?= $project['ProjectID'] ?>, '<?= htmlspecialchars($project['ProjectName']) ?>')" title="Xóa">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            <span class="ml-1">Xóa</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
                                         <tr>
                                             <td colspan="7" class="px-6 py-4 text-center text-gray-500">Không tìm thấy dự án nào</td>
                                         </tr>
@@ -372,5 +402,79 @@ $currentPage = "projects";
     </div>
     
     <script src="../../../public/js/admin.js"></script>
+    <script>
+        // Xử lý đóng cảnh báo sau 3 giây
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý thông báo thành công
+            const successAlert = document.getElementById('successAlert');
+            if (successAlert) {
+                let seconds = 3;
+                const countdown = document.getElementById('successCountdown');
+                const timer = setInterval(function() {
+                    seconds--;
+                    countdown.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(timer);
+                        successAlert.style.display = 'none';
+                    }
+                }, 1000);
+            }
+            
+            // Xử lý thông báo lỗi
+            const errorAlert = document.getElementById('errorAlert');
+            if (errorAlert) {
+                let seconds = 3;
+                const countdown = document.getElementById('errorCountdown');
+                const timer = setInterval(function() {
+                    seconds--;
+                    countdown.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(timer);
+                        errorAlert.style.display = 'none';
+                    }
+                }, 1000);
+            }
+        });
+        
+        // Hiển thị modal xác nhận xóa
+        function showDeleteConfirm(projectId, projectName) {
+            const modal = document.getElementById('deleteConfirmModal');
+            const confirmText = document.getElementById('deleteConfirmText');
+            const confirmDeleteBtn = document.getElementById('confirmDelete');
+            
+            // Cập nhật nội dung modal
+            confirmText.textContent = `Bạn có chắc chắn muốn xóa dự án "${projectName}" không?`;
+            confirmDeleteBtn.href = `Projects.php?action=delete&id=${projectId}`;
+            
+            // Hiển thị modal
+            modal.classList.remove('hidden');
+        }
+        
+        // Đóng modal khi nhấn nút Hủy
+        document.getElementById('cancelDelete').addEventListener('click', function() {
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+        });
+        
+        // Xử lý sắp xếp khi click vào tiêu đề cột
+        document.addEventListener('DOMContentLoaded', function() {
+            const sortableHeaders = document.querySelectorAll('.sortable');
+            
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const sort = this.getAttribute('data-sort');
+                    const currentOrder = new URLSearchParams(window.location.search).get('order') || 'desc';
+                    const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+                    
+                    // Xây dựng URL mới với tham số sắp xếp
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('sort', sort);
+                    url.searchParams.set('order', newOrder);
+                    
+                    // Chuyển hướng tới URL mới
+                    window.location.href = url.toString();
+                });
+            });
+        });
+    </script>
 </body>
 </html>
