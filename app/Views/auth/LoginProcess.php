@@ -28,12 +28,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Đăng nhập thành công
         $_SESSION["user_id"] = $user["UserID"];
         $_SESSION["username"] = $user["Username"];
-        $_SESSION["role"] = $user["Role"];
+        $_SESSION["role"] = $user["Role"] ?? "USER"; // Default to USER if role not set
         $_SESSION["fullname"] = $user["FullName"];
         $_SESSION["avatar"] = $user["Avatar"] ?? "/public/images/default-avatar.png";
         $_SESSION["last_activity"] = time();
         $_SESSION["success"] = "🎉 Đăng nhập thành công!";
-        header("Location: LoginSuccess.php");
+        
+        // Redirect based on role
+        if ($_SESSION["role"] === "ADMIN") {
+          header("Location: ../admin/dashboard.php");
+        } else {
+          header("Location: LoginSuccess.php");
+        }
         exit();
       } else {
         $message = "Tên đăng nhập hoặc mật khẩu không chính xác!";

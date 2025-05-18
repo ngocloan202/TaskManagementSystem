@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   if (empty($projectName)) {
     $_SESSION["error"] = "Vui lòng nhập tên dự án!";
-    header("Location: /app/Views/dashboard/HomePage.php");
+    header("Location: /app/Views/dashboard/index.php");
     exit();
   }
 
@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   if ($result->num_rows > 0) {
     $_SESSION["error"] = "Dự án đã tồn tại!";
-    header("Location: /app/Views/dashboard/HomePage.php");
+    header("Location: /app/Views/dashboard/index.php");
     exit();
   }
   $checkStmt->close();
@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $memberStmt->close();
 
     $_SESSION['success'] = 'Tạo dự án thành công!';
-    header('Location: ../dashboard/HomePage.php');
+    header('Location: ../dashboard/index.php');
     exit();
   } else {
     $_SESSION["error"] = "Có lỗi xảy ra khi tạo dự án!";
@@ -57,6 +57,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $statement->close();
 }
 
-header("Location: /app/Views/dashboard/HomePage.php");
+header("Location: /app/Views/dashboard/index.php");
 exit();
 ?> 

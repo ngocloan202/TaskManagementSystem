@@ -132,7 +132,7 @@ foreach ($allTasks as $tk) {
       <main class="flex-1 overflow-y-auto p-6">
         <!-- Breadcrumb -->
         <div class="mb-6 flex items-center text-gray-600">
-          <a href="HomePage.php" class="text-indigo-600 font-bold">Dự án</a>
+          <a href="index.php" class="text-indigo-600 font-bold">Dự án</a>
           <span class="mx-2">›</span>
           <span class="font-bold"><?= htmlspecialchars($proj["ProjectName"]) ?></span>
         </div>

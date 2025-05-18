@@ -8,7 +8,7 @@ unset($_SESSION["success"]);
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="2;url=../dashboard/HomePage.php"> <!-- Chuyển hướng sau 2s -->
+  <meta http-equiv="refresh" content="2;url=../dashboard/index.php"> <!-- Chuyển hướng sau 2s -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Đăng nhập thành công</title>
   <link rel="stylesheet" href="../../../public/css/tailwind.css">

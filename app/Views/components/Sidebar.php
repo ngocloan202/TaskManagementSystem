@@ -37,7 +37,7 @@ if ($userId) {
   <!-- Navigation Menu -->
   <nav class="flex-1 mt-6 px-2 space-y-2">
     <a
-      href="HomePage.php"
+      href="index.php"
       class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "homepage"
         ? "bg-indigo-50 text-gray-800"
         : "hover:bg-indigo-200 text-gray-800" ?>"
