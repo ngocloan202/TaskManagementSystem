@@ -136,18 +136,11 @@ if (!$isEmbedded):
             <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row['RoleInProject']) ?></td>
             <td class="px-4 py-2 text-gray-700"><?= date('d/m/Y H:i', strtotime($row['JoinedAt'])) ?></td>
             <td class="px-4 py-2 space-x-2">
-              <?php if ($isOwner || ($currentUserID == $row['UserID'])): ?>
-              <button onclick="openModal('memberModal', <?= $row['ProjectMembersID'] ?>)"
-                      data-id="<?= $row['ProjectMembersID'] ?>"
-                      data-member-id="<?= $row['ProjectMembersID'] ?>"
-                      data-role-id="<?= ($row['RoleInProject'] === 'người sở hữu') ? 1 : 2 ?>"
-                      class="edit-member-btn px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition">Sửa</button>
               <?php if ($isOwner && $currentUserID != $row['UserID']): ?>
               <button onclick="deleteMember(<?= $row['ProjectMembersID'] ?>, '<?= htmlspecialchars($row['FullName']) ?>')"
                       data-id="<?= $row['ProjectMembersID'] ?>"
                       data-member-id="<?= $row['ProjectMembersID'] ?>"
                       class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">Xóa</button>
-              <?php endif; ?>
               <?php endif; ?>
             </td>
           </tr>
@@ -184,7 +177,7 @@ if (!$isEmbedded):
   })();
 </script>
 
-<!-- Modal Thêm/Sửa thành viên -->
+<!-- Modal Thêm thành viên -->
 <div id="memberModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; overflow:auto;">
   <div style="background-color:white; border-radius:8px; width:90%; max-width:500px; padding:20px; max-height:90vh; overflow-y:auto; position:relative;">
     <div class="flex justify-between items-center mb-4">
@@ -195,33 +188,26 @@ if (!$isEmbedded):
         </svg>
       </button>
     </div>
-
     <form id="memberForm" onsubmit="return submitMemberForm(this);" method="POST">
       <input type="hidden" name="projectId" value="<?php echo $projectID; ?>">
-      <input type="hidden" id="projectMemberId" name="projectMemberId" value="">
-      <input type="hidden" id="formAction" name="formAction" value="add">
-
       <div class="mb-4">
         <label for="userSelect" class="block text-sm font-medium text-gray-700 mb-1">Chọn người dùng</label>
         <select id="userSelect" name="userId" class="w-full px-3 py-2 border border-gray-300 rounded-md 
                focus:outline-none focus:ring-blue-500 focus:border-blue-500">
           <option value="">-- Chọn người dùng --</option>
           <?php
-          // Lấy danh sách người dùng
-          $userQuery = "SELECT ID, Username FROM Users WHERE ID != ? AND ID NOT IN 
-                        (SELECT UserID FROM ProjectMembers WHERE ProjectID = ?)";
+          // Lấy danh sách user chưa là thành viên của project
+          $userQuery = "SELECT UserID, FullName FROM Users WHERE UserID NOT IN (SELECT UserID FROM ProjectMembers WHERE ProjectID = ?) ORDER BY FullName";
           $stmt = $connect->prepare($userQuery);
-          $stmt->bind_param("ii", $userID, $projectID);
+          $stmt->bind_param("i", $projectID);
           $stmt->execute();
           $result = $stmt->get_result();
-
           while ($row = $result->fetch_assoc()) {
-            echo "<option value='" . $row['ID'] . "'>" . htmlspecialchars($row['Username']) . "</option>";
+            echo "<option value='" . $row['UserID'] . "'>" . htmlspecialchars($row['FullName']) . "</option>";
           }
           ?>
         </select>
       </div>
-
       <?php if ($isOwner): ?>
       <div class="mb-4">
         <label for="roleSelect" class="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
@@ -234,7 +220,6 @@ if (!$isEmbedded):
       <?php else: ?>
       <input type="hidden" name="roleId" value="2">
       <?php endif; ?>
-
       <div class="flex justify-end space-x-3">
         <button type="button" onclick="toggleModal()"
                 class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">Hủy</button>
