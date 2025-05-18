@@ -19,9 +19,6 @@ $color = isset($_POST['color']) ? $_POST['color'] : '#60A5FA';
 $dueDate = isset($_POST['dueDate']) ? $_POST['dueDate'] : '';
 $statusName = isset($_POST['statusName']) ? $_POST['statusName'] : 'Cần làm';
 
-// Debug logging
-error_log("POST data: " . print_r($_POST, true));
-error_log("Project ID: " . $projectId);
 
 // Validate dữ liệu
 if ($projectId <= 0 || empty($taskName)) {
