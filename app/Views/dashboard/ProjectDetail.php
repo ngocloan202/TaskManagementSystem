@@ -123,6 +123,7 @@ foreach ($allTasks as $tk) {
       margin-bottom: 5px;
     }
   </style>
+  
 </head>
 
 <body class="bg-gray-100">
@@ -241,28 +242,22 @@ foreach ($allTasks as $tk) {
           ?>
         </div>
 
-        <script>
-          // Khi click Quản lý thành viên thì show dialog (bạn tự thêm dialog HTML)
-          document.getElementById('btnMember').addEventListener('click', () => {
-            document.getElementById('memberDialog').classList.remove('hidden');
-          });
-
-          function addTask(statusName) {
-            document.getElementById('createTaskDialog').classList.remove('hidden');
-            document.getElementById('statusField').value = statusName;
-          }
-          
-          // Đóng dialog khi nhấn nút đóng
-          document.addEventListener('DOMContentLoaded', function() {
-            // Tìm nút đóng trong dialog
-            const closeButton = document.querySelector('#createTaskDialog button[class*="hover:bg-indigo-500"]');
-            if (closeButton) {
-              closeButton.addEventListener('click', function() {
-                document.getElementById('createTaskDialog').classList.add('hidden');
-              });
-            }
-          });
-        </script>
+        <!-- Member Dialog - will be loaded via JavaScript -->
+        <div id="memberDialog" 
+             class="hidden fixed inset-0 z-50 flex items-center justify-center overflow-auto"
+             style="background-color: rgba(0,0,0,0.4); backdrop-filter: blur(2px);"
+        >
+          <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto">
+            <div class="relative p-4">
+              <button id="closeMemberDialog" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div id="memberDialogContent"></div>
+            </div>
+          </div>
+        </div>
 
         <!-- Create Task Dialog -->
         <div id="createTaskDialog" class="hidden">
@@ -273,5 +268,6 @@ foreach ($allTasks as $tk) {
         </div>
       </main>
     </div>
+<script src="../../../public/js/ProjectDetail.js"></script>
 </body>
 </html>
