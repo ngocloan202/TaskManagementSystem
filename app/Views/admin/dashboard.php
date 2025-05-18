@@ -53,7 +53,7 @@ $currentPage = "admin_dashboard";
                             $result = $stmt->get_result();
                             $userCount = $result->fetch_assoc()["count"];
                             ?>
-                            <p class="text-4xl font-bold text-indigo-600 mt-2"><?= $userCount ?></p>
+                            <p class="text-xl font-bold text-indigo-600 mt-2"><?= $userCount ?></p>
                         </div>
                         
                         <!-- Total Projects -->
@@ -65,7 +65,7 @@ $currentPage = "admin_dashboard";
                             $result = $stmt->get_result();
                             $projectCount = $result->fetch_assoc()["count"];
                             ?>
-                            <p class="text-4xl font-bold text-indigo-600 mt-2"><?= $projectCount ?></p>
+                            <p class="text-xl font-bold text-indigo-600 mt-2"><?= $projectCount ?></p>
                         </div>
                         
                         <!-- Total Tasks -->
@@ -77,7 +77,7 @@ $currentPage = "admin_dashboard";
                             $result = $stmt->get_result();
                             $taskCount = $result->fetch_assoc()["count"];
                             ?>
-                            <p class="text-4xl font-bold text-indigo-600 mt-2"><?= $taskCount ?></p>
+                            <p class="text-xl font-bold text-indigo-600 mt-2"><?= $taskCount ?></p>
                         </div>
                     </div>
                     
