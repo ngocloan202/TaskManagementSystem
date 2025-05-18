@@ -81,7 +81,8 @@ $currentPage = "dashboard";
           <div class="mb-6 flex items-center text-gray-600">
             <a href="#" class="text-2xl font-bold" style="color: #3c40c6">Tất cả dự án</a>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div id="projectGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- JS sẽ render các project card vào đây -->
             <div class="bg-blue-600 rounded-lg flex items-center justify-center h-64">
               <button id="openProjectModalBtn" type="button" class="w-full h-full">
                 <div class="text-center">
@@ -140,5 +141,6 @@ $currentPage = "dashboard";
       });
     </script>
     </div>
+    <script src="../../../public/js/ProjectList.js"></script>
   </body>
 </html>

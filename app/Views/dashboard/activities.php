@@ -3,7 +3,7 @@ require_once "../../../config/SessionInit.php";
 require_once "../../../config/Database.php";
 $currentPage = "activities";
 
-$userId = $_SESSION["user_id"] ?? null;
+$userId = $_SESSION["user_id"] ?? 0;
 
 $activities = [];
 if ($userId) {
