@@ -56,7 +56,7 @@ $currentPage = "admin_dashboard";
                         <!-- Total Users -->
                         <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-medium text-gray-700">Tổng số người dùng</h3>
-                            <p class="text-xl font-bold text-indigo-600 mt-2" id="userCount">
+                            <p class="text-3xl font-bold text-indigo-600 mt-2" id="userCount">
                                 <!-- Số liệu sẽ được điền vào bởi JavaScript -->
                                 <span class="text-gray-400">Đang tải...</span>
                             </p>
@@ -65,7 +65,7 @@ $currentPage = "admin_dashboard";
                         <!-- Total Projects -->
                         <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-medium text-gray-700">Tổng số dự án</h3>
-                            <p class="text-xl font-bold text-indigo-600 mt-2" id="projectCount">
+                            <p class="text-3xl font-bold text-indigo-600 mt-2" id="projectCount">
                                 <!-- Số liệu sẽ được điền vào bởi JavaScript -->
                                 <span class="text-gray-400">Đang tải...</span>
                             </p>
@@ -74,7 +74,7 @@ $currentPage = "admin_dashboard";
                         <!-- Total Tasks -->
                         <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-medium text-gray-700">Tổng số công việc</h3>
-                            <p class="text-xl font-bold text-indigo-600 mt-2" id="taskCount">
+                            <p class="text-3xl font-bold text-indigo-600 mt-2" id="taskCount">
                                 <!-- Số liệu sẽ được điền vào bởi JavaScript -->
                                 <span class="text-gray-400">Đang tải...</span>
                             </p>
