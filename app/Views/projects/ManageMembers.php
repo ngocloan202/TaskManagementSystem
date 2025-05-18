@@ -37,7 +37,7 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý thành viên</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.2.4/dist/tailwind.min.css" rel="stylesheet">
+  <link href="../../../public/css/tailwind.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 font-sans">
 <div class="container mx-auto py-8">
