@@ -34,48 +34,6 @@ $flashSuccess = $_SESSION["success"] ?? null;
 $flashError = $_SESSION["error"] ?? null;
 unset($_SESSION["success"], $_SESSION["error"]);
 
-// Xử lý xóa dự án
-if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
-    $projectId = $_GET['id'];
-    
-    // Kiểm tra xem dự án có tồn tại và có task không
-    $checkTasksQuery = "SELECT COUNT(*) as task_count FROM Task WHERE ProjectID = ?";
-    $stmt = $connect->prepare($checkTasksQuery);
-    $stmt->bind_param("i", $projectId);
-    $stmt->execute();
-    $taskResult = $stmt->get_result();
-    $taskData = $taskResult->fetch_assoc();
-    
-    if ($taskData['task_count'] > 0) {
-        // Dự án có task, không thể xóa
-        $_SESSION['error'] = "Không thể xóa dự án có nhiệm vụ! Vui lòng xóa tất cả nhiệm vụ trước.";
-    } else {
-        // Xóa thành viên dự án trước
-        $deleteMembers = "DELETE FROM ProjectMembers WHERE ProjectID = ?";
-        $stmt = $connect->prepare($deleteMembers);
-        $stmt->bind_param("i", $projectId);
-        
-        if ($stmt->execute()) {
-            // Sau đó xóa dự án
-            $deleteProject = "DELETE FROM Project WHERE ProjectID = ?";
-            $stmt = $connect->prepare($deleteProject);
-            $stmt->bind_param("i", $projectId);
-            
-            if ($stmt->execute()) {
-                $_SESSION['success'] = "Xóa dự án thành công!";
-            } else {
-                $_SESSION['error'] = "Lỗi khi xóa dự án: " . $connect->error;
-            }
-        } else {
-            $_SESSION['error'] = "Lỗi khi xóa thành viên dự án: " . $connect->error;
-        }
-    }
-    
-    // Chuyển hướng để tránh gửi lại form khi refresh
-    header("Location: Projects.php");
-    exit();
-}
-
 // Xử lý sắp xếp và phân trang
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -133,7 +91,22 @@ if (!empty($search)) {
     $totalProjects = $countResult->fetch_assoc()['total'];
 } else {
     // Sắp xếp và phân trang cho kết quả ban đầu
-    $sql = $projectsQuery . " ORDER BY $sortColumnDB $sortDirectionDB LIMIT $perPage OFFSET $offset";
+    $sql = "
+      SELECT 
+        p.ProjectID, 
+        p.ProjectName, 
+        p.ProjectDescription,
+        DATE_FORMAT(p.StartDate, '%d/%m/%Y') AS StartDate,
+        DATE_FORMAT(p.EndDate, '%d/%m/%Y')   AS EndDate,
+        u.FullName       AS Creator,
+        (SELECT COUNT(*) FROM ProjectMembers pm WHERE pm.ProjectID = p.ProjectID) AS MemberCount,
+        (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID)             AS TaskCount,
+        (SELECT COUNT(*) FROM Task WHERE ProjectID = p.ProjectID AND TaskStatusID = 3) AS CompletedCount
+      FROM Project p
+      LEFT JOIN Users u ON p.CreatedBy = u.UserID
+      ORDER BY $sortColumnDB $sortDirectionDB
+      LIMIT $perPage OFFSET $offset
+    ";
     
     // Đếm tổng số dự án
     $countQuery = "SELECT COUNT(*) as total FROM Project";
@@ -141,14 +114,12 @@ if (!empty($search)) {
     $totalProjects = $countResult->fetch_assoc()['total'];
 }
 
-// Thực thi truy vấn đã chỉnh sửa nếu cần
-if (!empty($search) || $sortColumn != 'id' || $sortDirection != 'desc') {
-    $result = $connect->query($sql);
-    $projects = [];
-    if ($result) {
-        while ($row = $result->fetch_assoc()) {
-            $projects[] = $row;
-        }
+// Thực thi truy vấn
+$result = $connect->query($sql);
+$projects = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $projects[] = $row;
     }
 }
 
@@ -258,14 +229,6 @@ $currentPage = "projects";
                                     Tìm kiếm
                                 </button>
                             </form>
-                            
-                            <!-- Thêm dự án mới -->
-                            <a href="AddProject.php" class="h-10 bg-green-600 text-white px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center justify-center whitespace-nowrap text-sm font-medium">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Thêm dự án mới
-                            </a>
                         </div>
                         
                         <!-- Bảng dự án -->
@@ -319,18 +282,6 @@ $currentPage = "projects";
                                                             </svg>
                                                             <span class="ml-1">Xem</span>
                                                         </a>
-                                                        <a href="EditProject.php?id=<?= $project['ProjectID'] ?>" class="text-indigo-600 hover:text-indigo-900 flex items-center" title="Sửa">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                                            </svg>
-                                                            <span class="ml-1">Sửa</span>
-                                                        </a>
-                                                        <a href="javascript:void(0)" class="text-red-600 hover:text-red-900 flex items-center" onclick="showDeleteConfirm(<?= $project['ProjectID'] ?>, '<?= htmlspecialchars($project['ProjectName']) ?>')" title="Xóa">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                            </svg>
-                                                            <span class="ml-1">Xóa</span>
-                                                        </a>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -381,25 +332,6 @@ $currentPage = "projects";
             </main>
         </div>
     </div>
-
-    <!-- Modal xác nhận xóa dự án -->
-    <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
-    style="background-color: rgba(0, 0, 0, 0.4);">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <div class="mb-4 text-center">
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Xác nhận xóa dự án</h3>
-                <p class="text-gray-600" id="deleteConfirmText">Bạn có chắc chắn muốn xóa dự án này không?</p>
-            </div>
-            <div class="flex justify-center space-x-3">
-                <button id="cancelDelete" class="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200 focus:outline-none">
-                    Hủy
-                </button>
-                <a id="confirmDelete" href="#" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 focus:outline-none">
-                    Xóa
-                </a>
-            </div>
-        </div>
-    </div>
     
     <script src="../../../public/js/admin.js"></script>
     <script>
@@ -434,25 +366,6 @@ $currentPage = "projects";
                     }
                 }, 1000);
             }
-        });
-        
-        // Hiển thị modal xác nhận xóa
-        function showDeleteConfirm(projectId, projectName) {
-            const modal = document.getElementById('deleteConfirmModal');
-            const confirmText = document.getElementById('deleteConfirmText');
-            const confirmDeleteBtn = document.getElementById('confirmDelete');
-            
-            // Cập nhật nội dung modal
-            confirmText.textContent = `Bạn có chắc chắn muốn xóa dự án "${projectName}" không?`;
-            confirmDeleteBtn.href = `Projects.php?action=delete&id=${projectId}`;
-            
-            // Hiển thị modal
-            modal.classList.remove('hidden');
-        }
-        
-        // Đóng modal khi nhấn nút Hủy
-        document.getElementById('cancelDelete').addEventListener('click', function() {
-            document.getElementById('deleteConfirmModal').classList.add('hidden');
         });
         
         // Xử lý sắp xếp khi click vào tiêu đề cột
