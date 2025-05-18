@@ -90,36 +90,50 @@ $userRole = $_SESSION["role"] ?? "USER";
         <!-- Main Content -->
         <main class="flex-1 p-6">
           <div class="max-w-7xl mx-auto">
-            <h1 class="text-2xl font-semibold text-gray-900 mb-6">
-              <?= $userRole === "ADMIN" ? "Admin Dashboard" : "Dashboard" ?>
-            </h1>
-            
-            <?php if ($userRole === "ADMIN"): ?>
-              <!-- Admin specific content -->
-              <div class="bg-white rounded-lg shadow p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-4">Quản lý hệ thống</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <a href="../admin/users.php" class="p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">
-                    <h3 class="font-semibold text-indigo-700">Quản lý người dùng</h3>
-                    <p class="text-sm text-gray-600">Xem và quản lý tất cả người dùng trong hệ thống</p>
-                  </a>
-                  <a href="../admin/projects.php" class="p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">
-                    <h3 class="font-semibold text-indigo-700">Quản lý dự án</h3>
-                    <p class="text-sm text-gray-600">Xem và quản lý tất cả dự án trong hệ thống</p>
-                  </a>
-                  <a href="../admin/settings.php" class="p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">
-                    <h3 class="font-semibold text-indigo-700">Cài đặt hệ thống</h3>
-                    <p class="text-sm text-gray-600">Cấu hình và quản lý cài đặt hệ thống</p>
-                  </a>
-                </div>
-              </div>
-            <?php endif; ?>
-
-            <!-- Common content for all users -->
-            <div class="bg-white rounded-lg shadow p-6">
-              <h2 class="text-xl font-semibold mb-4">Dự án của bạn</h2>
-              <!-- Project list will be loaded here -->
+            <div class="mb-6 flex items-center text-gray-600">
+              <a href="#" class="text-2xl font-bold" style="color: #3c40c6">Tất cả dự án</a>
             </div>
+            <div id="projectGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- JS sẽ render các project card vào đây -->
+              <div id="openProjectModalBtnContainer" class="bg-blue-600 rounded-lg flex items-center justify-center h-64">
+                <button id="openProjectModalBtn" type="button" class="w-full h-full">
+                  <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-300 bg-opacity-40 rounded-full flex items-center justify-center mx-auto hover:bg-blue-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="text-white size-6">
+                        <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <p class="text-white font-medium mt-4 text-lg">Thêm dự án</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+            <!-- Modal container cho dialog -->
+            <div id="projectModalContainer" class="modal-container">
+              <?php include "../projects/DialogCreateProject.php"; ?>
+            </div>
+            <script>
+              // Lấy các phần tử DOM
+              const openModalBtn = document.getElementById('openProjectModalBtn');
+              const modalContainer = document.getElementById('projectModalContainer');
+              // Tìm nút đóng trong dialog
+              const closeModalBtn = modalContainer.querySelector('button');
+              // Mở modal khi nhấn nút "Thêm dự án"
+              openModalBtn.addEventListener('click', function() {
+                modalContainer.classList.add('active');
+              });
+              // Đóng modal khi nhấn nút đóng
+              closeModalBtn.addEventListener('click', function() {
+                modalContainer.classList.remove('active');
+              });
+              // Đóng modal khi nhấn bên ngoài modal
+              window.addEventListener('click', function(event) {
+                if (event.target === modalContainer) {
+                  modalContainer.classList.remove('active');
+                }
+              });
+            </script>
+            <script src="../../../public/js/ProjectList.js"></script>
           </div>
         </main>
       </div>

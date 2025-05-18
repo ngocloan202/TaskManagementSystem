@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . "/../../../config/SessionInit.php";
+require_once __DIR__ . "/../../../config/database.php";
+?>
 <!doctype html>
 <html lang="vi">
   <head>
