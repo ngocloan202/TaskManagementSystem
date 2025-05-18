@@ -47,37 +47,28 @@ $currentPage = "admin_dashboard";
                         <!-- Total Users -->
                         <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-medium text-gray-700">Tổng số người dùng</h3>
-                            <?php
-                            $stmt = $connect->prepare("SELECT COUNT(*) as count FROM Users");
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            $userCount = $result->fetch_assoc()["count"];
-                            ?>
-                            <p class="text-xl font-bold text-indigo-600 mt-2"><?= $userCount ?></p>
+                            <p class="text-xl font-bold text-indigo-600 mt-2" id="userCount">
+                                <!-- Số liệu sẽ được điền vào bởi JavaScript -->
+                                <span class="text-gray-400">Đang tải...</span>
+                            </p>
                         </div>
                         
                         <!-- Total Projects -->
                         <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-medium text-gray-700">Tổng số dự án</h3>
-                            <?php
-                            $stmt = $connect->prepare("SELECT COUNT(*) as count FROM Project");
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            $projectCount = $result->fetch_assoc()["count"];
-                            ?>
-                            <p class="text-xl font-bold text-indigo-600 mt-2"><?= $projectCount ?></p>
+                            <p class="text-xl font-bold text-indigo-600 mt-2" id="projectCount">
+                                <!-- Số liệu sẽ được điền vào bởi JavaScript -->
+                                <span class="text-gray-400">Đang tải...</span>
+                            </p>
                         </div>
                         
                         <!-- Total Tasks -->
                         <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-medium text-gray-700">Tổng số công việc</h3>
-                            <?php
-                            $stmt = $connect->prepare("SELECT COUNT(*) as count FROM Task");
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            $taskCount = $result->fetch_assoc()["count"];
-                            ?>
-                            <p class="text-xl font-bold text-indigo-600 mt-2"><?= $taskCount ?></p>
+                            <p class="text-xl font-bold text-indigo-600 mt-2" id="taskCount">
+                                <!-- Số liệu sẽ được điền vào bởi JavaScript -->
+                                <span class="text-gray-400">Đang tải...</span>
+                            </p>
                         </div>
                     </div>
                     
@@ -86,19 +77,19 @@ $currentPage = "admin_dashboard";
                         <h2 class="text-xl font-semibold mb-6">Quản lý hệ thống</h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <!-- Quản lý người dùng -->
-                            <a href="Users.php" class="block bg-blue-50 hover:bg-blue-100 rounded-lg p-4 transition duration-200">
+                            <a href="Users.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
                                 <h3 class="text-lg font-medium text-blue-700 mb-1">Quản lý người dùng</h3>
                                 <p class="text-sm text-gray-600">Xem và quản lý tất cả người dùng trong hệ thống</p>
                             </a>
                             
                             <!-- Quản lý dự án -->
-                            <a href="projects.php" class="block bg-blue-50 hover:bg-blue-100 rounded-lg p-4 transition duration-200">
+                            <a href="projects.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
                                 <h3 class="text-lg font-medium text-blue-700 mb-1">Quản lý dự án</h3>
                                 <p class="text-sm text-gray-600">Xem và quản lý tất cả dự án trong hệ thống</p>
                             </a>
                             
                             <!-- Cài đặt hệ thống -->
-                            <a href="settings.php" class="block bg-blue-50 hover:bg-blue-100 rounded-lg p-4 transition duration-200">
+                            <a href="settings.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
                                 <h3 class="text-lg font-medium text-blue-700 mb-1">Cài đặt hệ thống</h3>
                                 <p class="text-sm text-gray-600">Cấu hình và quản lý cài đặt hệ thống</p>
                             </a>
@@ -108,5 +99,11 @@ $currentPage = "admin_dashboard";
             </main>
         </div>
     </div>
+    
+    <!-- Import các file JavaScript tách riêng -->
+    <script src="js/UserStatisticsManager.js"></script>
+    <script src="js/ProjectStatisticsManager.js"></script>
+    <script src="js/TaskStatisticsManager.js"></script>
+    <script src="js/SystemManagementInteractions.js"></script>
 </body>
 </html> 
