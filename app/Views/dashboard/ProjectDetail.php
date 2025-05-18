@@ -247,39 +247,116 @@ foreach ($allTasks as $tk) {
              style="background-color: rgba(0,0,0,0.4); backdrop-filter: blur(2px);"
         >
           <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto">
-            <div class="relative">
+            <div class="relative p-4">
               <button id="closeMemberDialog" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <iframe id="memberDialogFrame" src="" class="w-full h-[80vh] border-0"></iframe>
+              <div id="memberDialogContent"></div>
             </div>
           </div>
         </div>
 
         <script>
-          // Khi click Quản lý thành viên thì show dialog
+          // Khi click Quản lý thành viên thì show dialog và load nội dung
           document.getElementById('btnMember').addEventListener('click', () => {
-            document.getElementById('memberDialogFrame').src = '../projects/DialogManageMembers.php?projectID=<?= $projectId ?>';
+            // Show the dialog
             document.getElementById('memberDialog').classList.remove('hidden');
+            
+            // Load the content
+            refreshMemberDialog();
           });
+
+          // Function to refresh the member dialog content
+          function refreshMemberDialog() {
+            // Show loading indicator
+            document.getElementById('memberDialogContent').innerHTML = '<div class="flex justify-center items-center h-[60vh]"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div></div>';
+
+            // Fetch the content
+            fetch('../projects/DialogManageMembers.php?projectID=<?= $projectId ?>&embed=1')
+              .then(response => response.text())
+              .then(html => {
+                // Insert the fetched HTML
+                document.getElementById('memberDialogContent').innerHTML = html;
+                
+                // Re-attach event handlers for the loaded content
+                attachMemberDialogEvents();
+                
+                // Also refresh the project header to show updated member avatars
+                refreshProjectHeader();
+              })
+              .catch(error => {
+                document.getElementById('memberDialogContent').innerHTML = '<div class="text-red-500 p-4">Đã xảy ra lỗi khi tải nội dung: ' + error.message + '</div>';
+              });
+          }
+
+          // Function to refresh the project header with updated member avatars
+          function refreshProjectHeader() {
+            fetch('ProjectHeaderPartial.php?id=<?= $projectId ?>')
+              .then(response => response.text())
+              .then(html => {
+                // We don't want to replace the entire header, just the member avatars
+                const tempContainer = document.createElement('div');
+                tempContainer.innerHTML = html;
+                
+                const newAvatars = tempContainer.querySelector('.flex.items-center.-space-x-2');
+                const currentAvatarsContainer = document.querySelector('.flex.items-center.-space-x-2');
+                
+                if (newAvatars && currentAvatarsContainer) {
+                  // Replace just the avatars, keeping the button
+                  const button = currentAvatarsContainer.querySelector('#btnMember');
+                  currentAvatarsContainer.innerHTML = newAvatars.innerHTML;
+                  if (button) currentAvatarsContainer.appendChild(button);
+                }
+              })
+              .catch(error => {
+                console.error('Error refreshing project header:', error);
+              });
+          }
+
+          // Function to attach event handlers to the loaded content
+          function attachMemberDialogEvents() {
+            // Listen for a custom event to know when to refresh data
+            document.addEventListener('memberDataChanged', function() {
+              refreshMemberDialog();
+            });
+            
+            // Add any other needed event handlers
+          }
+
+          // Setup an interval to check if there are new notifications from redirected pages
+          let lastUrl = '';
+          function checkForRedirects() {
+            // If we're showing the member dialog and we got redirected from somewhere else
+            if (!document.getElementById('memberDialog').classList.contains('hidden')) {
+              const url = new URL(window.location.href);
+              const params = new URLSearchParams(url.search);
+              
+              if (params.has('memberAction') && lastUrl !== window.location.href) {
+                // We have a memberAction parameter which indicates we need to refresh
+                lastUrl = window.location.href;
+                refreshMemberDialog();
+                
+                // Clean up the URL to prevent repeated refreshes
+                const newUrl = window.location.pathname + window.location.search.replace(/&?memberAction=[^&]*/, '');
+                window.history.replaceState({}, document.title, newUrl);
+              }
+            }
+          }
+
+          // Check periodically for redirects that might need content refreshes
+          setInterval(checkForRedirects, 500);
 
           // Close the dialog when clicking the close button
           document.getElementById('closeMemberDialog').addEventListener('click', function() {
             document.getElementById('memberDialog').classList.add('hidden');
-            setTimeout(() => {
-              document.getElementById('memberDialogFrame').src = '';
-            }, 300);
           });
           
           // Close the dialog when clicking the background overlay
           document.getElementById('memberDialog').addEventListener('click', function(e) {
             if (e.target === this) {
               document.getElementById('memberDialog').classList.add('hidden');
-              setTimeout(() => {
-                document.getElementById('memberDialogFrame').src = '';
-              }, 300);
             }
           });
           
@@ -287,9 +364,6 @@ foreach ($allTasks as $tk) {
           document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && !document.getElementById('memberDialog').classList.contains('hidden')) {
               document.getElementById('memberDialog').classList.add('hidden');
-              setTimeout(() => {
-                document.getElementById('memberDialogFrame').src = '';
-              }, 300);
             }
           });
 
@@ -306,6 +380,45 @@ foreach ($allTasks as $tk) {
               });
             }
           });
+
+          // Function to show notifications
+          function showNotification(type, message) {
+            console.log('Showing notification:', type, message);
+            // Create a notification element
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = `fixed top-4 right-4 z-[9999] px-4 py-3 rounded-lg shadow-lg transition-all duration-300 max-w-md ${
+              type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white`;
+            
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'absolute top-1 right-1 text-white';
+            closeBtn.innerHTML = '×';
+            closeBtn.onclick = function() {
+              document.body.removeChild(notificationDiv);
+            };
+            
+            // Add message
+            const messageSpan = document.createElement('span');
+            messageSpan.textContent = message;
+            
+            // Assemble the notification
+            notificationDiv.appendChild(closeBtn);
+            notificationDiv.appendChild(messageSpan);
+            
+            // Add to body
+            document.body.appendChild(notificationDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(function() {
+              if (document.body.contains(notificationDiv)) {
+                document.body.removeChild(notificationDiv);
+              }
+            }, 5000);
+          }
+
+          // Make the function globally available
+          window.showNotification = showNotification;
         </script>
 
         <!-- Create Task Dialog -->
