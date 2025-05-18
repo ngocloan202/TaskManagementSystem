@@ -1,11 +1,9 @@
 <?php
-// File: app/Views/projects/ManageMembers.php
 session_start();
 require_once __DIR__ . '/../../../config/database.php';
-$conn = $connect; // Kết nối DB
+$conn = $connect; 
 $projectID = isset($_GET['projectID']) ? (int)$_GET['projectID'] : 0;
 
-// Xử lý POST thêm/sửa
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pmID = !empty($_POST['ProjectMembersID']) ? (int)$_POST['ProjectMembersID'] : null;
     $userID = (int)$_POST['UserID'];
@@ -19,11 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param('iiss', $projectID, $userID, $role, $joined);
     }
     $stmt->execute();
-    header("Location: ?projectID={$projectID}");
+    
+    echo "<script>window.location.reload();</script>";
     exit;
 }
 
-// Lấy danh sách thành viên và người dùng
+$projectStmt = $conn->prepare("SELECT ProjectName FROM Project WHERE ProjectID=?");
+$projectStmt->bind_param('i', $projectID);
+$projectStmt->execute();
+$projectName = $projectStmt->get_result()->fetch_assoc()['ProjectName'] ?? 'Dự án không xác định';
+
 $memberStmt = $conn->prepare("SELECT pm.ProjectMembersID, u.FullName, u.Username, u.Avatar, pm.RoleInProject, pm.JoinedAt
     FROM ProjectMembers pm JOIN Users u ON pm.UserID=u.UserID WHERE pm.ProjectID=?");
 $memberStmt->bind_param('i', $projectID);
@@ -38,12 +41,22 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý thành viên</title>
   <link href="../../../public/css/tailwind.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: white;
+      padding: 0.5rem;
+      margin: 0;
+    }
+    .rounded-corners {
+      border-radius: 8px;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
-<div class="container mx-auto py-8">
-  <div class="bg-white shadow-lg rounded-lg p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Quản lý thành viên</h1>
-    <div class="flex flex-col md:flex-row items-center justify-between mb-6">
+<body class="font-sans">
+<div class="py-4">
+  <div class="rounded-corners">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Quản lý thành viên: <?= htmlspecialchars($projectName) ?></h1>
+    <div class="flex flex-col md:flex-row items-center justify-between mb-4">
       <div class="flex w-full md:w-1/2 mb-4 md:mb-0">
         <input id="searchMember" type="text" placeholder="Tìm kiếm thành viên..."
                class="flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
@@ -73,9 +86,9 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
           <tr class="hover:bg-gray-50">
             <td class="px-4 py-2">
               <?php if ($row['Avatar']): ?>
-                <img src="<?= htmlspecialchars($row['Avatar']) ?>" alt="Avatar" class="w-10 h-10 rounded-full">
+                <img src="<?= htmlspecialchars($row['Avatar']) ?>" alt="Avatar" class="w-8 h-8 rounded-full">
               <?php else: ?>
-                <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
+                <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
               <?php endif; ?>
             </td>
             <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row['FullName']) ?></td>
@@ -97,7 +110,7 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
 </div>
 
 <!-- Modal Thêm/Sửa thành viên -->
-<div id="memberModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+<div id="memberModal" class="fixed inset-0 items-center justify-center bg-black bg-opacity-50 hidden">
   <div class="bg-white rounded-lg w-full max-w-md p-6">
     <div class="flex justify-between items-center mb-4">
       <h2 id="memberModalLabel" class="text-xl font-semibold text-gray-800">Thêm thành viên</h2>
@@ -127,7 +140,7 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
       </div>
       <div>
         <label for="joinedAt" class="block text-gray-700 mb-1">Ngày tham gia</label>
-        <input id="joinedAt" name="JoinedAt" type="datetime-local" required
+        <input id="joinedAt" name="JoinedAt" type="datetime-local" required value="<?= date('Y-m-d\TH:i') ?>"
                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-300">
       </div>
       <div class="flex justify-end space-x-3">
@@ -144,18 +157,45 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
 const projectID = <?= json_encode($projectID) ?>;
 function toggleModal(id) {
   document.getElementById(id).classList.toggle('hidden');
+  document.getElementById(id).classList.toggle('flex');
 }
 function openModal(id, memberId) {
   document.getElementById('memberModalLabel').innerText = memberId ? 'Sửa thành viên' : 'Thêm thành viên';
   document.getElementById('projectMemberId').value = memberId || '';
-  // TODO: nếu sửa, fetch AJAX để điền form
-  toggleModal(id);
+  
+  if (memberId) {
+    // Fetch member data for editing
+    fetch(`GetMemberData.php?id=${memberId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data) {
+          document.getElementById('userSelect').value = data.UserID;
+          document.getElementById('roleSelect').value = data.RoleInProject;
+          document.getElementById('joinedAt').value = data.JoinedAt.replace(' ', 'T');
+        }
+      })
+      .catch(error => console.error('Error fetching member data:', error));
+  }
+  
+  document.getElementById(id).classList.add('flex');
+  document.getElementById(id).classList.remove('hidden');
 }
 function deleteMember(memberId) {
   if (confirm('Bạn có chắc muốn xóa thành viên này?')) {
-    window.location.href = `delete_member.php?id=${memberId}&projectID=${projectID}`;
+    window.location.href = `DeleteMember.php?id=${memberId}&projectID=${projectID}`;
   }
 }
+
+// Add search functionality
+document.getElementById('btnSearch').addEventListener('click', function() {
+  const searchTerm = document.getElementById('searchMember').value.toLowerCase();
+  const rows = document.querySelectorAll('tbody tr');
+  
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchTerm) ? '' : 'none';
+  });
+});
 </script>
 </body>
 </html>
