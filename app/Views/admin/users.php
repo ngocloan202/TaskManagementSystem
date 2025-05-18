@@ -89,7 +89,8 @@ if (!empty($search)) {
     $usersQuery .= " AND (Username LIKE ? OR Email LIKE ? OR FullName LIKE ?)";
 }
 
-$usersQuery .= " ORDER BY $sortColumnDB $sortDirectionDB LIMIT ? OFFSET ?";
+// Sử dụng backticks để tránh lỗi với các tên cột đặc biệt
+$usersQuery .= " ORDER BY `$sortColumnDB` $sortDirectionDB LIMIT ? OFFSET ?";
 
 // Lấy tổng số người dùng
 $stmt = $connect->prepare($countQuery);
@@ -102,6 +103,13 @@ $totalPages = ceil($totalUsers / $perPage);
 
 // Lấy danh sách người dùng theo phân trang
 $stmt = $connect->prepare($usersQuery);
+if ($stmt === false) {
+    // Xử lý lỗi khi chuẩn bị câu truy vấn
+    $_SESSION['error'] = "Lỗi SQL: " . $connect->error;
+    header("Location: users.php");
+    exit;
+}
+
 if (!empty($search)) {
     $stmt->bind_param("sssii", $searchTerm, $searchTerm, $searchTerm, $perPage, $offset);
 } else {
