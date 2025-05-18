@@ -49,6 +49,38 @@ if (!$isEmbedded):
     .rounded-corners {
       border-radius: 8px;
     }
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background-color: white;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      padding: 20px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    table {
+      table-layout: fixed;
+      width: 100%;
+    }
+    .overflow-x-auto {
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+    th, td {
+      word-break: break-word;
+    }
   </style>
 </head>
 <body class="font-sans">
@@ -67,9 +99,16 @@ if (!$isEmbedded):
           Tìm
         </button>
       </div>
-      <button onclick="openModal('memberModal', 0)"
+      <!-- Primary button for opening the modal -->
+      <button id="btnAddMember" onclick="openModal('memberModal', 0)" 
               class="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
         Thêm thành viên
+      </button>
+      <!-- Alternative button with direct toggle -->
+      <button id="btnAddMemberAlt" onclick="toggleModal()" type="button" 
+              class="ml-2 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition" 
+              style="display:none;">
+        Thêm thành viên (Alt)
       </button>
     </div>
     <div class="overflow-x-auto">
@@ -102,10 +141,13 @@ if (!$isEmbedded):
               <?php if ($isOwner || ($currentUserID == $row['UserID'])): ?>
               <button onclick="openModal('memberModal', <?= $row['ProjectMembersID'] ?>)"
                       data-id="<?= $row['ProjectMembersID'] ?>"
-                      class="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition">Sửa</button>
+                      data-member-id="<?= $row['ProjectMembersID'] ?>"
+                      data-role-id="<?= ($row['RoleInProject'] === 'người sở hữu') ? 1 : 2 ?>"
+                      class="edit-member-btn px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition">Sửa</button>
               <?php if ($isOwner && $currentUserID != $row['UserID']): ?>
-              <button onclick="deleteMember(<?= $row['ProjectMembersID'] ?>)"
+              <button onclick="deleteMember(<?= $row['ProjectMembersID'] ?>, '<?= htmlspecialchars($row['FullName']) ?>')"
                       data-id="<?= $row['ProjectMembersID'] ?>"
+                      data-member-id="<?= $row['ProjectMembersID'] ?>"
                       class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">Xóa</button>
               <?php endif; ?>
               <?php endif; ?>
@@ -118,48 +160,85 @@ if (!$isEmbedded):
   </div>
 </div>
 
+<!-- Immediate script to attach handlers -->
+<script>
+  // Reset body overflow (in case it was set to hidden and not reset)
+  document.body.style.overflow = 'auto';
+  
+  // Immediately attach handlers to buttons
+  (function attachHandlers() {
+    console.log('Immediately attaching handlers for regular buttons');
+    
+    // Regular add button
+    const addButtons = document.querySelectorAll('button');
+    for (const btn of addButtons) {
+      if (btn.textContent.trim() === 'Thêm thành viên') {
+        console.log('Found add member button in immediate script');
+        btn.onclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Add member button clicked via immediate handler');
+          openModal('memberModal', 0);
+          return false;
+        };
+      }
+    }
+  })();
+</script>
+
 <!-- Modal Thêm/Sửa thành viên -->
-<div id="memberModal" class="fixed inset-0 items-center justify-center bg-black bg-opacity-50 hidden">
-  <div class="bg-white rounded-lg w-full max-w-md p-6">
+<div id="memberModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; overflow:auto;">
+  <div style="background-color:white; border-radius:8px; width:90%; max-width:500px; padding:20px; max-height:90vh; overflow-y:auto; position:relative;">
     <div class="flex justify-between items-center mb-4">
       <h2 id="memberModalLabel" class="text-xl font-semibold text-gray-800">Thêm thành viên</h2>
-      <button onclick="toggleModal('memberModal')" class="text-gray-400 hover:text-red-500">
+      <button type="button" onclick="toggleModal()" class="text-gray-400 hover:text-red-500 focus:outline-none">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
-    <form id="memberForm" method="POST" class="space-y-4" onsubmit="submitMemberForm(event)">
-      <input type="hidden" name="ProjectID" value="<?= $projectID ?>">
-      <input type="hidden" name="ProjectMembersID" id="projectMemberId" value="">
-      <div>
-        <label for="userSelect" class="block text-gray-700 mb-1">Người dùng</label>
-        <select id="userSelect" name="UserID" required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-300">
-          <option value="">Chọn người dùng</option>
-          <?php mysqli_data_seek($usersResult->result_id, 0);
-          while ($u = $usersResult->fetch_assoc()): ?>
-          <option value="<?= $u['UserID'] ?>"><?= htmlspecialchars($u['FullName']) ?></option>
-          <?php endwhile; ?>
+
+    <form id="memberForm" onsubmit="return submitMemberForm(this);" method="POST">
+      <input type="hidden" name="projectId" value="<?php echo $projectID; ?>">
+      <input type="hidden" id="projectMemberId" name="projectMemberId" value="">
+      <input type="hidden" id="formAction" name="formAction" value="add">
+
+      <div class="mb-4">
+        <label for="userSelect" class="block text-sm font-medium text-gray-700 mb-1">Chọn người dùng</label>
+        <select id="userSelect" name="userId" class="w-full px-3 py-2 border border-gray-300 rounded-md 
+               focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          <option value="">-- Chọn người dùng --</option>
+          <?php
+          // Lấy danh sách người dùng
+          $userQuery = "SELECT ID, Username FROM Users WHERE ID != ? AND ID NOT IN 
+                        (SELECT UserID FROM ProjectMembers WHERE ProjectID = ?)";
+          $stmt = $connect->prepare($userQuery);
+          $stmt->bind_param("ii", $userID, $projectID);
+          $stmt->execute();
+          $result = $stmt->get_result();
+
+          while ($row = $result->fetch_assoc()) {
+            echo "<option value='" . $row['ID'] . "'>" . htmlspecialchars($row['Username']) . "</option>";
+          }
+          ?>
         </select>
       </div>
-      <div>
-        <label for="roleSelect" class="block text-gray-700 mb-1">Vai trò</label>
-        <select id="roleSelect" name="RoleInProject" required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-300" 
-                <?= !$isOwner ? 'disabled' : '' ?>>
-          <option value="thành viên">thành viên</option>
-          <?php if ($isOwner): ?>
-          <option value="người sở hữu">người sở hữu</option>
-          <?php endif; ?>
+
+      <?php if ($isOwner): ?>
+      <div class="mb-4">
+        <label for="roleSelect" class="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
+        <select id="roleSelect" name="roleId" class="w-full px-3 py-2 border border-gray-300 rounded-md 
+               focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          <option value="2">Thành viên</option>
+          <option value="1">Quản lý</option>
         </select>
-        <?php if (!$isOwner): ?>
-        <input type="hidden" name="RoleInProject" value="thành viên">
-        <p class="text-sm text-gray-500 mt-1">Chỉ người sở hữu dự án mới có thể phân quyền người sở hữu.</p>
-        <?php endif; ?>
       </div>
+      <?php else: ?>
+      <input type="hidden" name="roleId" value="2">
+      <?php endif; ?>
+
       <div class="flex justify-end space-x-3">
-        <button type="button" onclick="toggleModal('memberModal')"
+        <button type="button" onclick="toggleModal()"
                 class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">Hủy</button>
         <button type="submit"
                 class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Lưu</button>
@@ -169,193 +248,312 @@ if (!$isEmbedded):
 </div>
 
 <script>
+// Debug output
+console.log('DialogManageMembers.php loaded');
+console.log('Project ID:', <?= json_encode($projectID) ?>);
+console.log('Is owner:', <?= json_encode($isOwner) ?>);
+console.log('Is embedded:', <?= json_encode($isEmbedded) ?>);
+
 const projectID = <?= json_encode($projectID) ?>;
 const isOwner = <?= json_encode($isOwner) ?>;
 const isEmbedded = <?= json_encode($isEmbedded) ?>;
 let currentFormAction = '';
 
-function toggleModal(id) {
-  document.getElementById(id).classList.toggle('hidden');
-  document.getElementById(id).classList.toggle('flex');
-}
-
-function openModal(id, memberId) {
-  const isEditing = Boolean(memberId);
-  document.getElementById('memberModalLabel').innerText = isEditing ? 'Sửa thành viên' : 'Thêm thành viên';
-  document.getElementById('projectMemberId').value = memberId || '';
+function toggleModal() {
+  console.log("Toggling modal");
   
-  // Set the form action based on whether we're adding or editing
-  currentFormAction = isEditing ? 'EditMemberProcess.php' : 'AddMemberProcess.php';
-  
-  if (memberId) {
-    // Fetch member data for editing
-    fetch(`GetMemberByID.php?id=${memberId}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data) {
-          document.getElementById('userSelect').value = data.UserID;
-          
-          // Nếu có role selector (cho người sở hữu)
-          const roleSelect = document.getElementById('roleSelect');
-          if (!roleSelect.disabled) {
-            roleSelect.value = data.RoleInProject;
-          }
-        }
-      })
-      .catch(error => console.error('Error fetching member data:', error));
-  } else {
-    // Reset the form for adding new member
-    document.getElementById('userSelect').value = '';
-    const roleSelect = document.getElementById('roleSelect');
-    if (!roleSelect.disabled) {
-      roleSelect.value = 'thành viên';
-    }
+  const modal = document.getElementById('memberModal');
+  if (!modal) {
+    console.error("Modal not found!");
+    return;
   }
   
-  document.getElementById(id).classList.add('flex');
-  document.getElementById(id).classList.remove('hidden');
+  const currentDisplay = modal.style.display;
+  
+  if (currentDisplay === 'none' || currentDisplay === '') {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  } else {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restore scrolling
+  }
 }
 
-function submitMemberForm(event) {
-  event.preventDefault();
+function openModal(modalId, memberId = 0) {
+  console.log("Opening modal for member ID:", memberId);
+  
+  const modal = document.getElementById('memberModal');
+  if (!modal) {
+    console.error("Modal not found!");
+    return;
+  }
+
+  // Set title based on whether we're editing or adding
+  const modalTitle = document.getElementById('memberModalLabel');
+  if (modalTitle) {
+    modalTitle.textContent = memberId > 0 ? "Chỉnh sửa thành viên" : "Thêm thành viên";
+  }
+
+  // Update form action and member ID if editing
   const form = document.getElementById('memberForm');
-  const formData = new FormData(form);
+  const memberIdInput = document.getElementById('projectMemberId');
   
-  // Show loading state
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const originalBtnText = submitBtn.innerHTML;
-  submitBtn.innerHTML = 'Đang xử lý...';
-  submitBtn.disabled = true;
-  
-  fetch(currentFormAction, {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest'
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    // Close the modal
-    toggleModal('memberModal');
+  if (form && memberIdInput) {
+    memberIdInput.value = memberId;
     
-    // Show notification
-    if (data.success) {
-      showNotification('success', data.message);
-    } else {
-      showNotification('error', data.message);
-    }
-    
-    // Refresh the member list
-    if (isEmbedded) {
-      // If we're in an iframe/embedded context, tell the parent to refresh
-      if (window.parent && window.parent !== window) {
-        window.parent.document.dispatchEvent(new CustomEvent('memberDataChanged'));
-      } else {
-        // Refresh the content without full page reload
-        location.reload();
+    if (memberId > 0) {
+      // Get existing data for editing
+      const roleSelect = document.getElementById('roleSelect');
+      if (roleSelect) {
+        // Find the row with the member ID and get the current role
+        const memberRow = document.querySelector(`tr[data-member-id="${memberId}"]`);
+        if (memberRow) {
+          const roleId = memberRow.getAttribute('data-role-id');
+          if (roleId) {
+            roleSelect.value = roleId;
+          }
+        }
       }
     } else {
-      // Standalone page, just reload
-      location.reload();
+      // Reset form for adding a new member
+      form.reset();
+      // Make sure projectId is set back
+      const projectIdField = form.querySelector('input[name="projectId"]');
+      if (projectIdField) {
+        projectIdField.value = <?= json_encode($projectID) ?>;
+      }
     }
+  }
+
+  // Show the modal
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+// Handle form submission
+function submitMemberForm(form) {
+  console.log("Form submission initiated");
+  
+  // Determine if we're adding or editing a member
+  const memberId = document.getElementById('projectMemberId').value;
+  const formAction = memberId > 0 ? 'EditMemberProcess.php' : 'AddMemberProcess.php';
+  console.log(`Form action: ${formAction}, Member ID: ${memberId}`);
+  
+  // Get form data
+  const formData = new FormData(form);
+  
+  // Set the form action field
+  document.getElementById('formAction').value = memberId > 0 ? 'edit' : 'add';
+  
+  // Send the form data using fetch
+  fetch(formAction, {
+    method: 'POST',
+    body: formData
   })
+  .then(response => response.json())
   .catch(error => {
-    console.error('Error submitting form:', error);
-    showNotification('error', 'Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.');
+    console.error('Error:', error);
+    return { status: 'error', message: 'Đã xảy ra lỗi khi xử lý yêu cầu.' };
   })
-  .finally(() => {
-    // Reset button state
-    submitBtn.innerHTML = originalBtnText;
-    submitBtn.disabled = false;
+  .then(data => {
+    // Close the modal
+    toggleModal();
+    
+    // Show notification
+    if (data.status === 'success') {
+      showNotification('success', data.message);
+      // Reload the members list
+      setTimeout(() => {
+        location.reload();
+      }, 1500);
+    } else {
+      showNotification('error', data.message || 'Có lỗi xảy ra khi xử lý yêu cầu.');
+    }
+  });
+  
+  return false; // Prevent traditional form submission
+}
+
+// Handle member deletion
+function deleteMember(memberId, userName) {
+  if (!memberId) {
+    console.error('Invalid member ID');
+    return;
+  }
+  
+  if (!confirm(`Bạn có chắc chắn muốn xóa thành viên ${userName || ''} khỏi dự án này?`)) {
+    return;
+  }
+  
+  console.log(`Deleting member ID: ${memberId}`);
+  
+  // Create form data
+  const formData = new FormData();
+  formData.append('projectId', <?php echo $projectID; ?>);
+  formData.append('projectMemberId', memberId);
+  
+  // Send request
+  fetch('DeleteMemberProcess.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .catch(error => {
+    console.error('Error:', error);
+    return { status: 'error', message: 'Đã xảy ra lỗi khi xử lý yêu cầu.' };
+  })
+  .then(data => {
+    // Show notification
+    if (data.status === 'success') {
+      showNotification('success', data.message);
+      // Remove member row from table
+      const memberRow = document.querySelector(`tr[data-member-id="${memberId}"]`);
+      if (memberRow) {
+        memberRow.remove();
+      }
+    } else {
+      showNotification('error', data.message || 'Có lỗi xảy ra khi xóa thành viên.');
+    }
   });
 }
 
-function deleteMember(memberId) {
-  if (confirm('Bạn có chắc muốn xóa thành viên này?')) {
-    // Show loading state by changing the button text/style
-    const buttons = document.querySelectorAll(`button[data-id="${memberId}"]`);
-    const deleteBtn = Array.from(buttons).find(btn => btn.textContent.includes('Xóa'));
-    
-    if (deleteBtn) {
-      const originalBtnText = deleteBtn.innerHTML;
-      deleteBtn.innerHTML = 'Đang xóa...';
-      deleteBtn.disabled = true;
-    }
-    
-    // Make AJAX request instead of page navigation
-    fetch(`DeleteMemberProcess.php?id=${memberId}&projectID=${projectID}`, {
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      // Show notification
-      if (data.success) {
-        showNotification('success', data.message);
-      } else {
-        showNotification('error', data.message);
-      }
-      
-      // Refresh the member list
-      if (isEmbedded) {
-        // If we're in an iframe/embedded context, tell the parent to refresh
-        if (window.parent && window.parent !== window) {
-          window.parent.document.dispatchEvent(new CustomEvent('memberDataChanged'));
-        } else {
-          // Refresh the content without full page reload
-          location.reload();
-        }
-      } else {
-        // Standalone page, just reload
-        location.reload();
-      }
-    })
-    .catch(error => {
-      console.error('Error deleting member:', error);
-      showNotification('error', 'Có lỗi xảy ra khi xóa thành viên. Vui lòng thử lại.');
-      
-      // Reset button state if there was an error
-      if (deleteBtn) {
-        deleteBtn.innerHTML = originalBtnText;
-        deleteBtn.disabled = false;
-      }
-    });
-  }
-}
-
-// Helper function to show notifications
+// Helper function for displaying notifications
 function showNotification(type, message) {
-  if (typeof window.showNotification === 'function') {
-    window.showNotification(type, message);
-  } else if (isEmbedded && window.parent && typeof window.parent.showNotification === 'function') {
-    window.parent.showNotification(type, message);
-  } else {
-    // Fallback alert if notification functions aren't available
-    if (type === 'error') {
-      alert('Lỗi: ' + message);
-    } else {
-      alert(message);
+  console.log('Showing notification:', type, message);
+  
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-[10000] ${
+    type === 'success' ? 'bg-green-500' : 'bg-red-500'
+  } text-white max-w-md`;
+  
+  // Add content
+  notification.innerHTML = `
+    <div class="flex items-start">
+      <div class="flex-shrink-0 mr-3">
+        ${type === 'success' 
+          ? '<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'
+          : '<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+        }
+      </div>
+      <div>${message}</div>
+      <button class="ml-auto -mr-1 text-white hover:text-gray-100" onclick="this.parentElement.parentElement.remove()">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  `;
+  
+  // Add to body
+  document.body.appendChild(notification);
+  
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (document.body.contains(notification)) {
+      notification.remove();
+    }
+  }, 5000);
+  
+  // Try to also notify parent if embedded
+  if (isEmbedded && window.parent && window.parent !== window) {
+    try {
+      if (typeof window.parent.showNotification === 'function') {
+        window.parent.showNotification(type, message);
+      }
+    } catch (e) {
+      console.error('Error notifying parent:', e);
     }
   }
 }
 
-// Search functionality
-document.getElementById('searchMember').addEventListener('input', function() {
-  const searchTerm = this.value.toLowerCase().trim();
-  const rows = document.querySelectorAll('tbody tr');
+// Direct script to ensure Add Member button works
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Setting up event listeners for manage members dialog');
   
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(searchTerm) ? '' : 'none';
+  // Add event listener for Add Member button
+  const addMemberBtn = document.getElementById('btnAddMember');
+  if (addMemberBtn) {
+    console.log('Add Member button found, attaching event listener');
+    addMemberBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Add Member button clicked');
+      openModal('memberModal', 0);
+    });
+  } else {
+    console.error('Add Member button not found!');
+  }
+  
+  // Add event listeners for Edit buttons
+  const editButtons = document.querySelectorAll('.edit-member-btn');
+  console.log('Found', editButtons.length, 'edit buttons');
+  editButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      const memberId = this.getAttribute('data-member-id');
+      console.log('Edit button clicked for member ID:', memberId);
+      openModal('memberModal', memberId);
+    });
   });
 });
 
-document.getElementById('btnSearch').addEventListener('click', function() {
-  const input = document.getElementById('searchMember');
-  const event = new Event('input');
-  input.dispatchEvent(event);
+// A direct function to click the button programmatically
+function clickAddMemberButton() {
+  console.log('Programmatically clicking Add Member button');
+  const btn = document.getElementById('btnAddMember');
+  if (btn) {
+    console.log('Button found, simulating click');
+    btn.click();
+  } else {
+    console.error('Button not found for programmatic click');
+  }
+}
+</script>
+
+<script>
+// Add direct handlers as a last resort
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Final initialization check for modal functionality');
+  
+  // Add direct handler to the add button
+  const addBtn = document.getElementById('btnAddMember');
+  if (addBtn) {
+    addBtn.onclick = function(e) {
+      e.preventDefault();
+      console.log('Direct handler: Add button clicked');
+      openModal('memberModal', 0);
+      return false;
+    };
+  }
+  
+  // Make sure modal is properly styled
+  const modal = document.getElementById('memberModal');
+  if (modal) {
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    modal.style.zIndex = '9999';
+    modal.style.display = 'none';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+  }
+  
+  // Test toggle
+  console.log('Modal element found:', modal ? 'Yes' : 'No');
+  
+  // Add click handler to close button
+  const closeBtn = modal?.querySelector('button[onclick="toggleModal()"]');
+  if (closeBtn) {
+    closeBtn.onclick = function(e) {
+      e.preventDefault();
+      console.log('Direct handler: Close button clicked');
+      toggleModal();
+      return false;
+    };
+  }
 });
 </script>
 
