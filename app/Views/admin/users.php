@@ -126,48 +126,7 @@ $currentPage = "users";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CubeFlow - Quản lý người dùng</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
-    <style>
-        .menuItem {
-            margin-bottom: 2rem;
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-        .menuItem:last-child {
-            margin-bottom: 5px;
-        }
-        
-        /* Hiệu ứng hover cho các hàng trong bảng */
-        .hover-row:hover {
-            background-color: rgba(243, 244, 246, 0.8);
-            transition: background-color 150ms ease-in-out;
-        }
-        
-        /* Style cho các cột có thể sắp xếp */
-        .sortable {
-            cursor: pointer;
-            position: relative;
-            padding-right: 20px;
-        }
-        
-        .sortable::after {
-            content: "↕";
-            position: absolute;
-            right: 6px;
-            color: #9ca3af;
-        }
-        
-        .sortable.asc::after {
-            content: "↑";
-            color: #4f46e5;
-        }
-        
-        .sortable.desc::after {
-            content: "↓";
-            color: #4f46e5;
-        }
-    </style>
+    <link rel="stylesheet" href="../../../public/css/admin.css">
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen">
