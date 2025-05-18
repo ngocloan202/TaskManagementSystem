@@ -1,13 +1,5 @@
-<!doctype html>
-<html lang="vi">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Thêm nhiệm vụ</title>
-</head>
 
-<body>
   <!-- Dialog content -->
   <div class="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50" 
        style="background-color: rgba(0, 0, 0, 0.4);">
@@ -84,8 +76,4 @@
       </form>
     </div>
   </div>
-
-  <script src="../../../public/js/TaskFromHandler.js"></script>
-</body>
-
-</html>
+  <script src="../../../public/js/TaskFormHandler.js"></script>

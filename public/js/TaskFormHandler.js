@@ -27,7 +27,13 @@ function setTaskStatus(status) {
     e.preventDefault();
 
     const formData = new FormData(this);
-    fetch('CreateTask.php', {
+    // Debug logging
+    console.log('Form data:');
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+
+    fetch('/app/Views/tasks/CreateTask.php', {
       method: 'POST',
       body: formData
     })
@@ -45,3 +51,8 @@ function setTaskStatus(status) {
       alert('Đã xảy ra lỗi khi tạo nhiệm vụ');
     });
   });
+
+  function addTask(statusName) {
+    document.getElementById('createTaskDialog').classList.remove('hidden');
+    document.getElementById('statusField').value = statusName;
+  }

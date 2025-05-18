@@ -239,8 +239,7 @@ foreach ($allTasks as $tk) {
 
           function addTask(statusName) {
             document.getElementById('createTaskDialog').classList.remove('hidden');
-            // Lưu trữ trạng thái được chọn (nếu cần)
-            // Có thể thêm code để đặt trạng thái mặc định trong form dựa vào statusName
+            document.getElementById('statusField').value = statusName;
           }
           
           // Đóng dialog khi nhấn nút đóng
@@ -257,7 +256,10 @@ foreach ($allTasks as $tk) {
 
         <!-- Create Task Dialog -->
         <div id="createTaskDialog" class="hidden">
-          <?php include_once "../tasks/CreateTaskDialog.php"; ?>
+          <?php 
+          $projectId = $projectId; // Ensure projectId is available
+          include_once "../tasks/CreateTaskDialog.php"; 
+          ?>
         </div>
       </main>
     </div>

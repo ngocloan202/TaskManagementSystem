@@ -19,8 +19,12 @@ $dueDate = isset($_POST['dueDate']) ? $_POST['dueDate'] : '';
 $color = isset($_POST['color']) ? $_POST['color'] : 'blue-400';
 $statusName = isset($_POST['statusName']) ? $_POST['statusName'] : 'Cần làm';
 
+// Debug logging
+error_log("POST data: " . print_r($_POST, true));
+error_log("Project ID: " . $projectId);
+
 // Validate dữ liệu
-if ($projectId <= 0 || empty($taskName) || empty($dueDate)) {
+if ($projectId <= 0 || empty($taskName)) {
     echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
     exit;
 }
@@ -46,8 +50,8 @@ $statusId = $statusData['TaskStatusID'];
 
 // Insert task mới vào database
 $stmt = $connect->prepare("
-    INSERT INTO Task (ProjectID, TaskTitle, TaskDescription, StartDate, EndDate, TaskStatusID, Color, Tag)
-    VALUES (?, ?, '', CURDATE(), ?, ?, ?, ?)
+    INSERT INTO Task (TaskTitle, TaskDescription, TaskStatusID, Priority, StartDate, EndDate, ProjectID, ParentTaskID, Label)
+    VALUES (?, '', ?, 'Trung Bình', CURDATE(), CURDATE(), ?, NULL, ?)
 ");
 
 if (!$stmt) {
@@ -55,7 +59,7 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param("isisss", $projectId, $taskName, $dueDate, $statusId, $color, $tag);
+$stmt->bind_param("siis", $taskName, $statusId, $projectId, $tag);
 
 if ($stmt->execute()) {
     $taskId = $stmt->insert_id;
