@@ -28,25 +28,35 @@ if ($result->num_rows === 0) {
 
 $user = $result->fetch_assoc();
 
+// Nếu form chưa được submit, sử dụng dữ liệu từ database
+$userData = [
+    'username' => $user['Username'],
+    'email' => $user['Email'],
+    'fullname' => $user['FullName'] ?? '',
+    'role' => $user['Role']
+];
+
 // Xử lý khi form được submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Lấy dữ liệu từ form
-    $username = $_POST['username'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $newPassword = $_POST['new_password'] ?? '';
-    $fullname = $_POST['fullname'] ?? '';
-    $role = $_POST['role'] ?? 'USER';
+    $userData = [
+        'username' => isset($_POST['username']) ? $_POST['username'] : '',
+        'email' => isset($_POST['email']) ? $_POST['email'] : '',
+        'newPassword' => isset($_POST['new_password']) ? $_POST['new_password'] : '',
+        'fullname' => isset($_POST['fullname']) ? $_POST['fullname'] : '',
+        'role' => isset($_POST['role']) ? $_POST['role'] : 'USER'
+    ];
     
     // Validate dữ liệu
     $errors = [];
     
     // Kiểm tra username
-    if (empty($username)) {
+    if (empty($userData['username'])) {
         $errors['username'] = 'Tên người dùng không được để trống';
     } else {
         // Kiểm tra username đã tồn tại chưa (trừ user hiện tại)
         $stmt = $connect->prepare("SELECT UserID FROM Users WHERE Username = ? AND UserID != ?");
-        $stmt->bind_param("si", $username, $userId);
+        $stmt->bind_param("si", $userData['username'], $userId);
         $stmt->execute();
         if ($stmt->get_result()->num_rows > 0) {
             $errors['username'] = 'Tên người dùng đã tồn tại';
@@ -54,14 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Kiểm tra email
-    if (empty($email)) {
+    if (empty($userData['email'])) {
         $errors['email'] = 'Email không được để trống';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    } elseif (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = 'Email không hợp lệ';
     } else {
         // Kiểm tra email đã tồn tại chưa (trừ user hiện tại)
         $stmt = $connect->prepare("SELECT UserID FROM Users WHERE Email = ? AND UserID != ?");
-        $stmt->bind_param("si", $email, $userId);
+        $stmt->bind_param("si", $userData['email'], $userId);
         $stmt->execute();
         if ($stmt->get_result()->num_rows > 0) {
             $errors['email'] = 'Email đã tồn tại';
@@ -69,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Kiểm tra mật khẩu mới (nếu được cung cấp)
-    if (!empty($newPassword) && strlen($newPassword) < 6) {
+    if (!empty($userData['newPassword']) && strlen($userData['newPassword']) < 6) {
         $errors['new_password'] = 'Mật khẩu mới phải có ít nhất 6 ký tự';
     }
     
@@ -77,19 +87,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         // Chuẩn bị câu lệnh SQL cơ bản (không thay đổi mật khẩu)
         $sql = "UPDATE Users SET Username = ?, Email = ?, FullName = ?";
-        $params = [$username, $email, $fullname];
+        $params = [$userData['username'], $userData['email'], $userData['fullname']];
         $types = "sss";
         
         // Nếu là admin đang sửa người dùng khác, có thể thay đổi quyền
         if ($userId != $_SESSION['user_id']) {
             $sql .= ", Role = ?";
-            $params[] = $role;
+            $params[] = $userData['role'];
             $types .= "s";
         }
         
         // Nếu mật khẩu mới được cung cấp, thêm vào câu lệnh SQL
-        if (!empty($newPassword)) {
-            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        if (!empty($userData['newPassword'])) {
+            $hashedPassword = password_hash($userData['newPassword'], PASSWORD_DEFAULT);
             $sql .= ", Password = ?";
             $params[] = $hashedPassword;
             $types .= "s";
@@ -171,7 +181,7 @@ $currentPage = "users";
                                     type="text" 
                                     id="username" 
                                     name="username" 
-                                    value="<?= htmlspecialchars($user['Username'] ?? '') ?>" 
+                                    value="<?= htmlspecialchars($userData['username']) ?>" 
                                     required 
                                     class="w-full px-3 py-2 border <?= isset($errors['username']) ? 'border-red-500' : 'border-gray-300' ?> rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
@@ -187,7 +197,7 @@ $currentPage = "users";
                                     type="email" 
                                     id="email" 
                                     name="email" 
-                                    value="<?= htmlspecialchars($user['Email'] ?? '') ?>" 
+                                    value="<?= htmlspecialchars($userData['email']) ?>" 
                                     required 
                                     class="w-full px-3 py-2 border <?= isset($errors['email']) ? 'border-red-500' : 'border-gray-300' ?> rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
@@ -219,7 +229,7 @@ $currentPage = "users";
                                     type="text" 
                                     id="fullname" 
                                     name="fullname" 
-                                    value="<?= htmlspecialchars($user['FullName'] ?? '') ?>" 
+                                    value="<?= htmlspecialchars($userData['fullname']) ?>" 
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
                             </div>
@@ -233,11 +243,14 @@ $currentPage = "users";
                                     <?= $userId == $_SESSION['user_id'] ? 'disabled' : '' ?>
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 <?= $userId == $_SESSION['user_id'] ? 'bg-gray-100' : '' ?>"
                                 >
-                                    <option value="USER" <?= isset($user['Role']) && $user['Role'] === 'USER' ? 'selected' : '' ?>>User</option>
-                                    <option value="ADMIN" <?= isset($user['Role']) && $user['Role'] === 'ADMIN' ? 'selected' : '' ?>>Admin</option>
+                                    <option value="USER" <?= $userData['role'] === 'USER' ? 'selected' : '' ?>>User</option>
+                                    <option value="ADMIN" <?= $userData['role'] === 'ADMIN' ? 'selected' : '' ?>>Admin</option>
                                 </select>
+                                
                                 <?php if ($userId == $_SESSION['user_id']): ?>
                                     <p class="text-gray-500 text-sm mt-1">Bạn không thể thay đổi quyền của chính mình</p>
+                                    <!-- Field ẩn để đảm bảo giá trị role vẫn được gửi khi form submit -->
+                                    <input type="hidden" name="role" value="<?= htmlspecialchars($userData['role']) ?>">
                                 <?php endif; ?>
                             </div>
                             
