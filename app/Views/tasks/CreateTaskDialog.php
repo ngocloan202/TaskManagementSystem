@@ -85,7 +85,7 @@
     </div>
   </div>
 
-  <script src="../../../public/js/TaskFromHandler"></script>
+  <script src="../../../public/js/TaskFromHandler.js"></script>
 </body>
 
 </html>
