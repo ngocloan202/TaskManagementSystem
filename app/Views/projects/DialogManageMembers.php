@@ -3,18 +3,40 @@ session_start();
 require_once __DIR__ . '/../../../config/database.php';
 $conn = $connect; 
 $projectID = isset($_GET['projectID']) ? (int)$_GET['projectID'] : 0;
+$currentUserID = $_SESSION["user_id"] ?? 0;
 
+// Kiểm tra vai trò của người dùng hiện tại trong dự án
+$userRoleStmt = $conn->prepare("SELECT RoleInProject FROM ProjectMembers WHERE ProjectID = ? AND UserID = ?");
+$userRoleStmt->bind_param('ii', $projectID, $currentUserID);
+$userRoleStmt->execute();
+$userRoleResult = $userRoleStmt->get_result();
+$isOwner = false;
+
+if ($userRoleResult->num_rows > 0) {
+    $userRole = $userRoleResult->fetch_assoc()["RoleInProject"];
+    $isOwner = ($userRole === 'người sở hữu');
+}
+
+// For direct form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pmID = !empty($_POST['ProjectMembersID']) ? (int)$_POST['ProjectMembersID'] : null;
     $userID = (int)$_POST['UserID'];
-    $role   = $_POST['RoleInProject'];
-    $joined = $_POST['JoinedAt'];
+    $role = $_POST['RoleInProject'];
+    
+    // Nếu không phải owner, chỉ cho phép thêm thành viên với vai trò "thành viên"
+    if (!$isOwner) {
+        $role = "thành viên";
+    }
+    
+    // Sử dụng ngày giờ hiện tại
+    $currentDateTime = date('Y-m-d H:i:s');
+    
     if ($pmID) {
         $stmt = $conn->prepare("UPDATE ProjectMembers SET UserID=?, RoleInProject=?, JoinedAt=? WHERE ProjectMembersID=?");
-        $stmt->bind_param('issi', $userID, $role, $joined, $pmID);
+        $stmt->bind_param('issi', $userID, $role, $currentDateTime, $pmID);
     } else {
         $stmt = $conn->prepare("INSERT INTO ProjectMembers (ProjectID, UserID, RoleInProject, JoinedAt) VALUES (?,?,?,?)");
-        $stmt->bind_param('iiss', $projectID, $userID, $role, $joined);
+        $stmt->bind_param('iiss', $projectID, $userID, $role, $currentDateTime);
     }
     $stmt->execute();
     
@@ -27,7 +49,7 @@ $projectStmt->bind_param('i', $projectID);
 $projectStmt->execute();
 $projectName = $projectStmt->get_result()->fetch_assoc()['ProjectName'] ?? 'Dự án không xác định';
 
-$memberStmt = $conn->prepare("SELECT pm.ProjectMembersID, u.FullName, u.Username, u.Avatar, pm.RoleInProject, pm.JoinedAt
+$memberStmt = $conn->prepare("SELECT pm.ProjectMembersID, u.UserID, u.FullName, u.Username, u.Avatar, pm.RoleInProject, pm.JoinedAt
     FROM ProjectMembers pm JOIN Users u ON pm.UserID=u.UserID WHERE pm.ProjectID=?");
 $memberStmt->bind_param('i', $projectID);
 $memberStmt->execute();
@@ -94,12 +116,18 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
             <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row['FullName']) ?></td>
             <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row['Username']) ?></td>
             <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($row['RoleInProject']) ?></td>
-            <td class="px-4 py-2 text-gray-700"><?= date('Y-m-d H:i', strtotime($row['JoinedAt'])) ?></td>
+            <td class="px-4 py-2 text-gray-700"><?= date('d/m/Y H:i', strtotime($row['JoinedAt'])) ?></td>
             <td class="px-4 py-2 space-x-2">
+              <?php if ($isOwner || ($currentUserID == $row['UserID'])): ?>
               <button onclick="openModal('memberModal', <?= $row['ProjectMembersID'] ?>)"
+                      data-id="<?= $row['ProjectMembersID'] ?>"
                       class="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition">Sửa</button>
+              <?php if ($isOwner && $currentUserID != $row['UserID']): ?>
               <button onclick="deleteMember(<?= $row['ProjectMembersID'] ?>)"
+                      data-id="<?= $row['ProjectMembersID'] ?>"
                       class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">Xóa</button>
+              <?php endif; ?>
+              <?php endif; ?>
             </td>
           </tr>
           <?php endwhile; ?>
@@ -110,7 +138,7 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
 </div>
 
 <!-- Modal Thêm/Sửa thành viên -->
-<div id="memberModal" class="fixed inset-0 items-center justify-center bg-opacity-50 hidden">
+<div id="memberModal" class="fixed inset-0 items-center justify-center bg-black bg-opacity-50 hidden">
   <div class="bg-white rounded-lg w-full max-w-md p-6">
     <div class="flex justify-between items-center mb-4">
       <h2 id="memberModalLabel" class="text-xl font-semibold text-gray-800">Thêm thành viên</h2>
@@ -137,15 +165,17 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
       <div>
         <label for="roleSelect" class="block text-gray-700 mb-1">Vai trò</label>
         <select id="roleSelect" name="RoleInProject" required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-300">
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-300" 
+                <?= !$isOwner ? 'disabled' : '' ?>>
           <option value="thành viên">thành viên</option>
+          <?php if ($isOwner): ?>
           <option value="người sở hữu">người sở hữu</option>
+          <?php endif; ?>
         </select>
-      </div>
-      <div>
-        <label for="joinedAt" class="block text-gray-700 mb-1">Ngày tham gia</label>
-        <input id="joinedAt" name="JoinedAt" type="datetime-local" required value="<?= date('Y-m-d\TH:i') ?>"
-               class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-300">
+        <?php if (!$isOwner): ?>
+        <input type="hidden" name="RoleInProject" value="thành viên">
+        <p class="text-sm text-gray-500 mt-1">Chỉ người sở hữu dự án mới có thể phân quyền người sở hữu.</p>
+        <?php endif; ?>
       </div>
       <div class="flex justify-end space-x-3">
         <button type="button" onclick="toggleModal('memberModal')"
@@ -159,10 +189,13 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
 
 <script>
 const projectID = <?= json_encode($projectID) ?>;
+const isOwner = <?= json_encode($isOwner) ?>;
+
 function toggleModal(id) {
   document.getElementById(id).classList.toggle('hidden');
   document.getElementById(id).classList.toggle('flex');
 }
+
 function openModal(id, memberId) {
   document.getElementById('memberModalLabel').innerText = memberId ? 'Sửa thành viên' : 'Thêm thành viên';
   document.getElementById('projectMemberId').value = memberId || '';
@@ -174,8 +207,12 @@ function openModal(id, memberId) {
       .then(data => {
         if (data) {
           document.getElementById('userSelect').value = data.UserID;
-          document.getElementById('roleSelect').value = data.RoleInProject;
-          document.getElementById('joinedAt').value = data.JoinedAt.replace(' ', 'T');
+          
+          // Nếu có role selector (cho người sở hữu)
+          const roleSelect = document.getElementById('roleSelect');
+          if (!roleSelect.disabled) {
+            roleSelect.value = data.RoleInProject;
+          }
         }
       })
       .catch(error => console.error('Error fetching member data:', error));
@@ -184,6 +221,7 @@ function openModal(id, memberId) {
   document.getElementById(id).classList.add('flex');
   document.getElementById(id).classList.remove('hidden');
 }
+
 function deleteMember(memberId) {
   if (confirm('Bạn có chắc muốn xóa thành viên này?')) {
     window.location.href = `DeleteMember.php?id=${memberId}&projectID=${projectID}`;
@@ -205,13 +243,6 @@ document.getElementById('btnSearch').addEventListener('click', function() {
   const input = document.getElementById('searchMember');
   const event = new Event('input');
   input.dispatchEvent(event);
-});
-
-// Allow parent window to close this dialog if needed
-window.addEventListener('message', function(event) {
-  if (event.data === 'close') {
-    window.parent.postMessage('closed', '*');
-  }
 });
 </script>
 </body>

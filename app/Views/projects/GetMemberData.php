@@ -13,10 +13,12 @@ if ($id <= 0) {
 
 // Fetch member data
 $stmt = $connect->prepare("
-    SELECT ProjectMembersID, UserID, RoleInProject, 
-           DATE_FORMAT(JoinedAt, '%Y-%m-%d %H:%i') AS JoinedAt
-    FROM ProjectMembers 
-    WHERE ProjectMembersID = ?
+    SELECT pm.ProjectMembersID, pm.UserID, pm.RoleInProject, pm.JoinedAt,
+           p.ProjectID, u.FullName
+    FROM ProjectMembers pm 
+    JOIN Users u ON pm.UserID = u.UserID
+    JOIN Project p ON pm.ProjectID = p.ProjectID
+    WHERE pm.ProjectMembersID = ?
 ");
 $stmt->bind_param('i', $id);
 $stmt->execute();
