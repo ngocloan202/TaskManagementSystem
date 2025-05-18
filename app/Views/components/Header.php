@@ -68,7 +68,7 @@
           </a>
 
           <!-- Đăng xuất -->
-          <a href="../auth/logout.php"
+          <a href="/app/views/auth/logout.php"
             class="flex items-center gap-2 text-red-600 hover:bg-red-100 px-3 py-2 rounded-md transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">

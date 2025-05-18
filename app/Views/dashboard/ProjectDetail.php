@@ -123,6 +123,7 @@ foreach ($allTasks as $tk) {
       margin-bottom: 5px;
     }
   </style>
+  
 </head>
 
 <body class="bg-gray-100">
@@ -258,8 +259,6 @@ foreach ($allTasks as $tk) {
           </div>
         </div>
 
-        <script src="../../../public/js/ProjectDetail.js"></script>
-
         <!-- Create Task Dialog -->
         <div id="createTaskDialog" class="hidden">
           <?php
@@ -269,5 +268,6 @@ foreach ($allTasks as $tk) {
         </div>
       </main>
     </div>
+<script src="../../../public/js/ProjectDetail.js"></script>
 </body>
 </html>

@@ -1,10 +1,11 @@
 <?php
-require_once "../../../config/SessionInit.php";
-require_once "../../../config/database.php";
-require_once "../components/Notification.php";
+require_once __DIR__ . "/../../config/SessionInit.php";
+require_once __DIR__ . "/../../config/database.php";
+
+header("Content-Type: application/json");
+session_start();
 
 if (!isset($_SESSION["user_id"])) {
-  header("Content-Type: application/json");
   echo json_encode([
     "status" => "error",
     "message" => "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
@@ -12,12 +13,14 @@ if (!isset($_SESSION["user_id"])) {
   exit();
 }
 
-function clean_input($data)
-{
-  $data = trim($data);
-  $data = stripslashes($data);
-  $data = htmlspecialchars($data);
-  return $data;
+if (!function_exists('clean_input')) {
+  function clean_input($data)
+  {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+  }
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -32,7 +35,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   // Validate form data
   if ($projectID <= 0 || $userID <= 0) {
-    header("Content-Type: application/json");
     echo json_encode(["status" => "error", "message" => "Dữ liệu không hợp lệ! Vui lòng thử lại."]);
     exit();
   }
@@ -64,7 +66,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $memberResult = $checkMemberStmt->get_result()->fetch_assoc();
 
   if ($memberResult["isMember"] > 0) {
-    header("Content-Type: application/json");
     echo json_encode([
       "status" => "error",
       "message" => "Người dùng {$memberResult["FullName"]} đã là thành viên của dự án!",
@@ -91,7 +92,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $errorMsg = "Có lỗi xảy ra khi thêm thành viên! Chi tiết: " . $connect->error;
 
   // Return JSON response
-  header("Content-Type: application/json");
   if ($success) {
     echo json_encode([
       "status" => "success",
@@ -107,7 +107,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // If not a POST request
-header("Content-Type: application/json");
-echo json_encode(["status" => "error", "message" => "Phương thức không hợp lệ."]);
+if ($success) {
+  echo json_encode([
+    "status" => "success",
+    "message" => $successMsg,
+  ]);
+} else {
+  echo json_encode([
+    "status" => "error",
+    "message" => $errorMsg,
+  ]);
+}
 exit();
 ?> 
