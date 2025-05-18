@@ -387,15 +387,12 @@ $currentPage = "users";
     </div>
     
     <!-- Modal xác nhận xóa người dùng -->
-    <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+    style="background-color: rgba(0, 0, 0, 0.4);">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             <div class="mb-4 text-center">
-                <svg class="mx-auto mb-4 text-red-500 w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
                 <h3 class="text-lg font-semibold text-gray-900 mb-1">Xác nhận xóa người dùng</h3>
                 <p class="text-gray-600" id="deleteConfirmText">Bạn có chắc chắn muốn xóa người dùng này không?</p>
-                <p class="text-gray-500 text-sm mt-2">Thông báo tự động đóng sau <span id="countdownTimer" class="font-medium">3</span> giây</p>
             </div>
             <div class="flex justify-center space-x-3">
                 <button id="cancelDelete" class="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200 focus:outline-none">
@@ -462,7 +459,6 @@ $currentPage = "users";
             deleteModal.addEventListener('mouseenter', function() {
                 clearTimeout(deleteModalTimeout);
                 clearInterval(countdownInterval);
-                document.getElementById('countdownTimer').textContent = "dừng";
             });
             
             // Đăng ký sự kiện cho nút Xóa
@@ -583,7 +579,6 @@ $currentPage = "users";
             const modal = document.getElementById('deleteConfirmModal');
             const confirmText = document.getElementById('deleteConfirmText');
             const confirmDeleteBtn = document.getElementById('confirmDelete');
-            const countdownTimer = document.getElementById('countdownTimer');
             
             // Xóa timeout cũ nếu có
             if (deleteModalTimeout) {
@@ -599,28 +594,8 @@ $currentPage = "users";
             confirmText.textContent = `Bạn có chắc chắn muốn xóa người dùng "${username}" không?`;
             confirmDeleteBtn.href = `Users.php?action=delete&id=${userId}`;
             
-            // Đặt lại bộ đếm thời gian
-            let secondsLeft = 3;
-            countdownTimer.textContent = secondsLeft;
-            
             // Hiển thị modal
             modal.classList.remove('hidden');
-            
-            // Thiết lập interval để đếm ngược
-            countdownInterval = setInterval(function() {
-                secondsLeft -= 1;
-                countdownTimer.textContent = secondsLeft;
-                
-                if (secondsLeft <= 0) {
-                    clearInterval(countdownInterval);
-                }
-            }, 1000);
-            
-            // Thiết lập timeout để tự động đóng modal sau 3 giây
-            deleteModalTimeout = setTimeout(function() {
-                modal.classList.add('hidden');
-                clearInterval(countdownInterval);
-            }, 3000);
         }
 
         // Thêm JavaScript cho tính năng sắp xếp
