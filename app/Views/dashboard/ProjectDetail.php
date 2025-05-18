@@ -239,7 +239,8 @@ foreach ($allTasks as $tk) {
 
         <!-- Member Dialog - will be loaded via JavaScript -->
         <div id="memberDialog" 
-             class="hidden fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center overflow-auto"
+             class="hidden fixed inset-0 z-50 flex items-center justify-center overflow-auto"
+             style="background-color: rgba(0,0,0,0.4); backdrop-filter: blur(2px);"
         >
           <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto">
             <div class="relative">
