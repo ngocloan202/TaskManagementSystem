@@ -24,7 +24,7 @@ if ($userId) {
 <!-- Sidebar -->
 <aside class="bg-white w-64 border-r text-black font-semibold flex flex-col h-screen overflow-y-auto">
   <!-- Branding -->
-  <div class="px-6 py-2 flex items-center space-x-3 bg-[#0A1A44] text-white h-14">
+  <a href="HomePage.php" class="px-6 py-2 flex items-center space-x-3 bg-[#0A1A44] text-white h-14 hover:opacity-80 transition-opacity duration-150">
     <div class="w-10 h-10 rounded-full overflow-hidden">
       <img
         src="../../../public/images/cubeflow-logo.png"
@@ -33,7 +33,7 @@ if ($userId) {
       />
     </div>
     <span class="text-xl font-semibold">CubeFlow</span>
-  </div>
+  </a>
   <!-- Navigation Menu -->
   <nav class="flex-1 mt-6 px-2 space-y-2">
     <a
