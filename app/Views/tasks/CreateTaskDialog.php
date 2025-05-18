@@ -11,7 +11,7 @@
   </head>
   <body>
     <!-- Dialog content -->
-    <div class="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+    <div class="fixed inset-0 bg-opacity-20 flex items-center justify-center">
       <!-- Modal container -->
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <!-- Header -->
@@ -148,66 +148,6 @@
       </div>
     </div>
 
-    <script>
-      // Thiết lập trạng thái cho form
-      function setTaskStatus(status) {
-        document.getElementById('statusField').value = status;
-      }
-
-      // Xử lý chọn màu
-      document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          // Xóa border cho tất cả các nút
-          document.querySelectorAll('.color-btn').forEach(b => {
-            b.classList.remove('border-gray-800');
-            b.classList.add('border-transparent');
-          });
-          
-          // Thêm border cho nút được chọn
-          this.classList.remove('border-transparent');
-          this.classList.add('border-gray-800');
-          
-          // Cập nhật giá trị màu
-          document.getElementById('colorField').value = this.getAttribute('data-color');
-        });
-      });
-
-      // Xử lý đóng dialog
-      document.querySelectorAll('.close-dialog').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          document.getElementById('createTaskDialog').classList.add('hidden');
-        });
-      });
-
-      // Xử lý submit form
-      document.getElementById('taskForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Tạo FormData từ form
-        const formData = new FormData(this);
-        
-        // Gửi ajax request để tạo task mới
-        fetch('CreateTask.php', {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Đóng dialog
-            document.getElementById('createTaskDialog').classList.add('hidden');
-            // Reload trang để cập nhật danh sách
-            window.location.reload();
-          } else {
-            alert('Có lỗi xảy ra: ' + data.message);
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('Đã xảy ra lỗi khi tạo nhiệm vụ');
-        });
-      });
-    </script>
+    <script src="../../public/js/TaskFromHandler"></script>
   </body>
 </html>
