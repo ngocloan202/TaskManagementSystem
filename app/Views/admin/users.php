@@ -183,20 +183,30 @@ $currentPage = "users";
                     
                     <!-- Thông báo -->
                     <?php if ($flashSuccess): ?>
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                            </svg>
-                            <span class="font-medium"><?= htmlspecialchars($flashSuccess) ?></span>
+                        <div id="successAlert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="font-medium"><?= htmlspecialchars($flashSuccess) ?></span>
+                            </div>
+                            <div class="text-sm text-green-700">
+                                Đóng sau <span id="successCountdown" class="font-medium">3</span>s
+                            </div>
                         </div>
                     <?php endif; ?>
                     
                     <?php if ($flashError): ?>
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                            <span class="font-medium"><?= htmlspecialchars($flashError) ?></span>
+                        <div id="errorAlert" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="font-medium"><?= htmlspecialchars($flashError) ?></span>
+                            </div>
+                            <div class="text-sm text-red-700">
+                                Đóng sau <span id="errorCountdown" class="font-medium">3</span>s
+                            </div>
                         </div>
                     <?php endif; ?>
                     
@@ -274,7 +284,7 @@ $currentPage = "users";
                                                         <span class="ml-1">Sửa</span>
                                                     </a>
                                                     <?php if ($user['UserID'] != $_SESSION['user_id']): ?>
-                                                        <a href="Users.php?action=delete&id=<?= $user['UserID'] ?>" class="text-red-600 hover:text-red-900 flex items-center" onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')" title="Xóa">
+                                                        <a href="javascript:void(0)" class="text-red-600 hover:text-red-900 flex items-center" onclick="showDeleteConfirm(<?= $user['UserID'] ?>, '<?= htmlspecialchars($user['Username']) ?>')" title="Xóa">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                                 <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                                                             </svg>
@@ -376,20 +386,52 @@ $currentPage = "users";
         </div>
     </div>
     
+    <!-- Modal xác nhận xóa người dùng -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <div class="mb-4 text-center">
+                <svg class="mx-auto mb-4 text-red-500 w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Xác nhận xóa người dùng</h3>
+                <p class="text-gray-600" id="deleteConfirmText">Bạn có chắc chắn muốn xóa người dùng này không?</p>
+                <p class="text-gray-500 text-sm mt-2">Thông báo tự động đóng sau <span id="countdownTimer" class="font-medium">3</span> giây</p>
+            </div>
+            <div class="flex justify-center space-x-3">
+                <button id="cancelDelete" class="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200 focus:outline-none">
+                    Hủy
+                </button>
+                <a id="confirmDelete" href="#" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 focus:outline-none">
+                    Xóa
+                </a>
+            </div>
+        </div>
+    </div>
+    
     <script>
-        // Xử lý modal thêm người dùng
+        // Biến toàn cục để lưu trữ ID của timeout và interval
+        let deleteModalTimeout;
+        let countdownInterval;
+        let successAlertTimeout;
+        let errorAlertTimeout;
+        let successCountdownInterval;
+        let errorCountdownInterval;
+
+        // Xử lý modal thêm người dùng và xác nhận xóa người dùng
         document.addEventListener('DOMContentLoaded', function() {
             const addBtn = document.getElementById('addUserBtn');
             const addModal = document.getElementById('addUserModal');
             const closeAddModal = document.getElementById('closeAddModal');
             const cancelAdd = document.getElementById('cancelAdd');
             
+            // Xử lý mở modal thêm người dùng
             if (addBtn) {
                 addBtn.addEventListener('click', function() {
                     addModal.classList.remove('hidden');
                 });
             }
             
+            // Xử lý đóng modal thêm người dùng
             if (closeAddModal) {
                 closeAddModal.addEventListener('click', function() {
                     addModal.classList.add('hidden');
@@ -401,7 +443,185 @@ $currentPage = "users";
                     addModal.classList.add('hidden');
                 });
             }
+            
+            // Xử lý modal xác nhận xóa
+            const deleteModal = document.getElementById('deleteConfirmModal');
+            const cancelDelete = document.getElementById('cancelDelete');
+            const confirmDelete = document.getElementById('confirmDelete');
+            
+            // Đăng ký sự kiện cho nút Hủy
+            if (cancelDelete) {
+                cancelDelete.addEventListener('click', function() {
+                    clearTimeout(deleteModalTimeout);
+                    clearInterval(countdownInterval);
+                    deleteModal.classList.add('hidden');
+                });
+            }
+            
+            // Đăng ký sự kiện cho modal khi rê chuột vào
+            deleteModal.addEventListener('mouseenter', function() {
+                clearTimeout(deleteModalTimeout);
+                clearInterval(countdownInterval);
+                document.getElementById('countdownTimer').textContent = "dừng";
+            });
+            
+            // Đăng ký sự kiện cho nút Xóa
+            if (confirmDelete) {
+                confirmDelete.addEventListener('click', function() {
+                    clearTimeout(deleteModalTimeout);
+                    clearInterval(countdownInterval);
+                });
+            }
+            
+            // Xử lý thông báo thành công tự động đóng
+            const successAlert = document.getElementById('successAlert');
+            if (successAlert) {
+                const successCountdown = document.getElementById('successCountdown');
+                let secondsLeftSuccess = 3;
+                
+                // Thiết lập interval để đếm ngược thông báo thành công
+                successCountdownInterval = setInterval(function() {
+                    secondsLeftSuccess -= 1;
+                    successCountdown.textContent = secondsLeftSuccess;
+                    
+                    if (secondsLeftSuccess <= 0) {
+                        clearInterval(successCountdownInterval);
+                    }
+                }, 1000);
+                
+                // Thiết lập timeout để tự động ẩn thông báo thành công sau 3 giây
+                successAlertTimeout = setTimeout(function() {
+                    successAlert.style.display = 'none';
+                    clearInterval(successCountdownInterval);
+                }, 3000);
+                
+                // Tạm dừng đếm ngược khi di chuột vào thông báo
+                successAlert.addEventListener('mouseenter', function() {
+                    clearTimeout(successAlertTimeout);
+                    clearInterval(successCountdownInterval);
+                    successCountdown.textContent = "dừng";
+                });
+                
+                // Tiếp tục đếm ngược khi di chuột ra khỏi thông báo
+                successAlert.addEventListener('mouseleave', function() {
+                    if (successCountdown.textContent === "dừng") {
+                        secondsLeftSuccess = 3;
+                        successCountdown.textContent = secondsLeftSuccess;
+                        
+                        successCountdownInterval = setInterval(function() {
+                            secondsLeftSuccess -= 1;
+                            successCountdown.textContent = secondsLeftSuccess;
+                            
+                            if (secondsLeftSuccess <= 0) {
+                                clearInterval(successCountdownInterval);
+                            }
+                        }, 1000);
+                        
+                        successAlertTimeout = setTimeout(function() {
+                            successAlert.style.display = 'none';
+                            clearInterval(successCountdownInterval);
+                        }, 3000);
+                    }
+                });
+            }
+            
+            // Xử lý thông báo lỗi tự động đóng
+            const errorAlert = document.getElementById('errorAlert');
+            if (errorAlert) {
+                const errorCountdown = document.getElementById('errorCountdown');
+                let secondsLeftError = 3;
+                
+                // Thiết lập interval để đếm ngược thông báo lỗi
+                errorCountdownInterval = setInterval(function() {
+                    secondsLeftError -= 1;
+                    errorCountdown.textContent = secondsLeftError;
+                    
+                    if (secondsLeftError <= 0) {
+                        clearInterval(errorCountdownInterval);
+                    }
+                }, 1000);
+                
+                // Thiết lập timeout để tự động ẩn thông báo lỗi sau 3 giây
+                errorAlertTimeout = setTimeout(function() {
+                    errorAlert.style.display = 'none';
+                    clearInterval(errorCountdownInterval);
+                }, 3000);
+                
+                // Tạm dừng đếm ngược khi di chuột vào thông báo
+                errorAlert.addEventListener('mouseenter', function() {
+                    clearTimeout(errorAlertTimeout);
+                    clearInterval(errorCountdownInterval);
+                    errorCountdown.textContent = "dừng";
+                });
+                
+                // Tiếp tục đếm ngược khi di chuột ra khỏi thông báo
+                errorAlert.addEventListener('mouseleave', function() {
+                    if (errorCountdown.textContent === "dừng") {
+                        secondsLeftError = 3;
+                        errorCountdown.textContent = secondsLeftError;
+                        
+                        errorCountdownInterval = setInterval(function() {
+                            secondsLeftError -= 1;
+                            errorCountdown.textContent = secondsLeftError;
+                            
+                            if (secondsLeftError <= 0) {
+                                clearInterval(errorCountdownInterval);
+                            }
+                        }, 1000);
+                        
+                        errorAlertTimeout = setTimeout(function() {
+                            errorAlert.style.display = 'none';
+                            clearInterval(errorCountdownInterval);
+                        }, 3000);
+                    }
+                });
+            }
         });
+
+        // Hàm hiển thị modal xác nhận xóa
+        function showDeleteConfirm(userId, username) {
+            const modal = document.getElementById('deleteConfirmModal');
+            const confirmText = document.getElementById('deleteConfirmText');
+            const confirmDeleteBtn = document.getElementById('confirmDelete');
+            const countdownTimer = document.getElementById('countdownTimer');
+            
+            // Xóa timeout cũ nếu có
+            if (deleteModalTimeout) {
+                clearTimeout(deleteModalTimeout);
+            }
+            
+            // Xóa interval cũ nếu có
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // Cập nhật nội dung modal
+            confirmText.textContent = `Bạn có chắc chắn muốn xóa người dùng "${username}" không?`;
+            confirmDeleteBtn.href = `Users.php?action=delete&id=${userId}`;
+            
+            // Đặt lại bộ đếm thời gian
+            let secondsLeft = 3;
+            countdownTimer.textContent = secondsLeft;
+            
+            // Hiển thị modal
+            modal.classList.remove('hidden');
+            
+            // Thiết lập interval để đếm ngược
+            countdownInterval = setInterval(function() {
+                secondsLeft -= 1;
+                countdownTimer.textContent = secondsLeft;
+                
+                if (secondsLeft <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+            
+            // Thiết lập timeout để tự động đóng modal sau 3 giây
+            deleteModalTimeout = setTimeout(function() {
+                modal.classList.add('hidden');
+                clearInterval(countdownInterval);
+            }, 3000);
+        }
 
         // Thêm JavaScript cho tính năng sắp xếp
         document.addEventListener('DOMContentLoaded', function() {
