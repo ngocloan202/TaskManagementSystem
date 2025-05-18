@@ -139,7 +139,7 @@ foreach ($allTasks as $tk) {
 
         <!-- Project Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6 flex items-center justify-between">
-          <div>
+          <div id="projectDetailPage" class="relative z-0">
             <h1 class="text-2xl font-semibold mb-1"><?= htmlspecialchars(
               $proj["ProjectName"]
             ) ?></h1>
@@ -236,11 +236,30 @@ foreach ($allTasks as $tk) {
           document.getElementById('btnMember').addEventListener('click', () => {
             document.getElementById('memberDialog').classList.remove('hidden');
           });
+
+          function addTask(statusName) {
+            document.getElementById('createTaskDialog').classList.remove('hidden');
+            // Lưu trữ trạng thái được chọn (nếu cần)
+            // Có thể thêm code để đặt trạng thái mặc định trong form dựa vào statusName
+          }
+          
+          // Đóng dialog khi nhấn nút đóng
+          document.addEventListener('DOMContentLoaded', function() {
+            // Tìm nút đóng trong dialog
+            const closeButton = document.querySelector('#createTaskDialog button[class*="hover:bg-indigo-500"]');
+            if (closeButton) {
+              closeButton.addEventListener('click', function() {
+                document.getElementById('createTaskDialog').classList.add('hidden');
+              });
+            }
+          });
         </script>
 
         <!-- Create Task Dialog -->
         <div id="createTaskDialog" class="hidden">
-          <?php include_once "CreateTaskDialog.php"; ?>
+          <?php include_once "../tasks/CreateTaskDialog.php"; ?>
         </div>
+      </main>
+    </div>
 </body>
 </html>
