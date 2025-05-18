@@ -65,8 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Nếu không có lỗi, thêm người dùng mới
     if (empty($errors)) {
-        // Hash password
-        $hashedPassword = password_hash($user['password'], PASSWORD_DEFAULT);
+        // Mã hóa mật khẩu bằng MD5
+        $hashedPassword = md5($user['password']);
         
         // Thêm người dùng mới
         $stmt = $connect->prepare("INSERT INTO Users (Username, Email, Password, FullName, Role) VALUES (?, ?, ?, ?, ?)");
@@ -178,7 +178,7 @@ $currentPage = "users";
                                 <?php if (isset($errors['password'])): ?>
                                     <p class="text-red-500 text-sm mt-1"><?= htmlspecialchars($errors['password']) ?></p>
                                 <?php else: ?>
-                                    <p class="text-gray-500 text-sm mt-1">Mật khẩu phải có ít nhất 6 ký tự</p>
+                                    <p class="text-gray-500 text-sm mt-1">Mật khẩu phải có ít nhất 6 ký tự (Lưu ý: Mật khẩu sẽ được mã hóa bằng MD5)</p>
                                 <?php endif; ?>
                             </div>
                             

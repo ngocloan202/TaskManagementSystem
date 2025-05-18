@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Nếu mật khẩu mới được cung cấp, thêm vào câu lệnh SQL
         if (!empty($userData['newPassword'])) {
-            $hashedPassword = password_hash($userData['newPassword'], PASSWORD_DEFAULT);
+            $hashedPassword = md5($userData['newPassword']);
             $sql .= ", Password = ?";
             $params[] = $hashedPassword;
             $types .= "s";
@@ -218,7 +218,7 @@ $currentPage = "users";
                                 <?php if (isset($errors['new_password'])): ?>
                                     <p class="text-red-500 text-sm mt-1"><?= htmlspecialchars($errors['new_password']) ?></p>
                                 <?php else: ?>
-                                    <p class="text-gray-500 text-sm mt-1">Để trống nếu không muốn thay đổi mật khẩu</p>
+                                    <p class="text-gray-500 text-sm mt-1">Để trống nếu không muốn thay đổi mật khẩu (Lưu ý: Mật khẩu sẽ được mã hóa bằng MD5)</p>
                                 <?php endif; ?>
                             </div>
                             
