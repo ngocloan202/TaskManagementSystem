@@ -83,7 +83,7 @@ $currentPage = "dashboard";
           </div>
           <div id="projectGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- JS sẽ render các project card vào đây -->
-            <div class="bg-blue-600 rounded-lg flex items-center justify-center h-64">
+            <div id="openProjectModalBtnContainer" class="bg-blue-600 rounded-lg flex items-center justify-center h-64">
               <button id="openProjectModalBtn" type="button" class="w-full h-full">
                 <div class="text-center">
                   <div class="w-16 h-16 bg-blue-300 bg-opacity-40 rounded-full flex items-center justify-center mx-auto hover:bg-blue-400">

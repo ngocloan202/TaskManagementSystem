@@ -8,10 +8,10 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $projectName = clean_input($_POST["projectName"] ?? "");
-  $description = clean_input($_POST["description"] ?? "");
-  $image = clean_input($_POST["image"] ?? "");
-  $userId = $_SESSION["user_id"];
+  $projectName = $_POST['projectName'] ?? '';
+  $description = $_POST['description'] ?? '';
+  $createdBy = $_SESSION['user_id'];
+  $backgroundUrl = $_POST['image'] ?? null; // Lấy link ảnh từ input name="image"
 
   if (empty($projectName)) {
     $_SESSION["error"] = "Vui lòng nhập tên dự án!";
@@ -32,10 +32,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   }
   $checkStmt->close();
 
-  $sql =
-    "INSERT INTO Project (ProjectName, ProjectDescription, CreatedBy, StartDate) VALUES (?, ?, ?, NOW())";
+  $sql = "INSERT INTO Project (ProjectName, ProjectDescription, CreatedBy, BackgroundUrl) VALUES (?, ?, ?, ?)";
   $statement = $connect->prepare($sql);
-  $statement->bind_param("ssi", $projectName, $description, $userId);
+  $statement->bind_param("ssss", $projectName, $description, $createdBy, $backgroundUrl);
 
   if ($statement->execute()) {
     $projectId = $connect->insert_id;
@@ -43,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $memberSql =
       "INSERT INTO ProjectMembers (ProjectID, UserID, RoleInProject, JoinedAt) VALUES (?, ?, 'người sở hữu', NOW())";
     $memberStmt = $connect->prepare($memberSql);
-    $memberStmt->bind_param("ii", $projectId, $userId);
+    $memberStmt->bind_param("ii", $projectId, $createdBy);
     $memberStmt->execute();
     $memberStmt->close();
 

@@ -17,6 +17,7 @@ SELECT
     p.ProjectDescription,
     p.StartDate,
     p.EndDate,
+    p.BackgroundUrl,
     u.Avatar AS OwnerAvatar,
     u.FullName AS OwnerName,
     -- Tính tiến độ
