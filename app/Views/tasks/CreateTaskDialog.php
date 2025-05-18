@@ -50,21 +50,21 @@
           <p class="text-indigo-600 text-lg font-semibold">Chọn màu:</p>
           <div class="flex space-x-3 mt-2">
             <button type="button"
-              class="color-btn w-8 h-8 bg-pink-500 rounded-full focus:outline-none"
-              data-color="pink-500"></button>
+              class="color-btn w-8 h-8 rounded-full" style="background-color: #F472B6"
+              data-color="#F472B6"></button>
             <button type="button"
-              class="color-btn w-8 h-8 bg-red-600 rounded-full focus:outline-none"
-              data-color="red-600"></button>
+              class="color-btn w-8 h-8 rounded-full" style="background-color: #F87171"
+              data-color="#F87171"></button>
             <button type="button"
-              class="color-btn w-8 h-8 bg-green-500 rounded-full focus:outline-none"
-              data-color="green-500"></button>
+              class="color-btn w-8 h-8 rounded-full" style="background-color: #34D399"
+              data-color="#34D399"></button>
             <button type="button"
-              class="color-btn w-8 h-8 bg-blue-400 rounded-full focus:outline-none"
-              data-color="blue-400"></button>
+              class="color-btn w-8 h-8 rounded-full" style="background-color: #60A5FA"
+              data-color="#60A5FA"></button>
             <button type="button"
-              class="color-btn w-8 h-8 bg-orange-500 rounded-full focus:outline-none"
-              data-color="orange-500"></button>
-            <input type="hidden" name="color" id="colorField" value="blue-400">
+              class="color-btn w-8 h-8 rounded-full" style="background-color: #FBBF24"
+              data-color="#FBBF24"></button>
+            <input type="hidden" name="color" id="colorField" value="#60A5FA">
           </div>
         </div>
         <script src="../../../public/js/TaskFormHandler.js"></script>

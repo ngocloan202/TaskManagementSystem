@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $projectId = isset($_POST['projectId']) ? intval($_POST['projectId']) : 0;
 $taskName = isset($_POST['taskName']) ? trim($_POST['taskName']) : '';
 $tag = isset($_POST['tag']) ? trim($_POST['tag']) : '';
+$color = isset($_POST['color']) ? $_POST['color'] : '#60A5FA';
 $dueDate = isset($_POST['dueDate']) ? $_POST['dueDate'] : '';
-$color = isset($_POST['color']) ? $_POST['color'] : 'blue-400';
 $statusName = isset($_POST['statusName']) ? $_POST['statusName'] : 'Cần làm';
 
 // Debug logging
@@ -50,8 +50,8 @@ $statusId = $statusData['TaskStatusID'];
 
 // Insert task mới vào database
 $stmt = $connect->prepare("
-    INSERT INTO Task (TaskTitle, TaskDescription, TaskStatusID, Priority, StartDate, EndDate, ProjectID, ParentTaskID, Label)
-    VALUES (?, '', ?, 'Trung Bình', CURDATE(), CURDATE(), ?, NULL, ?)
+    INSERT INTO Task (TaskTitle, TaskDescription, TaskStatusID, Priority, StartDate, EndDate, ProjectID, ParentTaskID, TagName, TagColor)
+    VALUES (?, '', ?, 'Trung Bình', CURDATE(), CURDATE(), ?, NULL, ?, ?)
 ");
 
 if (!$stmt) {
@@ -59,7 +59,7 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param("siis", $taskName, $statusId, $projectId, $tag);
+$stmt->bind_param("siiss", $taskName, $statusId, $projectId, $tag, $color);
 
 if ($stmt->execute()) {
     $taskId = $stmt->insert_id;
