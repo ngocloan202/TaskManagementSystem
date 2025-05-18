@@ -110,11 +110,15 @@ $usersResult = $conn->query("SELECT UserID, FullName FROM Users ORDER BY FullNam
 </div>
 
 <!-- Modal Thêm/Sửa thành viên -->
-<div id="memberModal" class="fixed inset-0 items-center justify-center bg-black bg-opacity-50 hidden">
+<div id="memberModal" class="fixed inset-0 items-center justify-center bg-opacity-50 hidden">
   <div class="bg-white rounded-lg w-full max-w-md p-6">
     <div class="flex justify-between items-center mb-4">
       <h2 id="memberModalLabel" class="text-xl font-semibold text-gray-800">Thêm thành viên</h2>
-      <button onclick="toggleModal('memberModal')" class="text-gray-500 hover:text-gray-700">&times;</button>
+      <button onclick="toggleModal('memberModal')" class="text-gray-400 hover:text-red-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
     <form method="POST" class="space-y-4">
       <input type="hidden" name="ProjectID" value="<?= $projectID ?>">
@@ -186,15 +190,28 @@ function deleteMember(memberId) {
   }
 }
 
-// Add search functionality
-document.getElementById('btnSearch').addEventListener('click', function() {
-  const searchTerm = document.getElementById('searchMember').value.toLowerCase();
+// Search functionality
+document.getElementById('searchMember').addEventListener('input', function() {
+  const searchTerm = this.value.toLowerCase().trim();
   const rows = document.querySelectorAll('tbody tr');
   
   rows.forEach(row => {
     const text = row.textContent.toLowerCase();
     row.style.display = text.includes(searchTerm) ? '' : 'none';
   });
+});
+
+document.getElementById('btnSearch').addEventListener('click', function() {
+  const input = document.getElementById('searchMember');
+  const event = new Event('input');
+  input.dispatchEvent(event);
+});
+
+// Allow parent window to close this dialog if needed
+window.addEventListener('message', function(event) {
+  if (event.data === 'close') {
+    window.parent.postMessage('closed', '*');
+  }
 });
 </script>
 </body>

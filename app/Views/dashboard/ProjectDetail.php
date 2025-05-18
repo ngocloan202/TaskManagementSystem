@@ -237,18 +237,55 @@ foreach ($allTasks as $tk) {
           ?>
         </div>
 
+        <!-- Member Dialog - will be loaded via JavaScript -->
+        <div id="memberDialog" 
+             class="hidden fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center overflow-auto"
+        >
+          <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto">
+            <div class="relative">
+              <button id="closeMemberDialog" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <iframe id="memberDialogFrame" src="" class="w-full h-[80vh] border-0"></iframe>
+            </div>
+          </div>
+        </div>
+
         <script>
+          // Khi click Quản lý thành viên thì show dialog
           document.getElementById('btnMember').addEventListener('click', () => {
             document.getElementById('memberDialogFrame').src = '../projects/DialogManageMembers.php?projectID=<?= $projectId ?>';
             document.getElementById('memberDialog').classList.remove('hidden');
           });
 
-          document.getElementById('closeMemberDialog').addEventListener('click', () => {
+          // Close the dialog when clicking the close button
+          document.getElementById('closeMemberDialog').addEventListener('click', function() {
             document.getElementById('memberDialog').classList.add('hidden');
-            // Clear iframe src when closing
             setTimeout(() => {
               document.getElementById('memberDialogFrame').src = '';
             }, 300);
+          });
+          
+          // Close the dialog when clicking the background overlay
+          document.getElementById('memberDialog').addEventListener('click', function(e) {
+            if (e.target === this) {
+              document.getElementById('memberDialog').classList.add('hidden');
+              setTimeout(() => {
+                document.getElementById('memberDialogFrame').src = '';
+              }, 300);
+            }
+          });
+          
+          // Close the dialog when pressing Escape key
+          document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !document.getElementById('memberDialog').classList.contains('hidden')) {
+              document.getElementById('memberDialog').classList.add('hidden');
+              setTimeout(() => {
+                document.getElementById('memberDialogFrame').src = '';
+              }, 300);
+            }
           });
 
           function addTask(statusName) {
@@ -272,20 +309,6 @@ foreach ($allTasks as $tk) {
           $projectId = $projectId; // Ensure projectId is available
           include_once "../tasks/CreateTaskDialog.php"; 
           ?>
-        </div>
-
-        <!-- Member Dialog - will be loaded via JavaScript -->
-        <div id="memberDialog" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center overflow-auto">
-          <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto">
-            <div class="relative">
-              <button id="closeMemberDialog" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              <iframe id="memberDialogFrame" src="" class="w-full h-[80vh] border-0"></iframe>
-            </div>
-          </div>
         </div>
       </main>
     </div>
