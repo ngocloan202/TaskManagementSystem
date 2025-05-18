@@ -2,17 +2,17 @@ function setTaskStatus(status) {
     document.getElementById('statusField').value = status;
   }
 
-  document.querySelectorAll('.color-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.color-btn').forEach(b => {
-        b.classList.remove('border-gray-800');
-        b.classList.add('border-transparent');
+  document.addEventListener('DOMContentLoaded', () => {
+    const colorButtons = document.querySelectorAll('.color-btn');
+    const hiddenField  = document.getElementById('colorField');
+  
+    colorButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        colorButtons.forEach(b => b.classList.remove('selected'));
+
+        btn.classList.add('selected');
+        hiddenField.value = btn.getAttribute('data-color');
       });
-      
-      this.classList.remove('border-transparent');
-      this.classList.add('border-gray-800');
-      
-      document.getElementById('colorField').value = this.getAttribute('data-color');
     });
   });
 
