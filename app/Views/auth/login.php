@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . "/../../../config/SessionInit.php";
+require_once __DIR__ . "/../../../config/database.php";
+?>
 <!doctype html>
 <html lang="vi">
   <head>
@@ -7,13 +11,11 @@
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
   </head>
   <body class="min-h-screen bg-[#EEF0FF] flex items-center justify-center px-4">
-      <?php
-      if (!empty($_SESSION["login_error"])): ?>
+      <?php if (!empty($_SESSION["login_error"])): ?>
         <div class="fixed top-4 left-1/2 -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           <?= htmlspecialchars($_SESSION["login_error"]) ?>
         </div>
       <?php unset($_SESSION["login_error"]);endif;
-
 // Xóa để lần sau không hiện nữa
 ?>
     <div class="relative w-full max-w-sm">

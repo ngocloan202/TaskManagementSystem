@@ -1,6 +1,6 @@
 <?php
 require_once "../../../config/SessionInit.php";
-require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . "/../../../config/database.php";
 include __DIR__ . "../../../Controllers/LoadUserData.php";
 ?>
 <!-- Modal Profile -->
@@ -37,18 +37,22 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="email">Email</label>
-          <input id="email" name="email" type="email" value="<?= htmlspecialchars($_SESSION["email"] ?? "") ?>"
+          <input id="email" name="email" type="email" value="<?= htmlspecialchars(
+            $_SESSION["email"] ?? ""
+          ) ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="phone">Số điện thoại</label>
-          <input id="phone" name="phone" type="tel" value="<?= htmlspecialchars($_SESSION["phone"] ?? "") ?>"
+          <input id="phone" name="phone" type="tel" value="<?= htmlspecialchars(
+            $_SESSION["phone"] ?? ""
+          ) ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
           <label class="block text-gray-700 mb-1 font-medium" for="projects">Số dự án tham gia</label>
           <input id="projects" name="project_count" type="text"
-            value="<?= htmlspecialchars($_SESSION['project_count'] ?? '0') ?>" readonly
+            value="<?= htmlspecialchars($_SESSION["project_count"] ?? "0") ?>" readonly
             class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed text-gray-600" />
         </div>
         <div class="flex justify-center space-x-4 mt-6">

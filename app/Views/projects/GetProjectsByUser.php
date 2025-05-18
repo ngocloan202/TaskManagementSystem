@@ -1,6 +1,6 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set("display_errors", 1);
+ini_set("display_startup_errors", 1);
 error_reporting(E_ALL);
 
 require_once "../../../config/database.php";
@@ -36,7 +36,9 @@ $result = $stmt->get_result();
 
 $projects = [];
 while ($row = $result->fetch_assoc()) {
-    $row["progress"] = $row["totalTasks"] ? round($row["completedTasks"] / $row["totalTasks"] * 100) : 0;
-    $projects[] = $row;
+  $row["progress"] = $row["totalTasks"]
+    ? round(($row["completedTasks"] / $row["totalTasks"]) * 100)
+    : 0;
+  $projects[] = $row;
 }
 echo json_encode($projects);

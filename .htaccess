@@ -1,0 +1,11 @@
+DirectoryIndex app/Views/dashboard/index.php
+
+# Enable URL rewriting
+RewriteEngine On
+
+# Redirect root to index.php
+RewriteRule ^$ app/Views/dashboard/index.php [L]
+
+# Handle direct access to index.php
+RewriteCond %{REQUEST_URI} ^/index\.php$
+RewriteRule ^(.*)$ app/Views/dashboard/index.php [L] 
