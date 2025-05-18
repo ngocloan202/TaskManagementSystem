@@ -71,7 +71,6 @@ $sortMapping = [
     'username' => 'Username',
     'email' => 'Email',
     'fullname' => 'FullName',
-    'created' => 'CreatedAt',
     'role' => 'Role'
 ];
 
@@ -238,7 +237,6 @@ $currentPage = "users";
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="username">Tên người dùng</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="email">Email</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="fullname">Họ và tên</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="created">Ngày tạo</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="role">Quyền</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
                                     </tr>
@@ -251,17 +249,6 @@ $currentPage = "users";
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($user['Username']) ?></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($user['Email']) ?></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($user['FullName'] ?? 'N/A') ?></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                <?php 
-                                                // Hiển thị ngày tạo
-                                                if (isset($user['CreatedAt']) && !empty($user['CreatedAt'])) {
-                                                    echo date('d/m/Y', strtotime($user['CreatedAt']));
-                                                } else {
-                                                    // Sử dụng ngày cố định cho những người dùng không có ngày tạo
-                                                    echo date('d/m/Y', strtotime('2023-01-01'));
-                                                }
-                                                ?>
-                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <?php if ($user['UserID'] != $_SESSION['user_id']): ?>
                                                     <form method="post" class="inline-block">
@@ -301,7 +288,7 @@ $currentPage = "users";
                                     
                                     <?php if ($users->num_rows === 0): ?>
                                         <tr>
-                                            <td colspan="8" class="px-6 py-4 text-center text-gray-500">Không tìm thấy người dùng nào</td>
+                                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">Không tìm thấy người dùng nào</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
