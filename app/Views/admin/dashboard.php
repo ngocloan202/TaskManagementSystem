@@ -31,6 +31,15 @@ $currentPage = "admin_dashboard";
     </style>
 </head>
 <body class="bg-gray-100">
+    <!-- Thông báo flash từ session -->
+    <?php if ($flashSuccess): ?>
+        <div id="flash-success" class="hidden"><?= $flashSuccess ?></div>
+    <?php endif; ?>
+    
+    <?php if ($flashError): ?>
+        <div id="flash-error" class="hidden"><?= $flashError ?></div>
+    <?php endif; ?>
+    
     <div class="flex h-screen">
         <?php include "../components/Sidebar.php"; ?>
         
@@ -101,9 +110,46 @@ $currentPage = "admin_dashboard";
     </div>
     
     <!-- Import các file JavaScript tách riêng -->
+    <!-- Core functionality -->
+    <script src="js/DashboardInitializer.js"></script>
+    <script src="js/NotificationManager.js"></script>
+    <script src="js/ThemeManager.js"></script>
+    
+    <!-- Data fetching and statistics -->
     <script src="js/UserStatisticsManager.js"></script>
     <script src="js/ProjectStatisticsManager.js"></script>
     <script src="js/TaskStatisticsManager.js"></script>
+    
+    <!-- UI Interactions -->
     <script src="js/SystemManagementInteractions.js"></script>
+    
+    <!-- Đảm bảo xóa nút theme-toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xóa nút theme-toggle nếu tồn tại
+            const themeToggleButton = document.getElementById('theme-toggle');
+            if (themeToggleButton) {
+                themeToggleButton.remove();
+            }
+            
+            // Theo dõi DOM để xóa nút nếu được tạo sau này
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.id === 'theme-toggle') {
+                                node.remove();
+                            }
+                        });
+                    }
+                });
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    </script>
 </body>
 </html> 
