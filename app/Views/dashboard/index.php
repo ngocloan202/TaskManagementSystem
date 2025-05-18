@@ -4,7 +4,7 @@ require_once "../../../config/database.php";
 
 // Check if user is logged in
 if (!isset($_SESSION["user_id"])) {
-  header("Location: ../auth/login.php");
+  header("Location: /app/Views/auth/login.php");
   exit();
 }
 
@@ -124,37 +124,5 @@ $userRole = $_SESSION["role"] ?? "USER";
         </main>
       </div>
     </div>
-    <!-- Modal container cho dialog -->
-    <div id="projectModalContainer" class="modal-container">
-      <?php include "../projects/DialogCreateProject.php"; ?>
-    </div>
-
-    <script>
-      // Lấy các phần tử DOM
-      const openModalBtn = document.getElementById('openProjectModalBtn');
-      const modalContainer = document.getElementById('projectModalContainer');
-      
-      // Tìm nút đóng trong dialog
-      const closeModalBtn = modalContainer.querySelector('button');
-      
-      // Mở modal khi nhấn nút "Thêm dự án"
-      openModalBtn.addEventListener('click', function() {
-        modalContainer.classList.add('active');
-      });
-      
-      // Đóng modal khi nhấn nút đóng
-      closeModalBtn.addEventListener('click', function() {
-        modalContainer.classList.remove('active');
-      });
-      
-      // Đóng modal khi nhấn bên ngoài modal
-      window.addEventListener('click', function(event) {
-        if (event.target === modalContainer) {
-          modalContainer.classList.remove('active');
-        }
-      });
-    </script>
-    </div>
-    <script src="../../../public/js/ProjectList.js"></script>
-  </body>
+</body>
 </html>
