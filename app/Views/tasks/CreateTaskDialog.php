@@ -64,7 +64,7 @@
             <button type="button"
               class="w-8 h-8 bg-orange-500 rounded-full border-2 border-transparent focus:outline-none color-btn"
               data-color="orange-500"></button>
-            <input type="hidden" name="color" id="colorField" value="blue-400">
+            <input type="hidden" name="color" id="colorField" value="">
           </div>
         </div>
 

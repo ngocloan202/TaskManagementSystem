@@ -1,0 +1,32 @@
+.color-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: var(--btn-color);
+  box-shadow: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    box-shadow 0.2s;
+}
+
+/* File: customColorButton.css */
+.color-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.color-btn.selected {
+  transform: scale(1.1);
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 4px var(--btn-color, currentColor);
+}
+
+.custom-btn::before {
+  font-size: 1.25rem;
+  color: #666;
+}
