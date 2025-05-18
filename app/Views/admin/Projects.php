@@ -125,6 +125,29 @@ if ($result) {
 
 $totalPages = ceil($totalProjects / $perPage);
 $currentPage = "projects";
+
+// Xử lý sự kiện xem dự án
+if (isset($_GET['view']) && isset($_GET['id'])) {
+    $projectId = (int)$_GET['id'];
+    $adminId = $_SESSION['user_id'] ?? 0;
+    $viewTime = date('Y-m-d H:i:s');
+    
+    // Ghi log sự kiện xem dự án
+    $logQuery = "INSERT INTO ActivityLog (UserID, ActivityType, RelatedID, ActivityTime, Details) 
+                VALUES (?, 'view_project', ?, ?, ?)";
+    
+    $stmt = $connect->prepare($logQuery);
+    if ($stmt) {
+        $details = json_encode(['from' => 'admin_panel', 'ip' => $_SERVER['REMOTE_ADDR']]);
+        $stmt->bind_param('iiss', $adminId, $projectId, $viewTime, $details);
+        $stmt->execute();
+    }
+    
+    // Chuyển hướng đến trang xem dự án
+    header("Location: ../dashboard/ProjectDetail.php?id=" . $projectId);
+    exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -275,7 +298,7 @@ $currentPage = "projects";
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <div class="flex items-center space-x-2">
-                                                        <a href="ViewProject.php?id=<?= $project['ProjectID'] ?>" class="text-indigo-600 hover:text-indigo-900 flex items-center" title="Xem">
+                                                        <a href="?view=1&id=<?= $project['ProjectID'] ?>" class="text-indigo-600 hover:text-indigo-900 flex items-center" title="Xem">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                                                 <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
