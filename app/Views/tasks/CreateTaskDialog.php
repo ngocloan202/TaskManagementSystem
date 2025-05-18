@@ -9,8 +9,8 @@
 
 <body>
   <!-- Dialog content -->
-  <div class="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
-    <!-- Modal container -->
+  <div class="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50" 
+       style="background-color: rgba(0, 0, 0, 0.4);">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
       <!-- Header -->
       <div class="flex justify-between items-center bg-[#0A1A44] text-white px-6 py-4 rounded-t-2xl">
@@ -85,7 +85,7 @@
     </div>
   </div>
 
-  <script src="../../public/js/TaskFromHandler"></script>
+  <script src="../../../public/js/TaskFromHandler"></script>
 </body>
 
 </html>
