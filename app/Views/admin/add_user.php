@@ -18,11 +18,11 @@ $user = [
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Lấy dữ liệu từ form
     $user = [
-        'username' => $_POST['username'] ?? '',
-        'email' => $_POST['email'] ?? '',
-        'password' => $_POST['password'] ?? '',
-        'fullname' => $_POST['fullname'] ?? '',
-        'role' => $_POST['role'] ?? 'USER'
+        'username' => isset($_POST['username']) ? $_POST['username'] : '',
+        'email' => isset($_POST['email']) ? $_POST['email'] : '',
+        'password' => isset($_POST['password']) ? $_POST['password'] : '',
+        'fullname' => isset($_POST['fullname']) ? $_POST['fullname'] : '',
+        'role' => isset($_POST['role']) ? $_POST['role'] : 'USER'
     ];
     
     // Validate dữ liệu
@@ -140,7 +140,7 @@ $currentPage = "users";
                                     type="text" 
                                     id="username" 
                                     name="username" 
-                                    value="<?= htmlspecialchars($user['username']) ?>" 
+                                    value="<?= isset($user['username']) ? htmlspecialchars($user['username']) : '' ?>" 
                                     required 
                                     class="w-full px-3 py-2 border <?= isset($errors['username']) ? 'border-red-500' : 'border-gray-300' ?> rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
@@ -156,7 +156,7 @@ $currentPage = "users";
                                     type="email" 
                                     id="email" 
                                     name="email" 
-                                    value="<?= htmlspecialchars($user['email']) ?>" 
+                                    value="<?= isset($user['email']) ? htmlspecialchars($user['email']) : '' ?>" 
                                     required 
                                     class="w-full px-3 py-2 border <?= isset($errors['email']) ? 'border-red-500' : 'border-gray-300' ?> rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
@@ -189,7 +189,7 @@ $currentPage = "users";
                                     type="text" 
                                     id="fullname" 
                                     name="fullname" 
-                                    value="<?= htmlspecialchars($user['fullname']) ?>" 
+                                    value="<?= isset($user['fullname']) ? htmlspecialchars($user['fullname']) : '' ?>" 
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
                             </div>
@@ -202,8 +202,8 @@ $currentPage = "users";
                                     name="role" 
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
-                                    <option value="USER" <?= $user['role'] === 'USER' ? 'selected' : '' ?>>User</option>
-                                    <option value="ADMIN" <?= $user['role'] === 'ADMIN' ? 'selected' : '' ?>>Admin</option>
+                                    <option value="USER" <?= isset($user['role']) && $user['role'] === 'USER' ? 'selected' : '' ?>>User</option>
+                                    <option value="ADMIN" <?= isset($user['role']) && $user['role'] === 'ADMIN' ? 'selected' : '' ?>>Admin</option>
                                 </select>
                             </div>
                             
