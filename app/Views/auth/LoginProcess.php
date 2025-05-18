@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       $message = "Tên đăng nhập hoặc mật khẩu không chính xác!";
     } else {
       $user = $result->fetch_assoc();
-      // Kiểm tra mật khẩu hash (bcrypt)
+      // Kiểm tra mật khẩu hash (MD5)
       if (md5($password) === $user["Password"]) {
         // Đăng nhập thành công
         $_SESSION["user_id"] = $user["UserID"];
