@@ -2,17 +2,16 @@ function setTaskStatus(status) {
     document.getElementById('statusField').value = status;
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', () => {
     const colorButtons = document.querySelectorAll('.color-btn');
-
+    const hiddenField  = document.getElementById('colorField');
+  
     colorButtons.forEach(btn => {
-      btn.addEventListener('click', function() {
-        colorButtons.forEach(b => {
-          b.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-800');
-        });
-        
-        this.classList.add('ring-2', 'ring-offset-2', 'ring-gray-800');
-        document.getElementById('colorField').value = this.getAttribute('data-color');
+      btn.addEventListener('click', () => {
+        colorButtons.forEach(b => b.classList.remove('selected'));
+
+        btn.classList.add('selected');
+        hiddenField.value = btn.getAttribute('data-color');
       });
     });
   });

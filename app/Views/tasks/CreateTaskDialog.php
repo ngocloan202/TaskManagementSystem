@@ -1,4 +1,4 @@
-
+<link rel="stylesheet" href="../../../public/css/customColorButton.css">
 
   <!-- Dialog content -->
   <div class="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50" 
@@ -50,23 +50,25 @@
           <p class="text-indigo-600 text-lg font-semibold">Chọn màu:</p>
           <div class="flex space-x-3 mt-2">
             <button type="button"
-              class="w-8 h-8 bg-pink-500 rounded-full border-2 border-transparent focus:outline-none color-btn"
+              class="color-btn w-8 h-8 bg-pink-500 rounded-full focus:outline-none"
               data-color="pink-500"></button>
             <button type="button"
-              class="w-8 h-8 bg-red-600 rounded-full border-2 border-transparent focus:outline-none color-btn"
+              class="color-btn w-8 h-8 bg-red-600 rounded-full focus:outline-none"
               data-color="red-600"></button>
             <button type="button"
-              class="w-8 h-8 bg-green-500 rounded-full border-2 border-transparent focus:outline-none color-btn"
+              class="color-btn w-8 h-8 bg-green-500 rounded-full focus:outline-none"
               data-color="green-500"></button>
             <button type="button"
-              class="w-8 h-8 bg-blue-400 rounded-full border-2 border-transparent focus:outline-none color-btn"
+              class="color-btn w-8 h-8 bg-blue-400 rounded-full focus:outline-none"
               data-color="blue-400"></button>
             <button type="button"
-              class="w-8 h-8 bg-orange-500 rounded-full border-2 border-transparent focus:outline-none color-btn"
+              class="color-btn w-8 h-8 bg-orange-500 rounded-full focus:outline-none"
               data-color="orange-500"></button>
-            <input type="hidden" name="color" id="colorField" value="">
+            <input type="hidden" name="color" id="colorField" value="blue-400">
           </div>
         </div>
+        <script src="../../../public/js/TaskFormHandler.js"></script>
+
 
         <!-- Nút Thêm nhiệm vụ -->
         <button type="submit"
@@ -76,4 +78,3 @@
       </form>
     </div>
   </div>
-  <script src="../../../public/js/TaskFormHandler.js"></script>
