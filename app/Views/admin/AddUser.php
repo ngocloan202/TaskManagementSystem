@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($stmt->execute()) {
             $_SESSION['success'] = 'Thêm người dùng thành công';
-            header('Location: users.php');
+            header('Location: Users.php');
             exit;
         } else {
             $errors['general'] = 'Có lỗi xảy ra: ' . $connect->error;
@@ -115,7 +115,7 @@ $currentPage = "users";
             <main class="flex-1 p-6 overflow-auto">
                 <div class="max-w-3xl mx-auto">
                     <div class="flex items-center mb-6">
-                        <a href="users.php" class="text-indigo-600 hover:text-indigo-800 mr-2">
+                        <a href="Users.php" class="text-indigo-600 hover:text-indigo-800 mr-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
@@ -209,7 +209,7 @@ $currentPage = "users";
                             
                             <!-- Nút submit -->
                             <div class="flex justify-end">
-                                <a href="users.php" class="mr-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Hủy</a>
+                                <a href="Users.php" class="mr-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Hủy</a>
                                 <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Thêm người dùng</button>
                             </div>
                         </form>

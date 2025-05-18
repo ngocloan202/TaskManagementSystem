@@ -16,7 +16,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     // Không cho phép xóa chính mình
     if ($userId == $_SESSION['user_id']) {
         $_SESSION['error'] = "Không thể xóa tài khoản đang đăng nhập";
-        header("Location: users.php");
+        header("Location: Users.php");
         exit;
     }
     
@@ -28,7 +28,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     } else {
         $_SESSION['error'] = "Không thể xóa người dùng: " . $connect->error;
     }
-    header("Location: users.php");
+    header("Location: Users.php");
     exit;
 }
 
@@ -40,7 +40,7 @@ if (isset($_POST['change_role'])) {
     // Không cho phép thay đổi quyền của chính mình
     if ($userId == $_SESSION['user_id']) {
         $_SESSION['error'] = "Không thể thay đổi quyền của tài khoản đang đăng nhập";
-        header("Location: users.php");
+        header("Location: Users.php");
         exit;
     }
     
@@ -51,7 +51,7 @@ if (isset($_POST['change_role'])) {
     } else {
         $_SESSION['error'] = "Không thể thay đổi quyền người dùng: " . $connect->error;
     }
-    header("Location: users.php");
+    header("Location: Users.php");
     exit;
 }
 
@@ -106,7 +106,7 @@ $stmt = $connect->prepare($usersQuery);
 if ($stmt === false) {
     // Xử lý lỗi khi chuẩn bị câu truy vấn
     $_SESSION['error'] = "Lỗi SQL: " . $connect->error;
-    header("Location: users.php");
+    header("Location: Users.php");
     exit;
 }
 
@@ -221,7 +221,7 @@ $currentPage = "users";
                             </form>
                             
                             <!-- Thêm người dùng mới -->
-                            <a href="add_user.php" class="h-10 bg-green-600 text-white px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center justify-center whitespace-nowrap text-sm font-medium">
+                            <a href="AddUser.php" class="h-10 bg-green-600 text-white px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center justify-center whitespace-nowrap text-sm font-medium">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
@@ -280,14 +280,14 @@ $currentPage = "users";
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex items-center space-x-2">
-                                                    <a href="edit_user.php?id=<?= $user['UserID'] ?>" class="text-indigo-600 hover:text-indigo-900 flex items-center" title="Sửa">
+                                                    <a href="EditUser.php?id=<?= $user['UserID'] ?>" class="text-indigo-600 hover:text-indigo-900 flex items-center" title="Sửa">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                                         </svg>
                                                         <span class="ml-1">Sửa</span>
                                                     </a>
                                                     <?php if ($user['UserID'] != $_SESSION['user_id']): ?>
-                                                        <a href="users.php?action=delete&id=<?= $user['UserID'] ?>" class="text-red-600 hover:text-red-900 flex items-center" onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')" title="Xóa">
+                                                        <a href="Users.php?action=delete&id=<?= $user['UserID'] ?>" class="text-red-600 hover:text-red-900 flex items-center" onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')" title="Xóa">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                                 <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                                                             </svg>
@@ -382,7 +382,7 @@ $currentPage = "users";
                     </select>
                 </div>
                 <div class="flex justify-end">
-                    <button type="button" id="cancelAdd" class="mr-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Hủy</button>
+                    <a href="Users.php" class="mr-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Hủy</a>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Thêm</button>
                 </div>
             </form>

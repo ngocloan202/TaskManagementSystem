@@ -53,7 +53,7 @@ if ($userId) {
         <span>Dashboard</span>
       </a>
       <a
-        href="../admin/users.php"
+        href="../admin/Users.php"
         class="flex items-center w-full px-4 py-3 rounded-lg <?= $currentPage === "users"
           ? "bg-indigo-50 text-gray-800"
           : "hover:bg-indigo-200 text-gray-800" ?>"
