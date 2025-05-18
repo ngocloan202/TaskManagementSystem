@@ -86,8 +86,6 @@ if (!$isEmbedded):
 <body class="font-sans">
 <?php endif; ?>
 
-<?php include_once(__DIR__ . '/../components/Notification.php'); ?>
-
 <div class="py-4">
   <div class="rounded-corners">
     <h1 class="text-2xl font-bold text-gray-800 mb-4">Quản lý thành viên: <?= htmlspecialchars($projectName) ?></h1>
