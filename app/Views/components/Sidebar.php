@@ -24,7 +24,9 @@ if ($userId) {
 <!-- Sidebar -->
 <aside class="bg-white w-64 border-r text-black font-semibold flex flex-col h-screen overflow-y-auto">
   <!-- Branding -->
-  <a href="<?= $userRole === 'ADMIN' ? '../admin/dashboard.php' : 'index.php' ?>" class="px-6 py-2 flex items-center space-x-3 bg-[#0A1A44] text-white h-14 hover:opacity-80 transition-opacity duration-150">
+  <a href="<?= $userRole === "ADMIN"
+    ? "../admin/dashboard.php"
+    : "index.php" ?>" class="px-6 py-2 flex items-center space-x-3 bg-[#0A1A44] text-white h-14 hover:opacity-80 transition-opacity duration-150">
     <div class="w-10 h-10 rounded-full overflow-hidden">
       <img
         src="../../../public/images/cubeflow-logo.png"
@@ -125,7 +127,9 @@ if ($userId) {
                  style="color: #F15A29">
               <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z"/>
             </svg>
-                <span class="project-name flex-1 min-w-0"><?= htmlspecialchars($p["ProjectName"]) ?></span>
+                <span class="project-name flex-1 min-w-0"><?= htmlspecialchars(
+                  $p["ProjectName"]
+                ) ?></span>
               </a>
             </li>
           <?php endforeach; ?>
@@ -167,9 +171,9 @@ if ($userId) {
         ? "bg-[#A8B5D6]"
         : "" ?>"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="w-6 h-6 mr-3 flex-shrink-0" style="color: #0A1A44;">
-        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd"></path>
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="size-6">
+  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 0 1-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 0 1-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 0 1-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584ZM12 18a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd"></path>
+</svg>
       <span>Trợ giúp</span>
     </a>
   </nav>

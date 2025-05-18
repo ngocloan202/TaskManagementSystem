@@ -1,13 +1,14 @@
 /* Chịu trách nhiệm vẽ inner white dot */
 .color-btn {
-  position: relative;   /* để ::after căn giữa */
+  position: relative; /* để ::after căn giữa */
 }
 
 .color-btn.selected::after {
-  content: '';
+  content: "";
   position: absolute;
-  top: 50%; left: 50%;
-  width: 50%;    /* 50% của width nút (2rem) = 1rem */
+  top: 50%;
+  left: 50%;
+  width: 50%; /* 50% của width nút (2rem) = 1rem */
   height: 50%;
   background: #fff;
   border-radius: 50%;

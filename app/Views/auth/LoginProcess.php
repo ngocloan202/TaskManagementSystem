@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION["avatar"] = $user["Avatar"] ?? "/public/images/default-avatar.png";
         $_SESSION["last_activity"] = time();
         $_SESSION["success"] = "🎉 Đăng nhập thành công!";
-        
+
         // Redirect based on role
         if ($_SESSION["role"] === "ADMIN") {
           header("Location: ../admin/dashboard.php");

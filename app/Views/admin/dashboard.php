@@ -51,7 +51,7 @@ $currentPage = "admin_dashboard";
                             $stmt = $connect->prepare("SELECT COUNT(*) as count FROM Users");
                             $stmt->execute();
                             $result = $stmt->get_result();
-                            $userCount = $result->fetch_assoc()['count'];
+                            $userCount = $result->fetch_assoc()["count"];
                             ?>
                             <p class="text-3xl font-bold text-indigo-600"><?= $userCount ?></p>
                         </div>
@@ -63,7 +63,7 @@ $currentPage = "admin_dashboard";
                             $stmt = $connect->prepare("SELECT COUNT(*) as count FROM Project");
                             $stmt->execute();
                             $result = $stmt->get_result();
-                            $projectCount = $result->fetch_assoc()['count'];
+                            $projectCount = $result->fetch_assoc()["count"];
                             ?>
                             <p class="text-3xl font-bold text-indigo-600"><?= $projectCount ?></p>
                         </div>
@@ -75,7 +75,7 @@ $currentPage = "admin_dashboard";
                             $stmt = $connect->prepare("SELECT COUNT(*) as count FROM Task");
                             $stmt->execute();
                             $result = $stmt->get_result();
-                            $taskCount = $result->fetch_assoc()['count'];
+                            $taskCount = $result->fetch_assoc()["count"];
                             ?>
                             <p class="text-3xl font-bold text-indigo-600"><?= $taskCount ?></p>
                         </div>

@@ -214,17 +214,21 @@ foreach ($allTasks as $tk) {
               <!-- Tasks for this status -->
               <div class="space-y-2">
                 <?php foreach ($tasksByStatus[$status] as $task): ?>
-                  <div class="p-3 <?= $styles["bg"] ?> rounded-lg <?= $styles["hover"] ?> <?= $styles["border"] ?>">
+                  <div class="p-3 <?= $styles["bg"] ?> rounded-lg <?= $styles[
+   "hover"
+ ] ?> <?= $styles["border"] ?>">
                     <h4 class="font-medium"><?= htmlspecialchars($task["TaskTitle"]) ?></h4>
-                    <?php if (!empty($task['TagName'])): ?>
+                    <?php if (!empty($task["TagName"])): ?>
                       <span class="inline-block px-2 py-1 rounded text-white text-xs font-semibold mb-1"
-                            style="background-color: <?= htmlspecialchars($task['TagColor']) ?>">
-                        <?= htmlspecialchars($task['TagName']) ?>
+                            style="background-color: <?= htmlspecialchars($task["TagColor"]) ?>">
+                        <?= htmlspecialchars($task["TagName"]) ?>
                       </span>
                     <?php endif; ?>
                     <?php if ($task["UserID"]): ?>
                       <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <img src="../../..<?= htmlspecialchars($task["Avatar"]) ?>" class="w-6 h-6 rounded-full mr-2">
+                        <img src="../../..<?= htmlspecialchars(
+                          $task["Avatar"]
+                        ) ?>" class="w-6 h-6 rounded-full mr-2">
                         <span><?= htmlspecialchars($task["AssignedToName"]) ?></span>
                       </div>
                     <?php endif; ?>
@@ -262,9 +266,9 @@ foreach ($allTasks as $tk) {
 
         <!-- Create Task Dialog -->
         <div id="createTaskDialog" class="hidden">
-          <?php 
+          <?php
           $projectId = $projectId; // Ensure projectId is available
-          include_once "../tasks/CreateTaskDialog.php"; 
+          include_once "../tasks/CreateTaskDialog.php";
           ?>
         </div>
       </main>

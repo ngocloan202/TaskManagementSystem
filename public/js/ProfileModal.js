@@ -33,8 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hàm cập nhật trạng thái nút Lưu
   function updateSaveButtonState() {
     btnSave.disabled = !hasChanged();
-    btnSave.classList.toggle('opacity-50', btnSave.disabled);
-    btnSave.classList.toggle('cursor-not-allowed', btnSave.disabled);
+    btnSave.classList.toggle("opacity-50", btnSave.disabled);
+    btnSave.classList.toggle("cursor-not-allowed", btnSave.disabled);
   }
 
   // 1. Định nghĩa hàm đóng modal
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSaveButtonState(); // Disable save at first
     // Lắng nghe thay đổi
     inputs.forEach(input => {
-      input.addEventListener('input', updateSaveButtonState);
+      input.addEventListener("input", updateSaveButtonState);
     });
   });
 
@@ -97,12 +97,12 @@ document.addEventListener("DOMContentLoaded", () => {
     btnCancel.classList.add("hidden");
     // Bỏ lắng nghe
     inputs.forEach(input => {
-      input.removeEventListener('input', updateSaveButtonState);
+      input.removeEventListener("input", updateSaveButtonState);
     });
   });
 
   // 5.2 Nhấn Lưu: Hiện modal xác nhận
-  btnSave.addEventListener("click", (e) => {
+  btnSave.addEventListener("click", e => {
     if (btnSave.disabled) return; // Không cho lưu nếu chưa thay đổi
     e.preventDefault();
     const formData = new FormData(form);
@@ -113,43 +113,43 @@ document.addEventListener("DOMContentLoaded", () => {
   btnConfirmSave.addEventListener("click", () => {
     // Gửi AJAX tới UpdateProfile.php
     const formData = new FormData(form);
-    fetch('/app/Controllers/UpdateProfile.php', {
-      method: 'POST',
+    fetch("/app/Controllers/UpdateProfile.php", {
+      method: "POST",
       body: formData
     })
       .then(r => r.text())
       .then(text => {
-        if (text.trim() === 'success') {
+        if (text.trim() === "success") {
           // Cập nhật lại initialValues
           storeInitialValues();
           resetState();
           btnCancel.classList.add("hidden");
           // Bỏ lắng nghe
           inputs.forEach(input => {
-            input.removeEventListener('input', updateSaveButtonState);
+            input.removeEventListener("input", updateSaveButtonState);
           });
           // cập nhật UI ngay (nếu có avatar mới)
-          if (formData.get('avatar')) {
-            document.getElementById('profileAvatar').src = formData.get('avatar');
-            const profileBtnImg = document.querySelector('#profileBtn img');
-            if (profileBtnImg) profileBtnImg.src = formData.get('avatar');
+          if (formData.get("avatar")) {
+            document.getElementById("profileAvatar").src = formData.get("avatar");
+            const profileBtnImg = document.querySelector("#profileBtn img");
+            if (profileBtnImg) profileBtnImg.src = formData.get("avatar");
           }
           // Sau khi lưu thành công:
-          const successModal = document.getElementById('profileSuccessModal');
+          const successModal = document.getElementById("profileSuccessModal");
           if (successModal) {
-            successModal.classList.remove('hidden');
+            successModal.classList.remove("hidden");
             // Đóng modal khi bấm nút Đóng
-            document.getElementById('closeProfileSuccessModal').onclick = () => {
-              successModal.classList.add('hidden');
+            document.getElementById("closeProfileSuccessModal").onclick = () => {
+              successModal.classList.add("hidden");
             };
           }
         } else {
-          alert('Lỗi khi lưu: ' + text);
+          alert("Lỗi khi lưu: " + text);
         }
         confirmModal.classList.add("hidden");
       })
       .catch(() => {
-        alert('Không thể kết nối server');
+        alert("Không thể kết nối server");
         confirmModal.classList.add("hidden");
       });
   });

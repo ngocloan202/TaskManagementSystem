@@ -8,10 +8,10 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $projectName = $_POST['projectName'] ?? '';
-  $description = $_POST['description'] ?? '';
-  $createdBy = $_SESSION['user_id'];
-  $backgroundUrl = $_POST['image'] ?? null; // Lấy link ảnh từ input name="image"
+  $projectName = $_POST["projectName"] ?? "";
+  $description = $_POST["description"] ?? "";
+  $createdBy = $_SESSION["user_id"];
+  $backgroundUrl = $_POST["image"] ?? null; // Lấy link ảnh từ input name="image"
 
   if (empty($projectName)) {
     $_SESSION["error"] = "Vui lòng nhập tên dự án!";
@@ -32,7 +32,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   }
   $checkStmt->close();
 
-  $sql = "INSERT INTO Project (ProjectName, ProjectDescription, CreatedBy, BackgroundUrl) VALUES (?, ?, ?, ?)";
+  $sql =
+    "INSERT INTO Project (ProjectName, ProjectDescription, CreatedBy, BackgroundUrl) VALUES (?, ?, ?, ?)";
   $statement = $connect->prepare($sql);
   $statement->bind_param("ssss", $projectName, $description, $createdBy, $backgroundUrl);
 
@@ -46,12 +47,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $memberStmt->execute();
     $memberStmt->close();
 
-    $_SESSION['success'] = 'Tạo dự án thành công!';
-    header('Location: ../dashboard/index.php');
+    $_SESSION["success"] = "Tạo dự án thành công!";
+    header("Location: ../dashboard/index.php");
     exit();
   } else {
     $_SESSION["error"] = "Có lỗi xảy ra khi tạo dự án!";
-    
   }
 
   $statement->close();
