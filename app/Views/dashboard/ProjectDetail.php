@@ -155,7 +155,24 @@ foreach ($allTasks as $tk) {
       <main class="flex-1 overflow-y-auto p-6">
         <!-- Breadcrumb -->
         <div class="mb-6 flex items-center text-gray-600">
-          <a href="index.php" class="text-indigo-600 font-bold">Dự án</a>
+          <?php if ($isAdmin): ?>
+            <?php 
+              // Xây dựng URL quay lại với các tham số đã lưu
+              $backUrl = "../admin/Projects.php";
+              $refererParams = $_SESSION['project_view_referer']['params'] ?? [];
+              
+              if (!empty($refererParams)) {
+                $queryParams = [];
+                foreach ($refererParams as $key => $value) {
+                  $queryParams[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
+                }
+                $backUrl .= '?' . implode('&', $queryParams);
+              }
+            ?>
+            <a href="<?= $backUrl ?>" class="text-indigo-600 font-bold">Quay lại danh sách dự án</a>
+          <?php else: ?>
+            <a href="index.php" class="text-indigo-600 font-bold">Dự án</a>
+          <?php endif; ?>
           <span class="mx-2">›</span>
           <span class="font-bold"><?= htmlspecialchars($proj["ProjectName"]) ?></span>
         </div>
@@ -163,6 +180,16 @@ foreach ($allTasks as $tk) {
         <!-- Project Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6 flex items-center justify-between">
           <div id="projectDetailPage" class="relative z-0">
+            <?php if ($isAdmin): ?>
+            <div class="mb-3">
+              <a href="<?= $backUrl ?>" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 inline-flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Quay lại danh sách dự án
+              </a>
+            </div>
+            <?php endif; ?>
             <h1 class="text-2xl font-semibold mb-1"><?= htmlspecialchars(
               $proj["ProjectName"]
             ) ?></h1>
@@ -180,9 +207,11 @@ foreach ($allTasks as $tk) {
               <img src="../../../<?= htmlspecialchars($m["Avatar"]) ?>"
                 class="w-8 h-8 rounded-full border-2 border-white" />
             <?php endforeach; ?>
+            <?php if (!$isAdmin): ?>
             <button id="btnMember" class="ml-4 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">
               Quản lý thành viên
             </button>
+            <?php endif; ?>
           </div>
         </div>
 
@@ -221,6 +250,7 @@ foreach ($allTasks as $tk) {
                     <?= $count ?>
                   </span>
                 </div>
+                <?php if (!$isAdmin): ?>
                 <button class="p-2 rounded-full <?= $styles["bg"] ?> <?= $styles["color"] ?>
                   hover:bg-opacity-90 transition transform hover:scale-110" onclick="addTask('<?= $status ?>')"
                   title="Thêm nhiệm vụ mới (<?= $status ?>)"
@@ -230,6 +260,7 @@ foreach ($allTasks as $tk) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                   </svg>
                 </button>
+                <?php endif; ?>
               </div>
 
               <!-- Tasks for this status -->
