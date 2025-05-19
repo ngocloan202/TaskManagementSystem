@@ -256,6 +256,14 @@ foreach ($allTasks as $tk) {
                 <div class="h-2 bg-green-500 rounded-full" style="width: <?= $progress ?>%"></div>
               </div>
               <button class="px-3 py-1 bg-gray-200 text-indigo-700 rounded">Bảng</button>
+              <?php if (!$isAdmin): ?>
+                <button id="deleteProjectBtn" class="ml-3 px-3 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100 border border-red-200 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Xóa dự án
+                </button>
+              <?php endif; ?>
             </div>
           </div>
           <div class="flex items-center -space-x-2">
@@ -378,6 +386,29 @@ foreach ($allTasks as $tk) {
     <script src="../../../public/js/dialogManageMembers.js"></script>
     <script src="../../../public/js/projectDescriptionEdit.js"></script>
     <script src="../../../public/js/projectNameEdit.js"></script>
+    <script src="../../../public/js/projectDelete.js"></script>
+    
+    <!-- Delete Project Confirmation Modal -->
+    <div id="deleteProjectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center overflow-auto" 
+         style="background-color: rgba(0,0,0,0.4); backdrop-filter: blur(2px);">
+      <div class="bg-white rounded-lg w-full max-w-md p-6 shadow-xl">
+        <div class="text-center">
+          <h3 class="mt-4 text-xl font-medium text-gray-900">Xác nhận xóa dự án</h3>
+          <p class="mt-2 text-gray-500">
+            Bạn có chắc chắn muốn xóa dự án "<span id="deleteProjectName" class="font-semibold"></span>" không?
+            <br>Tất cả nhiệm vụ và dữ liệu liên quan sẽ bị xóa vĩnh viễn.
+            <br>Hành động này không thể hoàn tác.
+          </p>
+          <div class="mt-4 flex justify-center space-x-4">
+            <button id="confirmDeleteProject" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+              Xóa dự án
+            </button>
+            <button id="cancelDeleteProject" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">
+              Hủy bỏ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 </body>
-
 </html>
