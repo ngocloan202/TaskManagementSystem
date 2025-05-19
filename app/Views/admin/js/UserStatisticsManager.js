@@ -13,7 +13,7 @@ function fetchUserStats() {
             document.getElementById('userCount').textContent = data.count;
         })
         .catch(error => {
-            console.error('Error fetching user stats:', error);
+            // Silent error handling without console.error
             document.getElementById('userCount').textContent = 'Error';
         });
 }

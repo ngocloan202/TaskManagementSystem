@@ -42,7 +42,6 @@ document.getElementById("taskForm").addEventListener("submit", function (e) {
       }
     })
     .catch(error => {
-      console.error("Error:", error);
       alert("Đã xảy ra lỗi khi tạo nhiệm vụ");
     });
 });

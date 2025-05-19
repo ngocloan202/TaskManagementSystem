@@ -48,7 +48,7 @@ CREATE TABLE TaskStatus (
 -- Create Task table
 CREATE TABLE Task (
     TaskID INT AUTO_INCREMENT PRIMARY KEY,
-    TaskTitle VARCHAR(255) NOT NULL UNIQUE,
+    TaskTitle VARCHAR(255) NOT NULL,
     TaskDescription TEXT,
     TaskStatusID INT NOT NULL,
     Priority ENUM('Thấp', 'Trung Bình', 'Cao', 'Khẩn cấp'),

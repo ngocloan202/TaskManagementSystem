@@ -189,8 +189,17 @@ try {
         }
         
         if (isset($data['tag_color'])) {
+            // Ensure tag color is a valid hex color
+            $tagColor = $data['tag_color'];
+            // Make sure it starts with # if it doesn't already
+            if (!empty($tagColor) && $tagColor[0] !== '#') {
+                $tagColor = '#' . $tagColor;
+            }
+            // Log the color being saved
+            error_log("UpdateTask: Saving tag color: " . $tagColor);
+            
             $updates[] = "TagColor = ?";
-            $params[] = $data['tag_color'];
+            $params[] = $tagColor;
             $types .= "s";
         }
         

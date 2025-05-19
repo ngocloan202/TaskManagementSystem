@@ -13,7 +13,7 @@ function fetchTaskStats() {
             document.getElementById('taskCount').textContent = data.count;
         })
         .catch(error => {
-            console.error('Error fetching task stats:', error);
+            // Silent error handling without console.error
             document.getElementById('taskCount').textContent = 'Error';
         });
 }

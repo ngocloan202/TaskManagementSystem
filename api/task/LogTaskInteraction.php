@@ -54,10 +54,13 @@ try {
         'view_description' => 'task_detail_viewed',
         'change_priority' => 'task_priority_changed',
         'change_date' => 'task_date_changed',
-        'page_loaded' => 'task_detail_loaded'
+        'page_loaded' => 'task_detail_viewed',
+        'back_to_project' => 'task_navigation',
+        'member_added' => 'task_assigned',
+        'member_removed' => 'task_unassigned'
     ];
     
-    $activityType = $activityTypeMap[$interactionType] ?? 'task_interaction';
+    $activityType = $activityTypeMap[$interactionType] ?? 'task_updated';
     
     // Insert into ActivityLog
     $stmt = $connect->prepare("
