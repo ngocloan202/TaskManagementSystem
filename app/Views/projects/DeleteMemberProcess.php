@@ -1,102 +1,84 @@
 <?php
+header('Content-Type: application/json');
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
-require_once "../components/Notification.php";
 
-header("Content-Type: application/json");
-
-// Kiểm tra session
-if (!isset($_SESSION["user_id"])) {
-    echo json_encode([
-        "status" => "error",
-        "message" => "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."
-    ]);
-    exit();
+// 1) Chỉ cho phép POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['status'=>'error','message'=>'Phương thức không hợp lệ.']);
+    exit;
 }
 
-// Lấy thông tin từ request
-$projectMembersID = isset($_POST["projectMemberId"]) ? (int) $_POST["projectMemberId"] : 0;
-$projectID = isset($_POST["projectId"]) ? (int) $_POST["projectId"] : 0;
-$currentUserID = $_SESSION["user_id"];
+// 2) Check session
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['status'=>'error','message'=>'Phiên đăng nhập hết hạn.']);
+    exit;
+}
 
-// Validate input
+$currentUserID    = $_SESSION['user_id'];
+$projectMembersID = intval($_POST['projectMemberId'] ?? 0);
+$projectID        = intval($_POST['projectId']        ?? 0);
+
+// 3) Validate
 if ($projectMembersID <= 0 || $projectID <= 0) {
-    echo json_encode([
-        "status" => "error",
-        "message" => "Dữ liệu không hợp lệ!"
-    ]);
-    exit();
+    echo json_encode(['status'=>'error','message'=>'Dữ liệu không hợp lệ!']);
+    exit;
 }
 
 try {
-    // Bắt đầu transaction
     $connect->begin_transaction();
 
-    // 1. Kiểm tra quyền owner
-    $ownerCheckStmt = $connect->prepare("
-        SELECT COUNT(*) AS isOwner 
-        FROM ProjectMembers 
-        WHERE ProjectID = ? AND UserID = ? AND RoleInProject = 'người sở hữu'
+    // 4) Kiểm tra owner
+    $stmt = $connect->prepare("
+        SELECT COUNT(*) as cnt
+          FROM ProjectMembers
+         WHERE ProjectID = ? AND UserID = ? AND RoleInProject = 'người sở hữu'
     ");
-    $ownerCheckStmt->bind_param("ii", $projectID, $currentUserID);
-    $ownerCheckStmt->execute();
-    $isOwner = $ownerCheckStmt->get_result()->fetch_assoc()["isOwner"] > 0;
+    $stmt->bind_param('ii', $projectID, $currentUserID);
+    $stmt->execute();
+    $isOwner = $stmt->get_result()->fetch_assoc()['cnt'] > 0;
+    $stmt->close();
 
     if (!$isOwner) {
         throw new Exception("Bạn không có quyền xóa thành viên!");
     }
 
-    // 2. Lấy thông tin thành viên cần xóa
-    $targetUserStmt = $connect->prepare("
-        SELECT pm.UserID, u.FullName 
-        FROM ProjectMembers pm
-        JOIN Users u ON u.UserID = pm.UserID
-        WHERE pm.ProjectMembersID = ?
+    // 5) Lấy tên user để thông báo
+    $stmt = $connect->prepare("
+        SELECT u.FullName, pm.UserID
+          FROM ProjectMembers pm
+          JOIN Users u ON u.UserID = pm.UserID
+         WHERE pm.ProjectMembersID = ?
     ");
-    $targetUserStmt->bind_param("i", $projectMembersID);
-    $targetUserStmt->execute();
-    $targetUser = $targetUserStmt->get_result()->fetch_assoc();
-
-    if (!$targetUser) {
+    $stmt->bind_param('i', $projectMembersID);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$row) {
         throw new Exception("Không tìm thấy thành viên!");
     }
-
-    // 3. Kiểm tra không được xóa chính mình
-    if ($targetUser["UserID"] == $currentUserID) {
-        throw new Exception("Bạn không thể tự xóa mình khỏi dự án!");
+    if ($row['UserID'] == $currentUserID) {
+        throw new Exception("Bạn không thể tự xóa mình!");
     }
+    $userName = $row['FullName'];
 
-    // 4. Xóa thành viên
-    $deleteStmt = $connect->prepare("
-        DELETE FROM ProjectMembers 
-        WHERE ProjectMembersID = ? AND ProjectID = ?
+    // 6) Xóa
+    $stmt = $connect->prepare("
+        DELETE FROM ProjectMembers
+         WHERE ProjectMembersID = ? AND ProjectID = ?
     ");
-    $deleteStmt->bind_param("ii", $projectMembersID, $projectID);
-    
-    if (!$deleteStmt->execute()) {
-        throw new Exception("Lỗi khi xóa thành viên: " . $connect->error);
+    $stmt->bind_param('ii', $projectMembersID, $projectID);
+    if (!$stmt->execute()) {
+        throw new Exception("Lỗi khi xóa: ".$connect->error);
     }
+    $stmt->close();
 
-    // Commit transaction
     $connect->commit();
-
-    echo json_encode([
-        "status" => "success",
-        "message" => "Đã xóa {$targetUser['FullName']} khỏi dự án thành công!"
-    ]);
+    echo json_encode(['status'=>'success','message'=>"Đã xóa {$userName} khỏi dự án."]);
+    exit;
 
 } catch (Exception $e) {
-    // Rollback nếu có lỗi
     $connect->rollback();
-    
-    echo json_encode([
-        "status" => "error",
-        "message" => $e->getMessage()
-    ]);
+    echo json_encode(['status'=>'error','message'=>$e->getMessage()]);
+    exit;
 }
-
-// If not a POST or GET request
-header("Content-Type: application/json");
-echo json_encode(["status" => "error", "message" => "Phương thức không hợp lệ."]);
-exit();
-?> 

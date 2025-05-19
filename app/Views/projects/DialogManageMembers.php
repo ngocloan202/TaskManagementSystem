@@ -57,8 +57,13 @@ $availableUsersStmt->execute();
 $availableUsers = $availableUsersStmt->get_result();
 ?>
 
+<!-- Thiết lập biến toàn cục projectID -->
+<script>
+    window.projectID = <?= $projectID ?>;
+</script>
+
 <!-- HTML Template -->
-<div class="py-4">
+<div class="py-4" data-project-id="<?= $projectID ?>">
     <div class="rounded-corners">
         <h1 class="text-2xl font-bold text-gray-800 mb-4">
             Quản lý thành viên: <?= htmlspecialchars($projectName) ?>
@@ -129,12 +134,11 @@ $availableUsers = $availableUsersStmt->get_result();
 </div>
 
 <!-- Add Member Modal -->
-<div id="memberModal" style="background-color: rgba(0, 0, 0, 0.4);" class="hidden fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-opacity-50">
+<div id="memberModal" class="hidden fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-opacity-50" style="background-color: rgba(0, 0, 0, 0.4);">
     <div class="bg-white rounded-lg w-full max-w-md p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 id="memberModalLabel" class="text-xl font-semibold text-gray-800">Thêm thành viên</h2>
-            <button type="button" onclick="memberManager.hideModal()" 
-                    class="text-gray-400 hover:text-red-500 focus:outline-none">
+            <button id="closeMemberModal" type="button" onclick="document.getElementById('memberModal').classList.add('hidden'); document.body.style.overflow = 'auto';" class="text-gray-400 hover:text-red-500 focus:outline-none">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -175,8 +179,7 @@ $availableUsers = $availableUsersStmt->get_result();
             <?php endif; ?>
 
             <div class="flex justify-end space-x-3">
-                <button type="button" onclick="memberManager.hideModal()"
-                        class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">
+                <button type="button" id="cancelMemberModal" onclick="document.getElementById('memberModal').classList.add('hidden'); document.body.style.overflow = 'auto';" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">
                     Hủy
                 </button>
                 <button type="submit"
@@ -188,8 +191,18 @@ $availableUsers = $availableUsersStmt->get_result();
     </div>
 </div>
 
-<script>
-window.projectID = <?= json_encode($projectID) ?>;
-window.isOwner = <?= json_encode($isOwner) ?>;
-window.isEmbedded = <?= json_encode($isEmbedded) ?>;
-</script>
+<!-- Modal xác nhận xóa (nên đặt ở cuối trang, trước </body>) -->
+<div id="confirmDeleteModal" style="background-color: rgba(0, 0, 0, 0.4);" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-opacity-40">
+  <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+    <div class="mb-4 text-lg font-semibold text-gray-800" id="confirmDeleteMessage"></div>
+    <div class="flex justify-end space-x-3">
+      <button id="cancelDeleteBtn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">Hủy</button>
+      <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Các script JS của bạn -->
+<script src="../../../public/js/dialogManageMembers.js"></script>
+</body>
+</html>

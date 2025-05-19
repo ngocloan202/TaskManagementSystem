@@ -47,8 +47,8 @@ class ProjectManager {
     }
 
     closeMemberModal() {
-        if (!this.memberModal) return;
-        this.memberModal.classList.add('hidden');
+        if (!this.memberDialog) return;
+        this.memberDialog.classList.add('hidden');
         document.body.style.overflow = 'auto';
     }
 
@@ -185,11 +185,7 @@ class ProjectManager {
         const form = e.target;
         const formData = new FormData(form);
 
-        const memberId = formData.get('projectMemberId');
         let endpoint = '../projects/AddMemberProcess.php';
-        if (memberId && parseInt(memberId) > 0) {
-            endpoint = '../projects/EditMemberProcess.php';
-        }
 
         try {
             const response = await fetch(endpoint, {
