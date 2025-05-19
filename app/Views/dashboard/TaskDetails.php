@@ -78,6 +78,45 @@ try {
   
   $task = $taskResult->fetch_assoc();
 
+  // Ghi log sự kiện xem task
+  try {
+    // Tránh ghi log liên tục nếu người dùng refresh trang
+    $lastViewKey = "last_view_task_{$userID}_{$taskId}";
+    $currentTime = time();
+    $lastViewTime = $_SESSION[$lastViewKey] ?? 0;
+    
+    // Chỉ ghi log nếu đã qua 5 phút kể từ lần xem cuối
+    if ($currentTime - $lastViewTime > 300) {
+      $viewTime = date('Y-m-d H:i:s');
+      $details = json_encode([
+        'from' => $isAdmin ? 'admin_view' : 'user_view',
+        'ip' => $_SERVER['REMOTE_ADDR'],
+        'page' => 'task_details',
+        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
+      ]);
+      
+      $logQuery = $connect->prepare("
+        INSERT INTO ActivityLog (UserID, ActivityType, RelatedID, ActivityTime, Details) 
+        VALUES (?, 'task_viewed', ?, ?, ?)
+      ");
+      
+      if ($logQuery) {
+        $logQuery->bind_param('iiss', $userID, $taskId, $viewTime, $details);
+        $logQuery->execute();
+        
+        // Lưu thời gian xem cuối vào session
+        $_SESSION[$lastViewKey] = $currentTime;
+        
+        error_log("Logged task view event: User $userID viewed task $taskId at $viewTime");
+      } else {
+        error_log("Failed to prepare task view log query: " . $connect->error);
+      }
+    }
+  } catch (Exception $e) {
+    error_log("Error logging task view: " . $e->getMessage());
+    // Continue execution even if logging fails
+  }
+
   // Lấy thông tin người được giao nhiệm vụ - Sử dụng truy vấn đơn giản hơn
   try {
     $assigneeSQL = "
@@ -385,4 +424,114 @@ try {
     </div>
   </div>
 </body>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Track user interactions with task details
+    
+    // Function to log interaction events
+    function logInteraction(interactionType, element) {
+      // Only log if we have task information
+      const taskId = <?= $taskId ?? 'null' ?>;
+      if (!taskId) return;
+      
+      // Prepare data for logging
+      const data = {
+        task_id: taskId,
+        interaction_type: interactionType,
+        element_id: element?.id || '',
+        element_type: element?.tagName || '',
+        timestamp: new Date().toISOString()
+      };
+      
+      // Log to console during development
+      console.log('Task interaction:', data);
+      
+      // Send data to server for logging
+      fetch('../../../api/task/LogTaskInteraction.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(result => {
+        console.log('Interaction logged:', result);
+      })
+      .catch(error => {
+        console.error('Error logging interaction:', error);
+      });
+    }
+    
+    // Add buttons to interact with task
+    const taskHeader = document.querySelector('.bg-white.rounded-lg.shadow-sm.p-6.mb-6');
+    if (taskHeader && !<?= $isAdmin ? 'true' : 'false' ?>) {
+      const interactionContainer = document.createElement('div');
+      interactionContainer.className = 'mt-4 pt-4 border-t border-gray-200';
+      interactionContainer.innerHTML = `
+        <h3 class="text-lg font-medium mb-2">Cập nhật trạng thái</h3>
+        <div class="flex space-x-2">
+          <button id="btnMarkInProgress" class="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
+            Đang làm
+          </button>
+          <button id="btnMarkCompleted" class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+            Hoàn thành
+          </button>
+        </div>
+      `;
+      taskHeader.appendChild(interactionContainer);
+      
+      // Add event listeners to the buttons
+      document.getElementById('btnMarkInProgress').addEventListener('click', function() {
+        logInteraction('mark_in_progress', this);
+        alert('Đã đánh dấu nhiệm vụ là "Đang làm"');
+      });
+      
+      document.getElementById('btnMarkCompleted').addEventListener('click', function() {
+        logInteraction('mark_completed', this);
+        alert('Đã đánh dấu nhiệm vụ là "Hoàn thành"');
+      });
+    }
+    
+    // Track clicks on task description
+    const taskDescription = document.querySelector('.custom-textarea');
+    if (taskDescription) {
+      taskDescription.addEventListener('click', function() {
+        logInteraction('view_description', this);
+      });
+    }
+    
+    // Track clicks on task fields
+    const priorityField = document.querySelector('select');
+    if (priorityField) {
+      priorityField.addEventListener('change', function() {
+        logInteraction('change_priority', this);
+      });
+    }
+    
+    // Track date field interactions
+    const dateFields = document.querySelectorAll('input[type="date"]');
+    dateFields.forEach(field => {
+      field.addEventListener('change', function() {
+        logInteraction('change_date', this);
+      });
+    });
+    
+    // Add click tracking for the back button
+    const backButton = document.querySelector('a[href^="ProjectDetail.php"]');
+    if (backButton) {
+      backButton.addEventListener('click', function(e) {
+        // Log before navigating
+        logInteraction('back_to_project', this);
+        // Don't prevent default - allow navigation to continue
+      });
+    }
+    
+    // Log page load complete
+    logInteraction('page_loaded', document.body);
+  });
+</script>
 </html>
