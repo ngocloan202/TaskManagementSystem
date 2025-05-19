@@ -261,11 +261,11 @@ window.initTaskMemberAssignment = function(taskData) {
         // Update activity list with the new assignment
         const actionText = isAssigning 
           ? `đã giao nhiệm vụ cho ${memberName}`
-          : `đã bỏ giao nhiệm vụ từ ${memberName}`;
+          : `đã hủy giao nhiệm vụ cho ${memberName}`;
         window.taskActivityLogger.addNewActivity(actionText);
         
         // Show success notification
-        window.taskNotification.show(isAssigning ? 'Đã giao nhiệm vụ thành công' : 'Đã bỏ giao nhiệm vụ thành công');
+        window.taskNotification.show(isAssigning ? 'Đã giao nhiệm vụ thành công' : 'Đã hủy giao nhiệm vụ thành công');
         
         // Dispatch event with member name for detailed logging
         const event = new CustomEvent(isAssigning ? 'memberAssigned' : 'memberRemoved', {
