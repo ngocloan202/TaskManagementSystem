@@ -404,23 +404,42 @@ foreach ($allTasks as $tk) {
             .then(response => response.json())
             .then(data => {
               if (data.success) {
-                // Update the displayed name
+                // Update the displayed name in all locations
                 projectNameDisplay.textContent = newName;
                 document.getElementById('breadcrumbProjectName').textContent = newName;
+                
+                // Update the project name in the sidebar
+                const projectId = <?= $projectId ?>;
+                const sidebarProjectNames = document.querySelectorAll('.sidebar-project-name');
+                sidebarProjectNames.forEach(element => {
+                  if (element.dataset.projectId == projectId) {
+                    element.textContent = newName;
+                  }
+                });
+                
+                // Update document title
+                document.title = newName + " | CubeFlow";
                 
                 // Exit edit mode
                 projectNameDisplay.classList.remove('hidden');
                 projectNameEditForm.classList.add('hidden');
                 
-                // Show success feedback
+                // Show success feedback - more visible notification
                 const notification = document.createElement('div');
-                notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
-                notification.textContent = 'Đã cập nhật tên dự án';
+                notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50 flex items-center';
+                notification.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Đã cập nhật tên dự án thành công!</span>
+                `;
                 document.body.appendChild(notification);
                 
-                // Remove notification after 3 seconds
+                // Remove notification after 3 seconds with fade effect
                 setTimeout(() => {
-                  notification.remove();
+                  notification.style.transition = 'opacity 0.5s ease-out';
+                  notification.style.opacity = '0';
+                  setTimeout(() => notification.remove(), 500);
                 }, 3000);
                 
               } else {
