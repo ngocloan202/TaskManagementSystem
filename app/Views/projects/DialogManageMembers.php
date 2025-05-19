@@ -188,7 +188,7 @@ $availableUsers = $availableUsersStmt->get_result();
     </div>
 </div>
 
-<!-- Modal xác nhận xóa (nên đặt ở cuối trang, trước </body>) -->
+<!-- Delete confirmation modal (should be placed at the end of the page, before </body>) -->
 <div id="confirmDeleteModal" style="background-color: rgba(0, 0, 0, 0.4);" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-opacity-40">
   <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
     <div class="mb-4 text-lg font-semibold text-gray-800" id="confirmDeleteMessage"></div>
@@ -199,7 +199,7 @@ $availableUsers = $availableUsersStmt->get_result();
   </div>
 </div>
 
-<!-- Các script JS của bạn -->
+<!-- Your JS scripts -->
 <script src="../../../public/js/dialogManageMembers.js"></script>
 </body>
 </html>
