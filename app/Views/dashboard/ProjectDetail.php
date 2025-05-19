@@ -89,9 +89,9 @@ $taskStmt = $connect->prepare("
       t.TagColor,
       DATE_FORMAT(t.EndDate, '%d/%m/%Y') AS dueDate,
       ts.StatusName,
-      u.UserID,
-      u.FullName AS AssignedToName,
-      u.Avatar,
+      GROUP_CONCAT(u.UserID) AS UserIDs,
+      GROUP_CONCAT(u.FullName SEPARATOR '|||') AS AssignedToNames,
+      GROUP_CONCAT(u.Avatar SEPARATOR '|||') AS Avatars,
       CASE ts.StatusName
         WHEN 'Cần làm' THEN 'bg-blue-600 text-white'
         WHEN 'Đang làm' THEN 'bg-yellow-600 text-white'
@@ -103,6 +103,7 @@ $taskStmt = $connect->prepare("
     LEFT JOIN TaskAssignment ta ON ta.TaskID = t.TaskID
     LEFT JOIN Users u ON u.UserID = ta.UserID
     WHERE t.ProjectID = ?
+    GROUP BY t.TaskID, t.TaskTitle, t.TagName, t.TagColor, t.EndDate, ts.StatusName
     ORDER BY t.EndDate ASC
 ");
 if (!$taskStmt) {
@@ -282,12 +283,25 @@ foreach ($allTasks as $tk) {
                           <?= htmlspecialchars($task["TagName"]) ?>
                         </span>
                       <?php endif; ?>
-                      <?php if ($task["UserID"]): ?>
-                        <div class="mt-2 flex items-center text-sm text-gray-500">
-                          <img src="../../..<?= htmlspecialchars(
-                            $task["Avatar"]
-                          ) ?>" class="w-6 h-6 rounded-full mr-2">
-                          <span><?= htmlspecialchars($task["AssignedToName"]) ?></span>
+                      
+                      <?php if (!empty($task["UserIDs"])): ?>
+                        <div class="mt-2 flex flex-wrap items-center text-sm text-gray-500">
+                          <?php 
+                            $userIDs = explode(',', $task["UserIDs"]);
+                            $names = explode('|||', $task["AssignedToNames"]);
+                            $avatars = explode('|||', $task["Avatars"]);
+                            
+                            for ($i = 0; $i < count($userIDs); $i++):
+                              if (isset($names[$i]) && isset($avatars[$i])):
+                          ?>
+                            <div class="flex items-center mr-3 mb-1">
+                              <img src="../../..<?= htmlspecialchars($avatars[$i]) ?>" class="w-6 h-6 rounded-full mr-1">
+                              <span><?= htmlspecialchars($names[$i]) ?></span>
+                            </div>
+                          <?php 
+                              endif;
+                            endfor;
+                          ?>
                         </div>
                       <?php endif; ?>
                     </div>
