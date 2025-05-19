@@ -2,6 +2,11 @@
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
+// Reset edit mode on page load to prevent getting stuck in edit mode after navigation
+if (isset($_SESSION['edit_mode'])) {
+  unset($_SESSION['edit_mode']);
+}
+
 // Check if ActivityLog table exists, create it if it doesn't
 try {
   $tableCheckResult = $connect->query("SHOW TABLES LIKE 'ActivityLog'");
@@ -286,6 +291,101 @@ try {
       border: 2px solid #4f46e5 !important;
       background-color: #f9fafb !important;
     }
+    /* Member dropdown styles */
+    .member-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .member-dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 250px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      border-radius: 0.5rem;
+      padding: 0.5rem 0;
+      z-index: 100;
+      right: 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .member-dropdown-content.show {
+      display: block;
+    }
+    .member-item {
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .member-item:hover {
+      background-color: #f3f4f6;
+    }
+    .member-item img {
+      width: 32px;
+      height: 32px;
+      border-radius: 9999px;
+      margin-right: 0.75rem;
+    }
+    .member-item .member-name {
+      flex: 1;
+    }
+    .member-item .member-check {
+      width: 20px;
+      height: 20px;
+      color: #4f46e5;
+      opacity: 0;
+    }
+    .member-item.selected .member-check {
+      opacity: 1;
+    }
+    .member-badge {
+      display: inline-flex;
+      align-items: center;
+      background-color: #e5e7eb;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: background-color 0.2s;
+    }
+    .member-badge:hover {
+      background-color: #d1d5db;
+    }
+    .member-badge img {
+      width: 24px;
+      height: 24px;
+      border-radius: 9999px;
+      margin-right: 0.5rem;
+    }
+    .member-badge .remove-member {
+      margin-left: 0.5rem;
+      color: #6b7280;
+      cursor: pointer;
+    }
+    .member-badge .remove-member:hover {
+      color: #ef4444;
+    }
+    .member-search {
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .member-search input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.25rem;
+      outline: none;
+    }
+    .member-search input:focus {
+      border-color: #4f46e5;
+    }
+    .no-members-message {
+      padding: 1rem;
+      text-align: center;
+      color: #6b7280;
+    }
   </style>
 </head>
 <body style="background-color: #f0f2f5;">
@@ -402,13 +502,56 @@ try {
                   </svg>
                   <span>Thành viên</span>
                 </div>
-                <?php if ($assignee): ?>
-                <div class="flex items-center">
-                  <img src="../../../<?= htmlspecialchars($assignee['Avatar']) ?>" alt="<?= htmlspecialchars($assignee['FullName']) ?>" class="w-8 h-8 rounded-full">
-                  <span class="ml-2"><?= htmlspecialchars($assignee['FullName']) ?></span>
+                
+                <?php if (!$isAdmin): ?>
+                <div class="member-dropdown">
+                  <div id="memberDisplay" class="flex flex-wrap items-center cursor-pointer">
+                    <?php if ($assignee): ?>
+                    <div class="member-badge" data-member-id="<?= $assignee['UserID'] ?>">
+                      <img src="../../../<?= htmlspecialchars($assignee['Avatar']) ?>" alt="<?= htmlspecialchars($assignee['FullName']) ?>">
+                      <span><?= htmlspecialchars($assignee['FullName']) ?></span>
+                      <span class="remove-member">×</span>
+                    </div>
+                    <?php else: ?>
+                    <button id="addMemberBtn" class="flex items-center text-indigo-600 hover:text-indigo-800 font-medium">
+                      <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Thêm thành viên
+                    </button>
+                    <?php endif; ?>
+                    
+                    <!-- Always show "Add More" button when we have members -->
+                    <?php if ($assignee): ?>
+                    <button id="addMoreMembersBtn" class="flex items-center text-indigo-600 hover:text-indigo-800 font-medium ml-2">
+                      <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Thêm
+                    </button>
+                    <?php endif; ?>
+                  </div>
+                  
+                  <div id="memberDropdown" class="member-dropdown-content">
+                    <div class="member-search">
+                      <input type="text" id="memberSearchInput" placeholder="Tìm kiếm thành viên...">
+                    </div>
+                    <div id="memberList" class="member-list">
+                      <div class="no-members-message">Đang tải danh sách thành viên...</div>
+                    </div>
+                  </div>
                 </div>
                 <?php else: ?>
-                <span class="text-gray-500">Chưa giao cho ai</span>
+                <div class="flex items-center">
+                  <?php if ($assignee): ?>
+                  <div class="flex items-center">
+                    <img src="../../../<?= htmlspecialchars($assignee['Avatar']) ?>" alt="<?= htmlspecialchars($assignee['FullName']) ?>" class="w-8 h-8 rounded-full">
+                    <span class="ml-2"><?= htmlspecialchars($assignee['FullName']) ?></span>
+                  </div>
+                  <?php else: ?>
+                  <span class="text-gray-500">Chưa giao cho ai</span>
+                  <?php endif; ?>
+                </div>
                 <?php endif; ?>
               </div>
             </div>
@@ -521,7 +664,7 @@ try {
     const btnMarkCompleted = document.getElementById('btnMarkCompleted');
     
     // Track if we're in edit mode and status update in progress
-    let editMode = <?= isset($_SESSION['edit_mode']) && $_SESSION['edit_mode'] ? 'true' : 'false' ?>;
+    let editMode = false; // Always start in non-edit mode
     let statusUpdateInProgress = false;
     
     // Save original values for cancel
@@ -534,19 +677,18 @@ try {
       tagColor: tagColor?.value || '#3B82F6'
     };
     
-    // Initial UI setup based on edit mode
-    if (editMode) {
-      btnEdit?.classList.add('hidden');
-      btnSave?.classList.remove('hidden');
-      btnCancel?.classList.remove('hidden');
-      btnDelete?.classList.add('hidden');
-      
-      // Add edit-mode class to fields
-      taskPriority?.classList.add('edit-mode');
-      startDate?.classList.add('edit-mode');
-      endDate?.classList.add('edit-mode');
-      taskDescription?.classList.add('edit-mode');
+    // Function to reset edit mode in the session
+    function resetSessionEditMode() {
+      // Clear edit mode in the session
+      fetch('../../../api/task/SetEditMode.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ edit_mode: false })
+      }).catch(err => console.error('Failed to reset edit mode:', err));
     }
+    
+    // Reset session edit mode on page load
+    resetSessionEditMode();
     
     // Function to toggle edit mode
     function toggleEditMode(enabled) {
@@ -565,7 +707,7 @@ try {
       btnCancel?.classList.toggle('hidden', !enabled);
       btnDelete?.classList.toggle('hidden', enabled);
       
-      // Toggle field editability (add tag fields)
+      // Toggle field editability
       if (taskPriority) taskPriority.disabled = !enabled;
       if (startDate) startDate.readOnly = !enabled;
       if (endDate) endDate.readOnly = !enabled;
@@ -666,7 +808,10 @@ try {
         btnCancel.disabled = false;
         
         if (result.success) {
+          // Always reset edit mode both in UI and session
           toggleEditMode(false);
+          resetSessionEditMode();
+          
           showNotification('Đã cập nhật nhiệm vụ thành công!');
           logInteraction('task_updated', document.body);
           
@@ -679,6 +824,15 @@ try {
             tagName: tagName?.value || '',
             tagColor: tagColor?.value || '#3B82F6'
           };
+          
+          // Update the visible tag display if it changed
+          if (tagPreview && !editMode) {
+            const tagContainer = document.querySelector('.px-3.py-1.rounded-full.text-sm.text-white');
+            if (tagContainer && formData.tag_name) {
+              tagContainer.style.backgroundColor = formData.tag_color;
+              tagContainer.textContent = formData.tag_name;
+            }
+          }
         } else {
           alert('Lỗi: ' + (result.message || 'Không thể cập nhật nhiệm vụ'));
         }
@@ -931,11 +1085,20 @@ try {
     const backButton = document.querySelector('a[href^="ProjectDetail.php"]');
     if (backButton) {
       backButton.addEventListener('click', function(e) {
+        // Reset edit mode when navigating away
+        resetSessionEditMode();
+        
         // Log before navigating
         logInteraction('back_to_project', this);
         // Don't prevent default - allow navigation to continue
       });
     }
+    
+    // Also handle browser's back button
+    window.addEventListener('beforeunload', function() {
+      // Reset edit mode when leaving the page
+      resetSessionEditMode();
+    });
     
     // Add event listener for tag editor
     if (tagName && tagColor && tagPreview) {
@@ -952,8 +1115,345 @@ try {
       });
     }
     
+    // Add beforeunload event to confirm leaving if there are unsaved changes
+    window.addEventListener('beforeunload', function(e) {
+      // Only prompt if in edit mode
+      if (editMode) {
+        // Check if there are unsaved changes
+        if (
+          taskPriority?.value !== originalValues.priority ||
+          startDate?.value !== originalValues.startDate ||
+          endDate?.value !== originalValues.endDate ||
+          taskDescription?.innerHTML !== originalValues.description ||
+          tagName?.value !== originalValues.tagName ||
+          tagColor?.value !== originalValues.tagColor
+        ) {
+          // Standard message for unsaved changes (browser will show its own message)
+          const confirmationMessage = 'Bạn có thay đổi chưa được lưu. Bạn có chắc chắn muốn rời khỏi trang này?';
+          e.returnValue = confirmationMessage;
+          return confirmationMessage;
+        }
+      }
+    });
+    
     // Log page load complete
     logInteraction('page_loaded', document.body);
+    
+    // Member assignment functionality
+    const memberDropdown = document.getElementById('memberDropdown');
+    const memberDisplay = document.getElementById('memberDisplay');
+    const addMemberBtn = document.getElementById('addMemberBtn');
+    const addMoreMembersBtn = document.getElementById('addMoreMembersBtn');
+    const memberList = document.getElementById('memberList');
+    const memberSearchInput = document.getElementById('memberSearchInput');
+    
+    // Project members data
+    let projectMembers = [];
+    let assignedMembers = [];
+    
+    // Function to toggle member dropdown
+    function toggleMemberDropdown() {
+      memberDropdown.classList.toggle('show');
+      if (memberDropdown.classList.contains('show')) {
+        loadProjectMembers();
+        if (memberSearchInput) {
+          setTimeout(() => memberSearchInput.focus(), 100);
+        }
+      }
+    }
+    
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function(event) {
+      if (!event.target.closest('.member-dropdown')) {
+        memberDropdown.classList.remove('show');
+      }
+    });
+    
+    // Toggle dropdown when clicking on the member display or add buttons
+    if (memberDisplay) {
+      // Don't open dropdown when clicking on any existing member display
+      memberDisplay.addEventListener('click', function(event) {
+        if (event.target.closest('.member-badge') || event.target.closest('.remove-member')) {
+          event.stopPropagation();
+          return;
+        }
+        
+        // Only open when clicking on the add button or empty space
+        if (event.target.closest('#addMemberBtn') || event.target.closest('#addMoreMembersBtn')) {
+          toggleMemberDropdown();
+          event.stopPropagation();
+        }
+      });
+    }
+    
+    if (addMemberBtn) {
+      addMemberBtn.addEventListener('click', function(event) {
+        toggleMemberDropdown();
+        event.stopPropagation();
+      });
+    }
+    
+    if (addMoreMembersBtn) {
+      addMoreMembersBtn.addEventListener('click', function(event) {
+        toggleMemberDropdown();
+        event.stopPropagation();
+      });
+    }
+    
+    // Search functionality
+    if (memberSearchInput) {
+      memberSearchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        renderMemberList(searchTerm);
+      });
+    }
+    
+    // Load project members from API
+    function loadProjectMembers() {
+      if (projectMembers.length > 0) {
+        renderMemberList();
+        return;
+      }
+      
+      // Set loading state
+      memberList.innerHTML = '<div class="no-members-message">Đang tải danh sách thành viên...</div>';
+      
+      fetch(`../../../api/project/GetProjectMembers.php?project_id=${projectId}`)
+        .then(response => {
+          if (!response.ok) throw new Error('Lỗi khi tải thành viên');
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            projectMembers = data.members || [];
+            
+            // Get currently assigned members if any
+            const memberBadges = document.querySelectorAll('.member-badge');
+            if (memberBadges.length > 0) {
+              assignedMembers = Array.from(memberBadges).map(badge => parseInt(badge.dataset.memberId));
+            }
+            
+            renderMemberList();
+          } else {
+            memberList.innerHTML = `<div class="no-members-message">Lỗi: ${data.message || 'Không thể tải thành viên'}</div>`;
+          }
+        })
+        .catch(error => {
+          console.error('Error loading members:', error);
+          memberList.innerHTML = '<div class="no-members-message">Lỗi khi tải thành viên. Vui lòng thử lại.</div>';
+        });
+    }
+    
+    // Render member list with optional search filter
+    function renderMemberList(searchTerm = '') {
+      if (projectMembers.length === 0) {
+        memberList.innerHTML = '<div class="no-members-message">Không có thành viên trong dự án</div>';
+        return;
+      }
+      
+      // Filter members by search term if provided
+      const filteredMembers = searchTerm 
+        ? projectMembers.filter(member => 
+            member.FullName.toLowerCase().includes(searchTerm) ||
+            (member.Email && member.Email.toLowerCase().includes(searchTerm))
+          )
+        : projectMembers;
+      
+      if (filteredMembers.length === 0) {
+        memberList.innerHTML = '<div class="no-members-message">Không tìm thấy thành viên nào</div>';
+        return;
+      }
+      
+      // Generate member items HTML
+      const membersHtml = filteredMembers.map(member => {
+        const isSelected = assignedMembers.includes(member.UserID);
+        return `
+          <div class="member-item ${isSelected ? 'selected' : ''}" data-member-id="${member.UserID}">
+            <img src="../../../${member.Avatar}" alt="${member.FullName}">
+            <span class="member-name">${member.FullName}</span>
+            <svg class="member-check" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+        `;
+      }).join('');
+      
+      memberList.innerHTML = membersHtml;
+      
+      // Add click event listeners to member items
+      document.querySelectorAll('.member-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const memberId = parseInt(this.dataset.memberId);
+          toggleMemberAssignment(memberId);
+        });
+      });
+    }
+    
+    // Assign/unassign a member to the task
+    function toggleMemberAssignment(memberId) {
+      // Check if member is already assigned
+      const isAssigned = assignedMembers.includes(memberId);
+      
+      if (isAssigned) {
+        // Unassign member
+        assignedMembers = assignedMembers.filter(id => id !== memberId);
+        updateMemberAssignment(memberId, false);
+      } else {
+        // Assign member (without removing others)
+        assignedMembers.push(memberId);
+        updateMemberAssignment(memberId, true);
+      }
+      
+      // Update the UI
+      renderMemberList();
+      updateMemberDisplay();
+    }
+    
+    // Update member display in the UI
+    function updateMemberDisplay() {
+      if (assignedMembers.length === 0) {
+        memberDisplay.innerHTML = `
+          <button id="addMemberBtn" class="flex items-center text-indigo-600 hover:text-indigo-800 font-medium">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Thêm thành viên
+          </button>
+        `;
+        
+        // Re-attach click event to the new button
+        const newAddMemberBtn = document.getElementById('addMemberBtn');
+        if (newAddMemberBtn) {
+          newAddMemberBtn.addEventListener('click', function(event) {
+            toggleMemberDropdown();
+            event.stopPropagation();
+          });
+        }
+      } else {
+        // Generate HTML for all assigned members
+        let assigneesHtml = '';
+        
+        assignedMembers.forEach(memberId => {
+          const memberData = projectMembers.find(m => m.UserID === memberId);
+          if (memberData) {
+            assigneesHtml += `
+              <div class="member-badge" data-member-id="${memberData.UserID}">
+                <img src="../../../${memberData.Avatar}" alt="${memberData.FullName}">
+                <span>${memberData.FullName}</span>
+                <span class="remove-member">×</span>
+              </div>
+            `;
+          }
+        });
+        
+        // Add the "Add more" button
+        assigneesHtml += `
+          <button id="addMoreMembersBtn" class="flex items-center text-indigo-600 hover:text-indigo-800 font-medium ml-2">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Thêm
+          </button>
+        `;
+        
+        memberDisplay.innerHTML = assigneesHtml;
+        
+        // Re-attach click events for remove buttons
+        document.querySelectorAll('.remove-member').forEach(btn => {
+          btn.addEventListener('click', function(event) {
+            const memberId = parseInt(this.closest('.member-badge').dataset.memberId);
+            toggleMemberAssignment(memberId);
+            event.stopPropagation();
+          });
+        });
+        
+        // Re-attach click event to the add more button
+        const newAddMoreBtn = document.getElementById('addMoreMembersBtn');
+        if (newAddMoreBtn) {
+          newAddMoreBtn.addEventListener('click', function(event) {
+            toggleMemberDropdown();
+            event.stopPropagation();
+          });
+        }
+      }
+    }
+    
+    // Send member assignment update to the server
+    function updateMemberAssignment(memberId, isAssigning) {
+      if (!taskId) return;
+      
+      // Disable interactions during API call
+      document.querySelectorAll('.member-item, .remove-member').forEach(el => {
+        el.style.pointerEvents = 'none';
+      });
+      
+      // Show a loading indicator in the member display
+      memberDisplay.classList.add('opacity-50');
+      
+      const action = isAssigning ? 'assign' : 'unassign';
+      
+      fetch('../../../api/task/UpdateTaskAssignment.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          task_id: taskId,
+          user_id: memberId,
+          action: action
+        })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Lỗi khi cập nhật phân công');
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Update activity list with the new assignment
+          const actionText = isAssigning 
+            ? `đã giao nhiệm vụ cho ${projectMembers.find(m => m.UserID === memberId)?.FullName || 'thành viên'}`
+            : 'đã bỏ giao nhiệm vụ';
+          addNewActivity(actionText);
+          
+          // Show success notification
+          showNotification(isAssigning ? 'Đã giao nhiệm vụ thành công' : 'Đã bỏ giao nhiệm vụ thành công');
+          
+          // Log the interaction
+          logInteraction(isAssigning ? 'assign_member' : 'unassign_member', memberDisplay);
+        } else {
+          // Revert the UI changes
+          if (isAssigning) {
+            assignedMembers = assignedMembers.filter(id => id !== memberId);
+          } else {
+            assignedMembers.push(memberId);
+          }
+          renderMemberList();
+          updateMemberDisplay();
+          
+          // Show error
+          alert('Lỗi: ' + (data.message || 'Không thể cập nhật phân công'));
+        }
+      })
+      .catch(error => {
+        console.error('Error updating assignment:', error);
+        
+        // Revert the UI changes
+        if (isAssigning) {
+          assignedMembers = assignedMembers.filter(id => id !== memberId);
+        } else {
+          assignedMembers.push(memberId);
+        }
+        renderMemberList();
+        updateMemberDisplay();
+        
+        alert('Lỗi: ' + error.message);
+      })
+      .finally(() => {
+        // Re-enable interactions
+        document.querySelectorAll('.member-item, .remove-member').forEach(el => {
+          el.style.pointerEvents = '';
+        });
+        memberDisplay.classList.remove('opacity-50');
+      });
+    }
   });
 </script>
 </html>
