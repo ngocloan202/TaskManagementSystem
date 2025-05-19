@@ -210,10 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   } else {
   }
-  
-  // Add event listeners for Edit buttons
   const editButtons = document.querySelectorAll('.edit-member-btn');
-  console.log('Found', editButtons.length, 'edit buttons');
   editButtons.forEach(button => {
     button.addEventListener('click', function(e) {
       e.preventDefault();
@@ -226,7 +223,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // A direct function to click the button programmatically
 function clickAddMemberButton() {
-  console.log('Programmatically clicking Add Member button');
   const btn = document.getElementById('btnAddMember');
   if (btn) {
     console.log('Button found, simulating click');
