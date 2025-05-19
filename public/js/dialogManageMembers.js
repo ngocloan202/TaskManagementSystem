@@ -34,13 +34,11 @@ function openModal(modalId, memberId = 0) {
     return;
   }
 
-  // Set title based on whether we're editing or adding
   const modalTitle = document.getElementById('memberModalLabel');
   if (modalTitle) {
     modalTitle.textContent = memberId > 0 ? "Chỉnh sửa thành viên" : "Thêm thành viên";
   }
 
-  // Update form action and member ID if editing
   const form = document.getElementById('memberForm');
   const memberIdInput = document.getElementById('projectMemberId');
   
@@ -48,7 +46,6 @@ function openModal(modalId, memberId = 0) {
     memberIdInput.value = memberId;
     
     if (memberId > 0) {
-      // Get existing data for editing
       const roleSelect = document.getElementById('roleSelect');
       if (roleSelect) {
         // Find the row with the member ID and get the current role
@@ -197,11 +194,8 @@ function showNotification(type, message) {
   }
 }
 
-// Direct script to ensure Add Member button works
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Setting up event listeners for manage members dialog');
   
-  // Add event listener for Add Member button
   const addMemberBtn = document.getElementById('btnAddMember');
   if (addMemberBtn) {
     addMemberBtn.addEventListener('click', function(e) {
@@ -209,39 +203,25 @@ document.addEventListener('DOMContentLoaded', function() {
       openModal('memberModal', 0);
     });
   } else {
+    console.error('Add member button not found!');
   }
-  const editButtons = document.querySelectorAll('.edit-member-btn');
-  editButtons.forEach(button => {
-    button.addEventListener('click', function(e) {
-      e.preventDefault();
-      const memberId = this.getAttribute('data-member-id');
-      console.log('Edit button clicked for member ID:', memberId);
-      openModal('memberModal', memberId);
-    });
-  });
 });
 
 // A direct function to click the button programmatically
 function clickAddMemberButton() {
   const btn = document.getElementById('btnAddMember');
   if (btn) {
-    console.log('Button found, simulating click');
     btn.click();
   } else {
-    console.error('Button not found for programmatic click');
   }
 }
 
-// Add direct handlers as a last resort
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Final initialization check for modal functionality');
   
-  // Add direct handler to the add button
   const addBtn = document.getElementById('btnAddMember');
   if (addBtn) {
     addBtn.onclick = function(e) {
       e.preventDefault();
-      console.log('Direct handler: Add button clicked');
       openModal('memberModal', 0);
       return false;
     };
@@ -262,15 +242,10 @@ document.addEventListener('DOMContentLoaded', function() {
     modal.style.alignItems = 'center';
   }
   
-  // Test toggle
-  console.log('Modal element found:', modal ? 'Yes' : 'No');
-  
-  // Add click handler to close button
   const closeBtn = modal?.querySelector('button[onclick="toggleModal()"]');
   if (closeBtn) {
     closeBtn.onclick = function(e) {
       e.preventDefault();
-      console.log('Direct handler: Close button clicked');
       toggleModal();
       return false;
     };

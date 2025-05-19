@@ -27,11 +27,6 @@ document.getElementById("taskForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
   const formData = new FormData(this);
-  // Debug logging
-  console.log("Form data:");
-  for (let pair of formData.entries()) {
-    console.log(pair[0] + ": " + pair[1]);
-  }
 
   fetch("/app/Views/tasks/CreateTask.php", {
     method: "POST",
