@@ -25,12 +25,12 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 
   // Get member information
   $memberStmt = $connect->prepare("
-    SELECT pm.ID, pm.UserID, pm.ProjectID, pm.RoleInProject, u.Username,
+    SELECT pm.ProjectMembersID, pm.UserID, pm.ProjectID, pm.RoleInProject, u.Username,
            (SELECT COUNT(*) FROM ProjectMembers 
             WHERE ProjectID = pm.ProjectID AND UserID = ? AND RoleInProject = 'người sở hữu') AS isCurrentUserOwner
     FROM ProjectMembers pm
-    JOIN Users u ON u.ID = pm.UserID
-    WHERE pm.ID = ?
+    JOIN Users u ON u.USERID = pm.UserID
+    WHERE pm.ProjectMembersID = ?
   ");
   $memberStmt->bind_param("ii", $currentUserID, $memberId);
   $memberStmt->execute();

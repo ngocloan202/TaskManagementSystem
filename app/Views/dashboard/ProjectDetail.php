@@ -325,6 +325,7 @@ foreach ($allTasks as $tk) {
       </main>
     </div>
     <script src="../../../public/js/ProjectDetail.js"></script>
+    <script src="../../../public/js/dialogManageMembers.js"></script>
 </body>
 
 </html>
