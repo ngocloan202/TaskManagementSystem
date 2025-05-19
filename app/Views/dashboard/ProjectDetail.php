@@ -173,10 +173,10 @@ foreach ($allTasks as $tk) {
               Danh sách dự án
             </a>
           <?php else: ?>
-            <a href="index.php" class="text-indigo-600 font-bold">Dự án</a>
+            <a href="index.php" class="text-indigo-600 font-bold text-xl">Dự án</a>
           <?php endif; ?>
           <span class="mx-2">›</span>
-          <span class="font-bold"><?= htmlspecialchars($proj["ProjectName"]) ?></span>
+          <span id="breadcrumbProjectName" class="font-bold text-xl"><?= htmlspecialchars($proj["ProjectName"]) ?></span>
         </div>
 
         <!-- Project Header -->
@@ -196,9 +196,27 @@ foreach ($allTasks as $tk) {
                 </a>
               </div>
             <?php endif; ?>
-            <h1 class="text-2xl font-semibold mb-1"><?= htmlspecialchars(
-              $proj["ProjectName"]
-            ) ?></h1>
+            <div class="flex items-center mb-1">
+              <h1 id="projectNameDisplay" class="text-2xl font-semibold"><?= htmlspecialchars($proj["ProjectName"]) ?></h1>
+              <?php if (!$isAdmin): ?>
+                <button id="editProjectNameBtn" class="ml-2 text-gray-500 hover:text-indigo-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              <?php endif; ?>
+            </div>
+            
+            <div id="projectNameEditForm" class="hidden mb-3">
+              <div class="flex items-center">
+                <input type="text" id="projectNameInput" class="border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                  value="<?= htmlspecialchars($proj["ProjectName"]) ?>">
+                <button id="saveProjectNameBtn" class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Lưu</button>
+                <button id="cancelProjectNameBtn" class="px-3 py-2 ml-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+              </div>
+              <p id="projectNameError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+            
             <p class="text-gray-600 mb-3"><?= htmlspecialchars($proj["ProjectDescription"]) ?></p>
             <div class="flex items-center">
               <span class="font-medium mr-2">Tiến độ: <?= $progress ?>%</span>
@@ -326,6 +344,105 @@ foreach ($allTasks as $tk) {
     </div>
     <script src="../../../public/js/ProjectDetail.js"></script>
     <script src="../../../public/js/dialogManageMembers.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Project name editing functionality
+        const projectNameDisplay = document.getElementById('projectNameDisplay');
+        const editProjectNameBtn = document.getElementById('editProjectNameBtn');
+        const projectNameEditForm = document.getElementById('projectNameEditForm');
+        const projectNameInput = document.getElementById('projectNameInput');
+        const saveProjectNameBtn = document.getElementById('saveProjectNameBtn');
+        const cancelProjectNameBtn = document.getElementById('cancelProjectNameBtn');
+        const projectNameError = document.getElementById('projectNameError');
+        
+        // Toggle edit mode for project name
+        if (editProjectNameBtn) {
+          editProjectNameBtn.addEventListener('click', function() {
+            projectNameDisplay.classList.add('hidden');
+            projectNameEditForm.classList.remove('hidden');
+            projectNameInput.focus();
+            projectNameInput.select();
+          });
+        }
+        
+        // Cancel editing
+        if (cancelProjectNameBtn) {
+          cancelProjectNameBtn.addEventListener('click', function() {
+            projectNameDisplay.classList.remove('hidden');
+            projectNameEditForm.classList.add('hidden');
+            projectNameError.classList.add('hidden');
+            // Reset input to original value
+            projectNameInput.value = projectNameDisplay.textContent.trim();
+          });
+        }
+        
+        // Save project name
+        if (saveProjectNameBtn) {
+          saveProjectNameBtn.addEventListener('click', function() {
+            const newName = projectNameInput.value.trim();
+            
+            // Validation
+            if (!newName) {
+              projectNameError.textContent = 'Tên dự án không được để trống';
+              projectNameError.classList.remove('hidden');
+              return;
+            }
+            
+            // Show loading state
+            saveProjectNameBtn.textContent = 'Đang lưu...';
+            saveProjectNameBtn.disabled = true;
+            
+            // Send to API
+            fetch('../../../api/project/UpdateProjectName.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                project_id: <?= $projectId ?>,
+                project_name: newName
+              })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Update the displayed name
+                projectNameDisplay.textContent = newName;
+                document.getElementById('breadcrumbProjectName').textContent = newName;
+                
+                // Exit edit mode
+                projectNameDisplay.classList.remove('hidden');
+                projectNameEditForm.classList.add('hidden');
+                
+                // Show success feedback
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
+                notification.textContent = 'Đã cập nhật tên dự án';
+                document.body.appendChild(notification);
+                
+                // Remove notification after 3 seconds
+                setTimeout(() => {
+                  notification.remove();
+                }, 3000);
+                
+              } else {
+                // Show error
+                projectNameError.textContent = data.message || 'Không thể cập nhật tên dự án';
+                projectNameError.classList.remove('hidden');
+              }
+            })
+            .catch(error => {
+              console.error('Error updating project name:', error);
+              projectNameError.textContent = 'Lỗi: Không thể kết nối với máy chủ';
+              projectNameError.classList.remove('hidden');
+            })
+            .finally(() => {
+              // Reset button
+              saveProjectNameBtn.textContent = 'Lưu';
+              saveProjectNameBtn.disabled = false;
+            });
+          });
+        }
+      });
+    </script>
 </body>
 
 </html>
