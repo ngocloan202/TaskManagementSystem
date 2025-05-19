@@ -520,8 +520,9 @@ try {
     const btnMarkInProgress = document.getElementById('btnMarkInProgress');
     const btnMarkCompleted = document.getElementById('btnMarkCompleted');
     
-    // Track if we're in edit mode
-    let editMode = false;
+    // Track if we're in edit mode and status update in progress
+    let editMode = <?= isset($_SESSION['edit_mode']) && $_SESSION['edit_mode'] ? 'true' : 'false' ?>;
+    let statusUpdateInProgress = false;
     
     // Save original values for cancel
     let originalValues = {
@@ -532,6 +533,20 @@ try {
       tagName: tagName?.value || '',
       tagColor: tagColor?.value || '#3B82F6'
     };
+    
+    // Initial UI setup based on edit mode
+    if (editMode) {
+      btnEdit?.classList.add('hidden');
+      btnSave?.classList.remove('hidden');
+      btnCancel?.classList.remove('hidden');
+      btnDelete?.classList.add('hidden');
+      
+      // Add edit-mode class to fields
+      taskPriority?.classList.add('edit-mode');
+      startDate?.classList.add('edit-mode');
+      endDate?.classList.add('edit-mode');
+      taskDescription?.classList.add('edit-mode');
+    }
     
     // Function to toggle edit mode
     function toggleEditMode(enabled) {
@@ -545,13 +560,13 @@ try {
       }).catch(err => console.error('Failed to set edit mode:', err));
       
       // Toggle button visibility
-      btnEdit.classList.toggle('hidden', enabled);
-      btnSave.classList.toggle('hidden', !enabled);
-      btnCancel.classList.toggle('hidden', !enabled);
-      btnDelete.classList.toggle('hidden', enabled);
+      btnEdit?.classList.toggle('hidden', enabled);
+      btnSave?.classList.toggle('hidden', !enabled);
+      btnCancel?.classList.toggle('hidden', !enabled);
+      btnDelete?.classList.toggle('hidden', enabled);
       
       // Toggle field editability (add tag fields)
-      if (taskPriority) taskPriority.readOnly = !enabled;
+      if (taskPriority) taskPriority.disabled = !enabled;
       if (startDate) startDate.readOnly = !enabled;
       if (endDate) endDate.readOnly = !enabled;
       if (taskDescription) taskDescription.contentEditable = enabled.toString();
@@ -617,6 +632,11 @@ try {
     function saveTaskChanges() {
       if (!taskId) return;
       
+      // Disable buttons and show loading
+      btnSave.disabled = true;
+      btnSave.innerHTML = '<span class="animate-pulse">Đang lưu...</span>';
+      btnCancel.disabled = true;
+      
       const formData = {
         task_id: taskId,
         priority: taskPriority?.value || '',
@@ -640,31 +660,56 @@ try {
         return response.json();
       })
       .then(result => {
+        // Re-enable buttons and restore text
+        btnSave.disabled = false;
+        btnSave.innerHTML = 'Lưu';
+        btnCancel.disabled = false;
+        
         if (result.success) {
           toggleEditMode(false);
           showNotification('Đã cập nhật nhiệm vụ thành công!');
           logInteraction('task_updated', document.body);
+          
+          // Update original values after successful save
+          originalValues = {
+            priority: taskPriority?.value || '',
+            startDate: startDate?.value || '',
+            endDate: endDate?.value || '',
+            description: taskDescription?.innerHTML || '',
+            tagName: tagName?.value || '',
+            tagColor: tagColor?.value || '#3B82F6'
+          };
         } else {
           alert('Lỗi: ' + (result.message || 'Không thể cập nhật nhiệm vụ'));
         }
       })
       .catch(error => {
+        // Re-enable buttons and restore text
+        btnSave.disabled = false;
+        btnSave.innerHTML = 'Lưu';
+        btnCancel.disabled = false;
+        
         console.error('Error updating task:', error);
         alert('Lỗi: ' + error.message);
       });
     }
     
     // Function to update task status
-    function updateTaskStatus(statusId, statusName) {
-      if (!taskId) return;
+    function updateTaskStatus(statusId, statusName, buttonElement) {
+      if (!taskId || statusUpdateInProgress) return;
       
-      // Show loading indicator
-      const btn = document.querySelector(`button[data-status-id="${statusId}"]`);
-      if (btn) {
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="animate-pulse">Đang cập nhật...</span>';
-        btn.disabled = true;
-      }
+      // Set flag to prevent multiple status updates
+      statusUpdateInProgress = true;
+      
+      // Show loading indicator on the clicked button
+      const originalText = buttonElement.innerHTML;
+      buttonElement.innerHTML = '<span class="animate-pulse">Đang cập nhật...</span>';
+      buttonElement.disabled = true;
+      
+      // Disable all status buttons while updating
+      if (btnMarkTodo) btnMarkTodo.disabled = true;
+      if (btnMarkInProgress) btnMarkInProgress.disabled = true;
+      if (btnMarkCompleted) btnMarkCompleted.disabled = true;
       
       const formData = {
         task_id: taskId,
@@ -680,16 +725,27 @@ try {
         body: JSON.stringify(formData)
       })
       .then(response => {
-        console.log('Status update response:', response);
+        console.log('Status update response status:', response.status);
         return response.json();
       })
       .then(result => {
         console.log('Status update result:', result);
         
-        // Restore button state
-        if (btn) {
-          btn.innerHTML = originalText;
-          btn.disabled = false;
+        // Reset status update flag
+        statusUpdateInProgress = false;
+        
+        // Restore all buttons
+        if (btnMarkTodo) {
+          btnMarkTodo.innerHTML = 'Cần làm';
+          btnMarkTodo.disabled = false;
+        }
+        if (btnMarkInProgress) {
+          btnMarkInProgress.innerHTML = 'Đang làm';
+          btnMarkInProgress.disabled = false;
+        }
+        if (btnMarkCompleted) {
+          btnMarkCompleted.innerHTML = 'Hoàn thành';
+          btnMarkCompleted.disabled = false;
         }
         
         if (result.success) {
@@ -707,10 +763,21 @@ try {
       .catch(error => {
         console.error('Error updating status:', error);
         
-        // Restore button state
-        if (btn) {
-          btn.innerHTML = originalText;
-          btn.disabled = false;
+        // Reset status update flag
+        statusUpdateInProgress = false;
+        
+        // Restore all buttons
+        if (btnMarkTodo) {
+          btnMarkTodo.innerHTML = 'Cần làm';
+          btnMarkTodo.disabled = false;
+        }
+        if (btnMarkInProgress) {
+          btnMarkInProgress.innerHTML = 'Đang làm';
+          btnMarkInProgress.disabled = false;
+        }
+        if (btnMarkCompleted) {
+          btnMarkCompleted.innerHTML = 'Hoàn thành';
+          btnMarkCompleted.disabled = false;
         }
         
         alert('Lỗi: ' + error.message);
@@ -719,23 +786,20 @@ try {
     
     // Add event listeners to the status buttons
     if (btnMarkTodo) {
-      btnMarkTodo.setAttribute('data-status-id', '1');
       btnMarkTodo.addEventListener('click', function() {
-        updateTaskStatus(1, 'Cần làm');
+        updateTaskStatus(1, 'Cần làm', this);
       });
     }
     
     if (btnMarkInProgress) {
-      btnMarkInProgress.setAttribute('data-status-id', '2');
       btnMarkInProgress.addEventListener('click', function() {
-        updateTaskStatus(2, 'Đang làm');
+        updateTaskStatus(2, 'Đang làm', this);
       });
     }
     
     if (btnMarkCompleted) {
-      btnMarkCompleted.setAttribute('data-status-id', '3');
       btnMarkCompleted.addEventListener('click', function() {
-        updateTaskStatus(3, 'Hoàn thành');
+        updateTaskStatus(3, 'Hoàn thành', this);
       });
     }
     
