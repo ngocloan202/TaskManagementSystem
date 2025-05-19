@@ -107,8 +107,8 @@ window.initTaskMemberAssignment = function(taskData) {
     // Filter members by search term if provided
     const filteredMembers = searchTerm 
       ? projectMembers.filter(member => 
-          member.FullName.toLowerCase().includes(searchTerm) ||
-          (member.Email && member.Email.toLowerCase().includes(searchTerm))
+          member.FullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (member.Email && member.Email.toLowerCase().includes(searchTerm.toLowerCase()))
         )
       : projectMembers;
     
@@ -176,7 +176,7 @@ window.initTaskMemberAssignment = function(taskData) {
             <div class="member-badge" data-member-id="${memberData.UserID}">
               <img src="../../../${memberData.Avatar}" alt="${memberData.FullName}">
               <span>${memberData.FullName}</span>
-              <span class="remove-member">×</span>
+              <span class="remove-member" role="button" tabindex="0" title="Xóa thành viên">×</span>
             </div>
           `;
         }
@@ -193,15 +193,6 @@ window.initTaskMemberAssignment = function(taskData) {
       `;
       
       memberDisplay.innerHTML = assigneesHtml;
-      
-      // Re-attach click events for remove buttons
-      document.querySelectorAll('.remove-member').forEach(btn => {
-        btn.addEventListener('click', function(event) {
-          const memberId = parseInt(this.closest('.member-badge').dataset.memberId);
-          toggleMemberAssignment(memberId);
-          event.stopPropagation();
-        });
-      });
       
       // Re-attach click event to the add more button
       const newAddMoreBtn = document.getElementById('addMoreMembersBtn');
@@ -320,24 +311,27 @@ window.initTaskMemberAssignment = function(taskData) {
       }
     });
 
-    // Toggle dropdown when clicking on the member display or add buttons
+    // Use event delegation for all member display interactions including removal
     if (memberDisplay) {
-      // Don't open dropdown when clicking on any existing member display
       memberDisplay.addEventListener('click', function(event) {
-        if (event.target.closest('.member-badge')) {
+        // Handle member badge clicks (preventing dropdown open)
+        if (event.target.closest('.member-badge') && !event.target.closest('.remove-member')) {
           event.stopPropagation();
           return;
         }
         
-        // Handle remove-member click explicitly
+        // Handle remove-member clicks
         if (event.target.closest('.remove-member')) {
-          const memberId = parseInt(event.target.closest('.member-badge').dataset.memberId);
-          toggleMemberAssignment(memberId);
-          event.stopPropagation();
-          return;
+          const memberBadge = event.target.closest('.member-badge');
+          if (memberBadge) {
+            const memberId = parseInt(memberBadge.dataset.memberId);
+            toggleMemberAssignment(memberId);
+            event.stopPropagation();
+            return;
+          }
         }
         
-        // Only open when clicking on the add button or empty space
+        // Handle add member button clicks
         if (event.target.closest('#addMemberBtn') || event.target.closest('#addMoreMembersBtn')) {
           toggleMemberDropdown();
           event.stopPropagation();
