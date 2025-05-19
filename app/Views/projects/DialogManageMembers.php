@@ -199,7 +199,6 @@ $availableUsers = $availableUsersStmt->get_result();
   </div>
 </div>
 
-<!-- Your JS scripts -->
 <script src="../../../public/js/dialogManageMembers.js"></script>
 </body>
 </html>
