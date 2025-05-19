@@ -132,6 +132,19 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
     $adminId = $_SESSION['user_id'] ?? 0;
     $viewTime = date('Y-m-d H:i:s');
     
+    // Tạo URL tham chiếu với các tham số hiện tại (ngoại trừ view và id)
+    $refererParams = [];
+    foreach ($_GET as $key => $value) {
+        if ($key !== 'view' && $key !== 'id') {
+            $refererParams[$key] = $value;
+        }
+    }
+    // Lưu trữ tham số vào session để có thể quay lại đúng trạng thái của trang
+    $_SESSION['project_view_referer'] = [
+        'params' => $refererParams,
+        'time' => time()
+    ];
+    
     // Ghi log sự kiện xem dự án
     $logQuery = "INSERT INTO ActivityLog (UserID, ActivityType, RelatedID, ActivityTime, Details) 
                 VALUES (?, 'view_project', ?, ?, ?)";
