@@ -16,8 +16,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnSave) {
     const originalClick = btnSave.onclick;
     btnSave.onclick = function(e) {
-      // Log task update event
-      window.taskInteractionLogger.log('task_updated', this);
+      // Log task update event with details about what was changed
+      const tagNameInput = document.getElementById('tagName');
+      const tagName = tagNameInput ? tagNameInput.value : '';
+      
+      const additionalData = {};
+      
+      // If tag was changed
+      if (tagName && tagName !== taskData.tagName) {
+        additionalData.tagName = tagName;
+        window.taskInteractionLogger.log('change_tag_name', this, additionalData);
+      } else {
+        window.taskInteractionLogger.log('task_updated', this);
+      }
       
       // Call original click handler if it exists
       if (typeof originalClick === 'function') {
@@ -28,16 +39,26 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Track member assignment changes
   document.addEventListener('memberAssigned', function(e) {
-    window.taskInteractionLogger.log('member_added', e.detail || {});
+    const additionalData = {
+      assignedTo: e.detail?.memberName || 'thành viên'
+    };
+    window.taskInteractionLogger.log('member_added', e.detail || {}, additionalData);
   });
   
   document.addEventListener('memberRemoved', function(e) {
-    window.taskInteractionLogger.log('member_removed', e.detail || {});
+    const additionalData = {
+      unassignedFrom: e.detail?.memberName || 'thành viên'
+    };
+    window.taskInteractionLogger.log('member_removed', e.detail || {}, additionalData);
   });
   
   // Track status changes
   document.addEventListener('statusChanged', function(e) {
-    window.taskInteractionLogger.log('status_changed', e.detail || {});
+    const additionalData = {
+      oldStatus: e.detail?.oldStatus || taskData.statusName,
+      newStatus: e.detail?.newStatus || 'trạng thái mới'
+    };
+    window.taskInteractionLogger.log('status_changed', e.detail || {}, additionalData);
   });
   
   // Track clicks on task description
@@ -56,7 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const taskPriority = document.getElementById('taskPriority');
   if (taskPriority) {
     taskPriority.addEventListener('change', function() {
-      window.taskInteractionLogger.log('change_priority', this);
+      const additionalData = {
+        oldPriority: taskData.priority || 'không có',
+        newPriority: this.value
+      };
+      window.taskInteractionLogger.log('change_priority', this, additionalData);
     });
   }
   
@@ -64,7 +89,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const dateFields = document.querySelectorAll('input[type="date"]');
   dateFields.forEach(field => {
     field.addEventListener('change', function() {
-      window.taskInteractionLogger.log('change_date', this);
+      const fieldName = this.id === 'startDate' ? 'ngày bắt đầu' : 'ngày kết thúc';
+      const oldValue = this.id === 'startDate' ? taskData.startDate : taskData.endDate;
+      const additionalData = {
+        fieldName: fieldName,
+        oldValue: oldValue,
+        newValue: this.value
+      };
+      window.taskInteractionLogger.log('change_date', this, additionalData);
     });
   });
   

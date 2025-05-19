@@ -13,6 +13,9 @@ window.initTaskStatusManager = function(taskData) {
   function updateTaskStatus(statusId, statusName, buttonElement) {
     if (!taskData.taskId || statusUpdateInProgress) return;
     
+    // Save old status name for logging
+    const oldStatusName = taskStatus?.textContent || taskData.statusName || 'Không xác định';
+    
     // Set flag to prevent multiple status updates
     statusUpdateInProgress = true;
     
@@ -62,10 +65,18 @@ window.initTaskStatusManager = function(taskData) {
         // Update the UI
         if (taskStatus) taskStatus.textContent = statusName;
         window.taskNotification.show(`Đã cập nhật trạng thái thành "${statusName}"!`);
-        window.taskInteractionLogger.log('status_updated', document.body);
         
-        // Add new activity to the activity list
-        window.taskActivityLogger.addNewActivity('đã thay đổi trạng thái nhiệm vụ thành ' + statusName);
+        // Add new activity to the activity list with detailed information
+        window.taskActivityLogger.addNewActivity(`đã thay đổi trạng thái từ "${oldStatusName}" thành "${statusName}"`);
+        
+        // Dispatch event for status change with detailed information
+        const statusChangeEvent = new CustomEvent('statusChanged', {
+          detail: {
+            oldStatus: oldStatusName,
+            newStatus: statusName
+          }
+        });
+        document.dispatchEvent(statusChangeEvent);
       } else {
         alert('Lỗi: ' + (result.message || 'Không thể cập nhật trạng thái'));
       }

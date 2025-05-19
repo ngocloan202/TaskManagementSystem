@@ -229,6 +229,10 @@ window.initTaskMemberAssignment = function(taskData) {
   function updateMemberAssignment(memberId, isAssigning) {
     if (!taskData.taskId) return;
     
+    // Find member data to get name for logging
+    const memberData = projectMembers.find(m => parseInt(m.UserID) === memberId);
+    const memberName = memberData?.FullName || 'Thành viên';
+    
     // Disable interactions during API call
     document.querySelectorAll('.member-item, .remove-member').forEach(el => {
       el.style.pointerEvents = 'none';
@@ -256,15 +260,21 @@ window.initTaskMemberAssignment = function(taskData) {
       if (data.success) {
         // Update activity list with the new assignment
         const actionText = isAssigning 
-          ? `đã giao nhiệm vụ cho ${projectMembers.find(m => parseInt(m.UserID) === memberId)?.FullName || 'thành viên'}`
-          : 'đã bỏ giao nhiệm vụ';
+          ? `đã giao nhiệm vụ cho ${memberName}`
+          : `đã bỏ giao nhiệm vụ từ ${memberName}`;
         window.taskActivityLogger.addNewActivity(actionText);
         
         // Show success notification
         window.taskNotification.show(isAssigning ? 'Đã giao nhiệm vụ thành công' : 'Đã bỏ giao nhiệm vụ thành công');
         
-        // Log the interaction
-        window.taskInteractionLogger.log(isAssigning ? 'assign_member' : 'unassign_member', memberDisplay);
+        // Dispatch event with member name for detailed logging
+        const event = new CustomEvent(isAssigning ? 'memberAssigned' : 'memberRemoved', {
+          detail: { 
+            memberId: memberId,
+            memberName: memberName
+          }
+        });
+        document.dispatchEvent(event);
       } else {
         // Revert the UI changes
         if (isAssigning) {

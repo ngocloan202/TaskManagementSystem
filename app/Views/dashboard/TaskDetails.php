@@ -608,14 +608,12 @@ try {
                       $activityTypeMap = [
                         'task_created' => 'đã tạo nhiệm vụ',
                         'task_updated' => 'đã cập nhật nhiệm vụ',
-                        'task_assigned' => 'đã giao nhiệm vụ',
-                        'task_unassigned' => 'đã hủy giao nhiệm vụ',
+                        'task_assigned' => 'đã giao nhiệm vụ cho',
+                        'task_unassigned' => 'đã hủy giao nhiệm vụ cho',
                         'task_status_changed' => 'đã thay đổi trạng thái nhiệm vụ',
-                        'task_comment' => 'đã bình luận',
                         'task_detail_viewed' => 'đã xem nhiệm vụ',
                         'task_priority_changed' => 'đã thay đổi ưu tiên nhiệm vụ',
-                        'task_date_changed' => 'đã thay đổi ngày nhiệm vụ',
-                        'task_navigation' => 'đã rời khỏi nhiệm vụ'
+                        'task_date_changed' => 'đã thay đổi ngày nhiệm vụ'
                       ];
                       echo $activityTypeMap[$activity['ActivityType']] ?? $activity['ActivityType'];
                       ?>
