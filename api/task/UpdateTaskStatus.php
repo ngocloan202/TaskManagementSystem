@@ -65,9 +65,7 @@ try {
     $userId = $_SESSION['user_id'];
     $activityTime = date('Y-m-d H:i:s');
     
-    // Log incoming data for debugging
-    error_log("UpdateTaskStatus received: taskId=$taskId, statusId=$statusId, userId=$userId");
-    
+            
     // Validate database connection
     if (!$connect || $connect->connect_error) {
         throw new Exception("Database connection failed: " . ($connect ? $connect->connect_error : "Connection not established"));
@@ -100,9 +98,7 @@ try {
     $projectId = $taskData['ProjectID'];
     $oldStatusName = $taskData['StatusName'];
     
-    // Debug log
-    error_log("UpdateTaskStatus: Task found, ProjectID=$projectId, OldStatus=$oldStatusName");
-    
+            
     // Verify user has permission to update the task (must be a project member)
     $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] === 'ADMIN';
     
@@ -129,9 +125,7 @@ try {
         }
     }
     
-    // Debug log
-    error_log("UpdateTaskStatus: Permission check passed for user $userId");
-    
+            
     // Get the new status name
     $getStatus = $connect->prepare("SELECT StatusName FROM TaskStatus WHERE TaskStatusID = ?");
     if (!$getStatus) {
@@ -152,9 +146,7 @@ try {
     $statusData = $statusResult->fetch_assoc();
     $newStatusName = $statusData['StatusName'];
     
-    // Debug log
-    error_log("UpdateTaskStatus: Status ID $statusId maps to '$newStatusName'");
-    
+            
     // Begin transaction
     $connect->begin_transaction();
     
@@ -203,9 +195,7 @@ try {
         // Commit the transaction
         $connect->commit();
         
-        // Debug log
-        error_log("UpdateTaskStatus: Transaction committed successfully");
-        
+                        
         // Update response
         $response = [
             'success' => true,

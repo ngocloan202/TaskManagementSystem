@@ -73,9 +73,7 @@ try {
         throw new Exception("Database connection failed: " . ($connect ? $connect->connect_error : "Connection not established"));
     }
     
-    // Log incoming data for debugging
-    error_log("UpdateTask received: taskId=$taskId, userId=$userId");
-    
+            
     // Validate the task ID and check if user has permission to update it
     $checkTask = $connect->prepare("
         SELECT t.TaskID, t.ProjectID, t.Priority, t.TaskDescription, 
@@ -114,9 +112,7 @@ try {
         'tag_color' => $taskData['TagColor']
     ];
     
-    // Debug log
-    error_log("UpdateTask: Task found, ProjectID=$projectId");
-    
+            
     // Verify user has permission to update the task (must be a project member and not an admin)
     $isAdmin = isset($_SESSION['role']) && $_SESSION['role'] === 'ADMIN';
     
@@ -145,9 +141,7 @@ try {
         throw new Exception("You don't have permission to update this task");
     }
     
-    // Debug log
-    error_log("UpdateTask: Permission check passed for user $userId");
-    
+            
     // Begin transaction
     $connect->begin_transaction();
     
@@ -195,9 +189,7 @@ try {
             if (!empty($tagColor) && $tagColor[0] !== '#') {
                 $tagColor = '#' . $tagColor;
             }
-            // Log the color being saved
-            error_log("UpdateTask: Saving tag color: " . $tagColor);
-            
+                                    
             $updates[] = "TagColor = ?";
             $params[] = $tagColor;
             $types .= "s";

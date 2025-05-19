@@ -158,8 +158,7 @@ try {
       WHERE ta.TaskID = ?
     ";
 
-    // Debugging
-    error_log("TaskDetails.php - Executing assignee query for Task ID: $taskId");
+    
     $assigneeQuery = $connect->prepare($assigneeSQL);
 
     if (!$assigneeQuery) {

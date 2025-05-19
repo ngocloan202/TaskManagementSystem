@@ -261,11 +261,7 @@ class MemberManager {
     }
 }
 
-// Thêm debug đặc biệt khi DOM load xong
-document.addEventListener('DOMContentLoaded', () => {
-    // Khởi tạo MemberManager
-    window.memberManager = new MemberManager();
-});
+document.addEventListener('DOMContentLoaded', () => {    window.memberManager = new MemberManager();});
 
 function showConfirmDialog(message) {
     return new Promise((resolve) => {
