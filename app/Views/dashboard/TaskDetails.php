@@ -156,7 +156,6 @@ try {
       FROM Users u
       JOIN TaskAssignment ta ON u.UserID = ta.UserID 
       WHERE ta.TaskID = ?
-      LIMIT 1
     ";
 
     // Debugging
@@ -192,13 +191,16 @@ try {
         error_log("Execution error for assignee query: " . $assigneeQuery->error);
       } else {
         $assigneeResult = $assigneeQuery->get_result();
-        $assignee = $assigneeResult->fetch_assoc();
+        $assignees = [];
+        while ($row = $assigneeResult->fetch_assoc()) {
+          $assignees[] = $row;
+        }
         
-        // Log whether we found an assignee
-        if ($assignee) {
-          error_log("Found assignee for task $taskId: " . $assignee['FullName']);
+        // Log whether we found assignees
+        if (count($assignees) > 0) {
+          error_log("Found " . count($assignees) . " assignees for task $taskId");
         } else {
-          error_log("No assignee found for task $taskId");
+          error_log("No assignees found for task $taskId");
         }
       }
     }
@@ -463,7 +465,7 @@ try {
               <div class="flex items-center mb-4">
                 <div class="flex items-center text-gray-600 mr-8">
                   <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"></path>
+                    <path d="M3 4a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                   </svg>
                   <span>Độ ưu tiên</span>
                 </div>
@@ -508,12 +510,14 @@ try {
                 <?php if (!$isAdmin): ?>
                 <div class="member-dropdown">
                   <div id="memberDisplay" class="flex flex-wrap items-center cursor-pointer">
-                    <?php if ($assignee): ?>
-                    <div class="member-badge" data-member-id="<?= $assignee['UserID'] ?>">
-                      <img src="../../../<?= htmlspecialchars($assignee['Avatar']) ?>" alt="<?= htmlspecialchars($assignee['FullName']) ?>">
-                      <span><?= htmlspecialchars($assignee['FullName']) ?></span>
-                      <span class="remove-member">×</span>
-                    </div>
+                    <?php if (!empty($assignees)): ?>
+                      <?php foreach ($assignees as $member): ?>
+                      <div class="member-badge" data-member-id="<?= $member['UserID'] ?>">
+                        <img src="../../../<?= htmlspecialchars($member['Avatar']) ?>" alt="<?= htmlspecialchars($member['FullName']) ?>">
+                        <span><?= htmlspecialchars($member['FullName']) ?></span>
+                        <span class="remove-member">×</span>
+                      </div>
+                      <?php endforeach; ?>
                     <?php else: ?>
                     <button id="addMemberBtn" class="flex items-center text-indigo-600 hover:text-indigo-800 font-medium">
                       <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -524,7 +528,7 @@ try {
                     <?php endif; ?>
                     
                     <!-- Always show "Add More" button when we have members -->
-                    <?php if ($assignee): ?>
+                    <?php if (!empty($assignees)): ?>
                     <button id="addMoreMembersBtn" class="flex items-center text-indigo-600 hover:text-indigo-800 font-medium ml-2">
                       <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -544,12 +548,14 @@ try {
                   </div>
                 </div>
                 <?php else: ?>
-                <div class="flex items-center">
-                  <?php if ($assignee): ?>
-                  <div class="flex items-center">
-                    <img src="../../../<?= htmlspecialchars($assignee['Avatar']) ?>" alt="<?= htmlspecialchars($assignee['FullName']) ?>" class="w-8 h-8 rounded-full">
-                    <span class="ml-2"><?= htmlspecialchars($assignee['FullName']) ?></span>
-                  </div>
+                <div class="flex flex-wrap items-center">
+                  <?php if (!empty($assignees)): ?>
+                    <?php foreach ($assignees as $member): ?>
+                      <div class="flex items-center mr-3 mb-2">
+                        <img src="../../../<?= htmlspecialchars($member['Avatar']) ?>" alt="<?= htmlspecialchars($member['FullName']) ?>" class="w-8 h-8 rounded-full">
+                        <span class="ml-2"><?= htmlspecialchars($member['FullName']) ?></span>
+                      </div>
+                    <?php endforeach; ?>
                   <?php else: ?>
                   <span class="text-gray-500">Chưa giao cho ai</span>
                   <?php endif; ?>
@@ -603,8 +609,13 @@ try {
                         'task_created' => 'đã tạo nhiệm vụ',
                         'task_updated' => 'đã cập nhật nhiệm vụ',
                         'task_assigned' => 'đã giao nhiệm vụ',
+                        'task_unassigned' => 'đã hủy giao nhiệm vụ',
                         'task_status_changed' => 'đã thay đổi trạng thái nhiệm vụ',
-                        'task_comment' => 'đã bình luận'
+                        'task_comment' => 'đã bình luận',
+                        'task_detail_viewed' => 'đã xem nhiệm vụ',
+                        'task_priority_changed' => 'đã thay đổi ưu tiên nhiệm vụ',
+                        'task_date_changed' => 'đã thay đổi ngày nhiệm vụ',
+                        'task_navigation' => 'đã rời khỏi nhiệm vụ'
                       ];
                       echo $activityTypeMap[$activity['ActivityType']] ?? $activity['ActivityType'];
                       ?>
@@ -658,9 +669,14 @@ try {
         avatar: <?= json_encode($_SESSION['avatar'] ?? 'public/uploads/default-avatar.png') ?>
       }
     };
-</script>
+  </script>
   
   <!-- Nhúng file JavaScript riêng -->
+  <script src="../../../public/js/modules/taskEditMode.js"></script>
+  <script src="../../../public/js/modules/taskStatus.js"></script>
+  <script src="../../../public/js/modules/taskNotification.js"></script>
+  <script src="../../../public/js/modules/taskActivityLogger.js"></script>
+  <script src="../../../public/js/modules/taskMemberAssignment.js"></script>
   <script src="../../../public/js/TaskDetails.js"></script>
 </body>
 </html>
