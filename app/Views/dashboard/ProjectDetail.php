@@ -173,10 +173,10 @@ foreach ($allTasks as $tk) {
               Danh sách dự án
             </a>
           <?php else: ?>
-            <a href="index.php" class="text-indigo-600 font-bold">Dự án</a>
+            <a href="index.php" class="text-indigo-600 font-bold text-xl">Dự án</a>
           <?php endif; ?>
           <span class="mx-2">›</span>
-          <span class="font-bold"><?= htmlspecialchars($proj["ProjectName"]) ?></span>
+          <span class="font-bold text-xl"><?= htmlspecialchars($proj["ProjectName"]) ?></span>
         </div>
 
         <!-- Project Header -->
@@ -271,25 +271,27 @@ foreach ($allTasks as $tk) {
               <!-- Tasks for this status -->
               <div class="space-y-2">
                 <?php foreach ($tasksByStatus[$status] as $task): ?>
-                  <div class="p-3 <?= $styles["bg"] ?> rounded-lg <?= $styles[
+                  <a href="TaskDetails.php?id=<?= $task['TaskID'] ?>&project_id=<?= $projectId ?>" class="block cursor-pointer">
+                    <div class="p-3 <?= $styles["bg"] ?> rounded-lg <?= $styles[
                        "hover"
                      ] ?> <?= $styles["border"] ?>">
-                    <h4 class="font-medium"><?= htmlspecialchars($task["TaskTitle"]) ?></h4>
-                    <?php if (!empty($task["TagName"])): ?>
-                      <span class="inline-block px-2 py-1 rounded text-white text-xs font-semibold mb-1"
-                        style="background-color: <?= htmlspecialchars($task["TagColor"]) ?>">
-                        <?= htmlspecialchars($task["TagName"]) ?>
-                      </span>
-                    <?php endif; ?>
-                    <?php if ($task["UserID"]): ?>
-                      <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <img src="../../..<?= htmlspecialchars(
-                          $task["Avatar"]
-                        ) ?>" class="w-6 h-6 rounded-full mr-2">
-                        <span><?= htmlspecialchars($task["AssignedToName"]) ?></span>
-                      </div>
-                    <?php endif; ?>
-                  </div>
+                      <h4 class="font-medium"><?= htmlspecialchars($task["TaskTitle"]) ?></h4>
+                      <?php if (!empty($task["TagName"])): ?>
+                        <span class="inline-block px-2 py-1 rounded text-white text-xs font-semibold mb-1"
+                          style="background-color: <?= htmlspecialchars($task["TagColor"]) ?>">
+                          <?= htmlspecialchars($task["TagName"]) ?>
+                        </span>
+                      <?php endif; ?>
+                      <?php if ($task["UserID"]): ?>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                          <img src="../../..<?= htmlspecialchars(
+                            $task["Avatar"]
+                          ) ?>" class="w-6 h-6 rounded-full mr-2">
+                          <span><?= htmlspecialchars($task["AssignedToName"]) ?></span>
+                        </div>
+                      <?php endif; ?>
+                    </div>
+                  </a>
                 <?php endforeach; ?>
               </div>
             </div>
