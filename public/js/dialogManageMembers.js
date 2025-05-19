@@ -9,8 +9,6 @@
 // }
 
 function toggleModal() {
-  console.log("Toggling modal");
-  
   const modal = document.getElementById('memberModal');
   if (!modal) {
     console.error("Modal not found!");
@@ -29,8 +27,7 @@ function toggleModal() {
 }
 
 function openModal(modalId, memberId = 0) {
-  console.log("Opening modal for member ID:", memberId);
-  
+
   const modal = document.getElementById('memberModal');
   if (!modal) {
     console.error("Modal not found!");
@@ -97,7 +94,6 @@ function submitMemberForm(form) {
     });
   })
   .then(data => {
-    console.log('Response:', data);
     if (data.status === 'success') {
       toggleModal();
       showNotification('success', data.message);
@@ -156,17 +152,12 @@ function deleteMember(memberId, userName) {
   });
 }
 
-// Helper function for displaying notifications
 function showNotification(type, message) {
-  console.log('Showing notification:', type, message);
-  
-  // Create notification element
   const notification = document.createElement('div');
   notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-[10000] ${
     type === 'success' ? 'bg-green-500' : 'bg-red-500'
   } text-white max-w-md`;
-  
-  // Add content
+
   notification.innerHTML = `
     <div class="flex items-start">
       <div class="flex-shrink-0 mr-3">
@@ -213,14 +204,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add event listener for Add Member button
   const addMemberBtn = document.getElementById('btnAddMember');
   if (addMemberBtn) {
-    console.log('Add Member button found, attaching event listener');
     addMemberBtn.addEventListener('click', function(e) {
       e.preventDefault();
-      console.log('Add Member button clicked');
       openModal('memberModal', 0);
     });
   } else {
-    console.error('Add Member button not found!');
   }
   
   // Add event listeners for Edit buttons
