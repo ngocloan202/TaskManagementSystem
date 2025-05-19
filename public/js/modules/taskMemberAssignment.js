@@ -31,19 +31,19 @@ window.initTaskMemberAssignment = function(taskData) {
     
     fetch(`../../../api/task/GetTaskAssignments.php?task_id=${taskData.taskId}`)
       .then(response => {
-        if (!response.ok) throw new Error('Lỗi khi tải thông tin thành viên được giao');
+        if (!response.ok) throw new Error('Error loading assigned members');
         return response.json();
       })
       .then(data => {
         if (data.success && data.assignments) {
-          // Initialize assigned members from API data - lấy tất cả thành viên
+          // Initialize assigned members from API data - load all members
           assignedMembers = data.assignments.map(a => parseInt(a.UserID));
           
           // Update UI with assigned members
           if (projectMembers.length > 0) {
             updateMemberDisplay();
           } else {
-            // Nếu chưa có projectMembers, cần tải để hiển thị đúng
+            // If no projectMembers yet, need to load for proper display
             loadProjectMembers();
           }
         } else {
@@ -168,7 +168,7 @@ window.initTaskMemberAssignment = function(taskData) {
       // Generate HTML for all assigned members
       let assigneesHtml = '';
       
-      // Hiển thị tất cả thành viên được gán
+      // Display all assigned members
       for (const memberId of assignedMembers) {
         const memberData = projectMembers.find(m => parseInt(m.UserID) === memberId);
         if (memberData) {

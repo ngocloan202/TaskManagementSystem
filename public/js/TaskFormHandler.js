@@ -38,11 +38,11 @@ document.getElementById("taskForm").addEventListener("submit", function (e) {
         document.getElementById("createTaskDialog").classList.add("hidden");
         window.location.reload();
       } else {
-        alert("Có lỗi xảy ra: " + data.message);
+        alert("Error occurred: " + data.message);
       }
     })
     .catch(error => {
-      alert("Đã xảy ra lỗi khi tạo nhiệm vụ");
+      alert("An error occurred while creating the task");
     });
 });
 

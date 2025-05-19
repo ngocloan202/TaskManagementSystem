@@ -113,7 +113,7 @@ $taskStmt->bind_param("i", $projectId);
 $taskStmt->execute();
 $allTasks = $taskStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// Phân nhóm
+// Group tasks
 $tasksByStatus = [
   "Cần làm" => [],
   "Đang làm" => [],

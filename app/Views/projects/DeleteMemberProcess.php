@@ -3,7 +3,6 @@ header('Content-Type: application/json');
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
-// 1) Chỉ cho phép POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['status'=>'error','message'=>'Phương thức không hợp lệ.']);
     exit;
@@ -28,7 +27,7 @@ if ($projectMembersID <= 0 || $projectID <= 0) {
 try {
     $connect->begin_transaction();
 
-    // 4) Kiểm tra owner
+    // 4) Check if user is owner
     $stmt = $connect->prepare("
         SELECT COUNT(*) as cnt
           FROM ProjectMembers
@@ -43,7 +42,7 @@ try {
         throw new Exception("Bạn không có quyền xóa thành viên!");
     }
 
-    // 5) Lấy tên user để thông báo
+    // 5) Get user name for notification
     $stmt = $connect->prepare("
         SELECT u.FullName, pm.UserID
           FROM ProjectMembers pm
@@ -62,7 +61,7 @@ try {
     }
     $userName = $row['FullName'];
 
-    // 6) Xóa
+    // 6) Delete
     $stmt = $connect->prepare("
         DELETE FROM ProjectMembers
          WHERE ProjectMembersID = ? AND ProjectID = ?

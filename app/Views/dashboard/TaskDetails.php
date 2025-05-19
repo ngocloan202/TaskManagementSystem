@@ -40,7 +40,7 @@ $assignee = null;
 $activities = [];
 
 try {
-  // Lấy task ID và project ID từ URL
+  // Get task ID and project ID from URL
   $taskId = isset($_GET["id"]) ? intval($_GET["id"]) : 0;
   $projectId = isset($_GET["project_id"]) ? intval($_GET["project_id"]) : 0;
 
@@ -48,12 +48,12 @@ try {
     throw new Exception("Thông tin nhiệm vụ không hợp lệ");
   }
 
-  // Kiểm tra quyền xem task (user phải là thành viên của dự án hoặc là admin)
+  // Check permission to view task (user must be a project member or admin)
   $userID = $_SESSION['user_id'] ?? 0;
   $isAdmin = $_SESSION['role'] === 'ADMIN';
 
   if (!$isAdmin) {
-    // Kiểm tra xem người dùng có phải là thành viên của dự án không
+    // Check if user is a member of the project
     $memberCheckStmt = $connect->prepare("
       SELECT COUNT(*) as isMember 
       FROM ProjectMembers 
@@ -73,7 +73,7 @@ try {
     }
   }
 
-  // Lấy thông tin chi tiết của task
+  // Get task details
   $taskQuery = $connect->prepare("
     SELECT 
       t.TaskID,
@@ -107,14 +107,14 @@ try {
   
   $task = $taskResult->fetch_assoc();
 
-  // Ghi log sự kiện xem task
+  // Log task view event
   try {
-    // Tránh ghi log liên tục nếu người dùng refresh trang
+    // Avoid logging repeatedly if user refreshes the page
     $lastViewKey = "last_view_task_{$userID}_{$taskId}";
     $currentTime = time();
     $lastViewTime = $_SESSION[$lastViewKey] ?? 0;
     
-    // Chỉ ghi log nếu đã qua 5 phút kể từ lần xem cuối
+    // Only log if 5 minutes have passed since last view
     if ($currentTime - $lastViewTime > 300) {
       $viewTime = date('Y-m-d H:i:s');
       $details = json_encode([
@@ -133,7 +133,7 @@ try {
         $logQuery->bind_param('iiss', $userID, $taskId, $viewTime, $details);
         $logQuery->execute();
         
-        // Lưu thời gian xem cuối vào session
+        // Save last view time to session
         $_SESSION[$lastViewKey] = $currentTime;
         
         error_log("Logged task view event: User $userID viewed task $taskId at $viewTime");
@@ -146,7 +146,7 @@ try {
     // Continue execution even if logging fails
   }
 
-  // Lấy thông tin người được giao nhiệm vụ - Sử dụng truy vấn đơn giản hơn
+  // Get information about assigned users - Using simpler query
   try {
     $assigneeSQL = "
       SELECT 
@@ -209,7 +209,7 @@ try {
     // Continue execution even if assignee query fails
   }
 
-  // Lấy hoạt động gần đây của task
+  // Get recent activities for this task
   try {
     $activitySQL = "
       SELECT 
@@ -225,8 +225,6 @@ try {
       LIMIT 10
     ";
 
-    // Debugging
-    error_log("TaskDetails.php - Executing activity query for Task ID: $taskId");
     $activityQuery = $connect->prepare($activitySQL);
 
     if (!$activityQuery) {

@@ -4,7 +4,6 @@ require_once "../../../config/database.php";
 
 header("Content-Type: application/json");
 
-// Kiểm tra session
 if (!isset($_SESSION["user_id"])) {
     echo json_encode([
         "status" => "error",
@@ -13,7 +12,7 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 
-// Lấy thông tin từ request
+// Get information from request
 $projectID = isset($_POST["projectId"]) ? (int) $_POST["projectId"] : 0;
 $userID = isset($_POST["userId"]) ? (int) $_POST["userId"] : 0;
 $roleId = isset($_POST["roleId"]) ? (int) $_POST["roleId"] : 2;
@@ -29,10 +28,10 @@ if ($projectID <= 0 || $userID <= 0) {
 }
 
 try {
-    // Bắt đầu transaction
+    // Start transaction
     $connect->begin_transaction();
 
-    // 1. Kiểm tra quyền owner
+    // 1. Check owner permission
     $ownerCheckStmt = $connect->prepare("
         SELECT COUNT(*) AS isOwner 
         FROM ProjectMembers 
@@ -45,7 +44,7 @@ try {
     // 2. Xác định role
     $roleInProject = $isOwner && $roleId == 1 ? "người sở hữu" : "thành viên";
 
-    // 3. Kiểm tra user đã là thành viên chưa
+    // 3. Check if user is already a member
     $checkMemberStmt = $connect->prepare("
         SELECT COUNT(*) AS isMember, u.FullName 
         FROM ProjectMembers pm
@@ -60,7 +59,7 @@ try {
         throw new Exception("Người dùng {$memberResult['FullName']} đã là thành viên của dự án!");
     }
 
-    // 4. Thêm thành viên mới
+    // 4. Add new member
     $currentDateTime = date("Y-m-d H:i:s");
     $addMemberStmt = $connect->prepare("
         INSERT INTO ProjectMembers (ProjectID, UserID, RoleInProject, JoinedAt) 
@@ -72,7 +71,7 @@ try {
         throw new Exception("Lỗi khi thêm thành viên: " . $connect->error);
     }
 
-    // 5. Lấy tên user để hiển thị thông báo
+    // 5. Get user name for notification
     $userStmt = $connect->prepare("SELECT FullName FROM Users WHERE UserID = ?");
     $userStmt->bind_param("i", $userID);
     $userStmt->execute();
@@ -87,7 +86,6 @@ try {
     ]);
 
 } catch (Exception $e) {
-    // Rollback nếu có lỗi
     $connect->rollback();
     
     echo json_encode([
