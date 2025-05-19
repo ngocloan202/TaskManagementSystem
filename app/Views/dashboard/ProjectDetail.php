@@ -224,7 +224,32 @@ foreach ($allTasks as $tk) {
               <p id="projectNameError" class="text-red-500 text-sm mt-1 hidden"></p>
             </div>
             
-            <p class="text-gray-600 mb-3"><?= htmlspecialchars($proj["ProjectDescription"]) ?></p>
+            <!-- Project Description Display -->
+            <div class="flex items-center">
+              <p id="projectDescriptionDisplay" class="text-gray-600 mb-3"><?= htmlspecialchars($proj["ProjectDescription"]) ?></p>
+              <?php if (!$isAdmin): ?>
+                <button id="editProjectDescriptionBtn" class="ml-2 text-gray-500 hover:text-indigo-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              <?php endif; ?>
+            </div>
+            
+            <!-- Project Description Edit Form -->
+            <div id="projectDescriptionEditForm" class="hidden mb-3">
+              <div class="flex flex-col">
+                <textarea id="projectDescriptionInput" 
+                  class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full" 
+                  rows="3"><?= htmlspecialchars($proj["ProjectDescription"]) ?></textarea>
+                <div class="flex items-center mt-2">
+                  <button id="saveProjectDescriptionBtn" class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Lưu</button>
+                  <button id="cancelProjectDescriptionBtn" class="px-3 py-2 ml-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+                </div>
+              </div>
+              <p id="projectDescriptionError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+            
             <div class="flex items-center">
               <span class="font-medium mr-2">Tiến độ: <?= $progress ?>%</span>
               <div class="w-60 h-2 bg-gray-200 rounded-full mr-4">
@@ -501,6 +526,107 @@ foreach ($allTasks as $tk) {
               // Reset button
               saveProjectNameBtn.textContent = 'Lưu';
               saveProjectNameBtn.disabled = false;
+            });
+          });
+        }
+
+        // Project Description editing functionality
+        const projectDescriptionDisplay = document.getElementById('projectDescriptionDisplay');
+        const editProjectDescriptionBtn = document.getElementById('editProjectDescriptionBtn');
+        const projectDescriptionEditForm = document.getElementById('projectDescriptionEditForm');
+        const projectDescriptionInput = document.getElementById('projectDescriptionInput');
+        const saveProjectDescriptionBtn = document.getElementById('saveProjectDescriptionBtn');
+        const cancelProjectDescriptionBtn = document.getElementById('cancelProjectDescriptionBtn');
+        const projectDescriptionError = document.getElementById('projectDescriptionError');
+        
+        // Toggle edit mode for project description
+        if (editProjectDescriptionBtn) {
+          editProjectDescriptionBtn.addEventListener('click', function() {
+            projectDescriptionDisplay.classList.add('hidden');
+            projectDescriptionEditForm.classList.remove('hidden');
+            
+            // Set the textarea value to current project description
+            projectDescriptionInput.value = projectDescriptionDisplay.textContent.trim();
+            
+            // Focus the textarea
+            setTimeout(() => {
+              projectDescriptionInput.focus();
+            }, 50);
+          });
+        }
+        
+        // Cancel editing description
+        if (cancelProjectDescriptionBtn) {
+          cancelProjectDescriptionBtn.addEventListener('click', function() {
+            projectDescriptionDisplay.classList.remove('hidden');
+            projectDescriptionEditForm.classList.add('hidden');
+            projectDescriptionError.classList.add('hidden');
+            // Reset input to original value
+            projectDescriptionInput.value = projectDescriptionDisplay.textContent.trim();
+          });
+        }
+        
+        // Save project description
+        if (saveProjectDescriptionBtn) {
+          saveProjectDescriptionBtn.addEventListener('click', function() {
+            const newDescription = projectDescriptionInput.value.trim();
+            
+            // Show loading state
+            saveProjectDescriptionBtn.textContent = 'Đang lưu...';
+            saveProjectDescriptionBtn.disabled = true;
+            
+            // Send to API
+            fetch('../../../api/project/UpdateProjectDescription.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                project_id: <?= $projectId ?>,
+                project_description: newDescription
+              })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Update the displayed description
+                projectDescriptionDisplay.textContent = newDescription;
+                
+                // Exit edit mode
+                projectDescriptionDisplay.classList.remove('hidden');
+                projectDescriptionEditForm.classList.add('hidden');
+                
+                // Show success feedback
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50 flex items-center';
+                notification.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Đã cập nhật mô tả dự án thành công!</span>
+                `;
+                document.body.appendChild(notification);
+                
+                // Remove notification after 3 seconds with fade effect
+                setTimeout(() => {
+                  notification.style.transition = 'opacity 0.5s ease-out';
+                  notification.style.opacity = '0';
+                  setTimeout(() => notification.remove(), 500);
+                }, 3000);
+                
+              } else {
+                // Show error
+                projectDescriptionError.textContent = data.message || 'Không thể cập nhật mô tả dự án';
+                projectDescriptionError.classList.remove('hidden');
+              }
+            })
+            .catch(error => {
+              console.error('Error updating project description:', error);
+              projectDescriptionError.textContent = 'Lỗi: Không thể kết nối với máy chủ';
+              projectDescriptionError.classList.remove('hidden');
+            })
+            .finally(() => {
+              // Reset button
+              saveProjectDescriptionBtn.textContent = 'Lưu';
+              saveProjectDescriptionBtn.disabled = false;
             });
           });
         }
