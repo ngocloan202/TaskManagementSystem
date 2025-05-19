@@ -41,7 +41,7 @@ try {
     $ownerCheckStmt->execute();
     $isOwner = $ownerCheckStmt->get_result()->fetch_assoc()["isOwner"] > 0;
 
-    // 2. Xác định role
+    // 2. Determine role
     $roleInProject = $isOwner && $roleId == 1 ? "người sở hữu" : "thành viên";
 
     // 3. Check if user is already a member

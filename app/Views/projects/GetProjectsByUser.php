@@ -9,7 +9,7 @@ require_once "../../../config/SessionInit.php";
 header("Content-Type: application/json");
 
 $userId = $_SESSION["user_id"] ?? 0;
-// Lấy tất cả project user là thành viên
+// Get all projects where the user is a member
 $sql = "
 SELECT 
     p.ProjectID,
@@ -20,7 +20,7 @@ SELECT
     p.BackgroundUrl,
     u.Avatar AS OwnerAvatar,
     u.FullName AS OwnerName,
-    -- Tính tiến độ
+    -- Calculate progress
     (SELECT COUNT(*) FROM Task t WHERE t.ProjectID = p.ProjectID) AS totalTasks,
     (SELECT COUNT(*) FROM Task t WHERE t.ProjectID = p.ProjectID AND t.TaskStatusID = 3) AS completedTasks
 FROM Project p

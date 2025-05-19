@@ -6,7 +6,6 @@ $projectID = isset($_GET["projectID"]) ? (int) $_GET["projectID"] : 0;
 $currentUserID = $_SESSION["user_id"] ?? 0;
 $isEmbedded = isset($_GET["embed"]) && $_GET["embed"] == "1";
 
-// Kiểm tra vai trò
 $userRoleStmt = $connect->prepare("
     SELECT RoleInProject 
     FROM ProjectMembers 
@@ -16,13 +15,11 @@ $userRoleStmt->bind_param("ii", $projectID, $currentUserID);
 $userRoleStmt->execute();
 $isOwner = $userRoleStmt->get_result()->fetch_assoc()["RoleInProject"] === "người sở hữu";
 
-// Lấy thông tin project
 $projectStmt = $connect->prepare("SELECT ProjectName FROM Project WHERE ProjectID = ?");
 $projectStmt->bind_param("i", $projectID);
 $projectStmt->execute();
 $projectName = $projectStmt->get_result()->fetch_assoc()["ProjectName"] ?? "Dự án không xác định";
 
-// Lấy danh sách thành viên
 $memberStmt = $connect->prepare("
     SELECT 
         pm.ProjectMembersID,
@@ -41,7 +38,7 @@ $memberStmt->bind_param("i", $projectID);
 $memberStmt->execute();
 $members = $memberStmt->get_result();
 
-// Lấy danh sách user chưa là thành viên
+// Get list of users who are not members yet
 $availableUsersStmt = $connect->prepare("
     SELECT UserID, FullName 
     FROM Users 
@@ -57,7 +54,7 @@ $availableUsersStmt->execute();
 $availableUsers = $availableUsersStmt->get_result();
 ?>
 
-<!-- Thiết lập biến toàn cục projectID -->
+<!-- Set global projectID variable -->
 <script>
     window.projectID = <?= $projectID ?>;
 </script>

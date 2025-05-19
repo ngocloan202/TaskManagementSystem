@@ -6,6 +6,7 @@ $userId = $_SESSION["user_id"] ?? null;
 $userRole = $_SESSION["role"] ?? "USER";
 $projects = [];
 if ($userId) {
+  // Get all projects where the user is a member
   $statement = $connect->prepare(
     "SELECT p.ProjectID, p.ProjectName
          FROM ProjectMembers pm, Project p
