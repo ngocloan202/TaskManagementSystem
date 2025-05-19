@@ -177,12 +177,12 @@ foreach ($allTasks as $tk) {
             <a href="index.php" class="text-indigo-600 font-bold text-xl">Dự án</a>
           <?php endif; ?>
           <span class="mx-2">›</span>
-          <span class="font-bold text-xl"><?= htmlspecialchars($proj["ProjectName"]) ?></span>
+          <span id="breadcrumbProjectName" class="font-bold text-xl"><?= htmlspecialchars($proj["ProjectName"]) ?></span>
         </div>
 
         <!-- Project Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6 flex items-center justify-between">
-          <div id="projectDetailPage" class="relative z-0">
+          <div id="projectDetailPage" class="relative z-0" data-project-id="<?= $projectId ?>">
             <?php if ($isAdmin): ?>
               <div class="mb-6">
                 <a href="<?= $backUrl ?>" class="inline-block border border-gray-300 rounded-md shadow-sm">
@@ -197,16 +197,74 @@ foreach ($allTasks as $tk) {
                 </a>
               </div>
             <?php endif; ?>
-            <h1 class="text-2xl font-semibold mb-1"><?= htmlspecialchars(
-              $proj["ProjectName"]
-            ) ?></h1>
-            <p class="text-gray-600 mb-3"><?= htmlspecialchars($proj["ProjectDescription"]) ?></p>
+            <div class="flex items-center mb-1">
+              <h1 id="projectNameDisplay" class="text-2xl font-semibold"><?= htmlspecialchars($proj["ProjectName"]) ?></h1>
+              <?php if (!$isAdmin): ?>
+                <button id="editProjectNameBtn" class="ml-2 text-gray-500 hover:text-indigo-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              <?php endif; ?>
+            </div>
+            
+            <div id="projectNameEditForm" class="hidden mb-3">
+              <div class="flex flex-col">
+                <div class="flex items-center relative">
+                  <div id="projectNameSizer" class="absolute invisible whitespace-pre"></div>
+                  <input type="text" id="projectNameInput" 
+                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                    style="min-width: 200px;" 
+                    value="<?= htmlspecialchars($proj["ProjectName"]) ?>">
+                </div>
+                <div class="flex items-center mt-2">
+                  <button id="saveProjectNameBtn" class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Lưu</button>
+                  <button id="cancelProjectNameBtn" class="px-3 py-2 ml-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+                </div>
+              </div>
+              <p id="projectNameError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+            
+            <!-- Project Description Display -->
+            <div class="flex items-center">
+              <p id="projectDescriptionDisplay" class="text-gray-600 mb-3"><?= htmlspecialchars($proj["ProjectDescription"]) ?></p>
+              <?php if (!$isAdmin): ?>
+                <button id="editProjectDescriptionBtn" class="ml-2 text-gray-500 hover:text-indigo-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              <?php endif; ?>
+            </div>
+            
+            <!-- Project Description Edit Form -->
+            <div id="projectDescriptionEditForm" class="hidden mb-3">
+              <div class="flex flex-col">
+                <textarea id="projectDescriptionInput" 
+                  class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full" 
+                  rows="3"><?= htmlspecialchars($proj["ProjectDescription"]) ?></textarea>
+                <div class="flex items-center mt-2">
+                  <button id="saveProjectDescriptionBtn" class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Lưu</button>
+                  <button id="cancelProjectDescriptionBtn" class="px-3 py-2 ml-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+                </div>
+              </div>
+              <p id="projectDescriptionError" class="text-red-500 text-sm mt-1 hidden"></p>
+            </div>
+            
             <div class="flex items-center">
               <span class="font-medium mr-2">Tiến độ: <?= $progress ?>%</span>
               <div class="w-60 h-2 bg-gray-200 rounded-full mr-4">
                 <div class="h-2 bg-green-500 rounded-full" style="width: <?= $progress ?>%"></div>
               </div>
               <button class="px-3 py-1 bg-gray-200 text-indigo-700 rounded">Bảng</button>
+              <?php if (!$isAdmin): ?>
+                <button id="deleteProjectBtn" class="ml-3 px-3 py-1 bg-red-50 text-red-600 rounded hover:bg-red-100 border border-red-200 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Xóa dự án
+                </button>
+              <?php endif; ?>
             </div>
           </div>
           <div class="flex items-center -space-x-2">
@@ -341,6 +399,31 @@ foreach ($allTasks as $tk) {
     </div>
     <script src="../../../public/js/ProjectDetail.js"></script>
     <script src="../../../public/js/dialogManageMembers.js"></script>
+    <script src="../../../public/js/projectDescriptionEdit.js"></script>
+    <script src="../../../public/js/projectNameEdit.js"></script>
+    <script src="../../../public/js/projectDelete.js"></script>
+    
+    <!-- Delete Project Confirmation Modal -->
+    <div id="deleteProjectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center overflow-auto" 
+         style="background-color: rgba(0,0,0,0.4); backdrop-filter: blur(2px);">
+      <div class="bg-white rounded-lg w-full max-w-md p-6 shadow-xl">
+        <div class="text-center">
+          <h3 class="mt-4 text-xl font-medium text-gray-900">Xác nhận xóa dự án</h3>
+          <p class="mt-2 text-gray-500">
+            Bạn có chắc chắn muốn xóa dự án "<span id="deleteProjectName" class="font-semibold"></span>" không?
+            <br>Tất cả nhiệm vụ và dữ liệu liên quan sẽ bị xóa vĩnh viễn.
+            <br>Hành động này không thể hoàn tác.
+          </p>
+          <div class="mt-4 flex justify-center space-x-4">
+            <button id="confirmDeleteProject" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+              Xóa dự án
+            </button>
+            <button id="cancelDeleteProject" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">
+              Hủy bỏ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 </body>
-
 </html>
