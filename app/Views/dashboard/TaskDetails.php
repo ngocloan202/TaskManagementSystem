@@ -2,6 +2,30 @@
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
+// Check if ActivityLog table exists, create it if it doesn't
+try {
+  $tableCheckResult = $connect->query("SHOW TABLES LIKE 'ActivityLog'");
+  if ($tableCheckResult && $tableCheckResult->num_rows === 0) {
+    // Table doesn't exist, create it
+    $createTableSQL = "
+      CREATE TABLE IF NOT EXISTS ActivityLog (
+        ActivityID INT AUTO_INCREMENT PRIMARY KEY,
+        UserID INT NOT NULL,
+        ActivityType VARCHAR(50) NOT NULL,
+        RelatedID INT NOT NULL,
+        ActivityTime DATETIME NOT NULL,
+        Details TEXT,
+        FOREIGN KEY (UserID) REFERENCES Users(UserID)
+      )
+    ";
+    $connect->query($createTableSQL);
+    error_log("Created ActivityLog table");
+  }
+} catch (Exception $e) {
+  error_log("Error checking/creating ActivityLog table: " . $e->getMessage());
+  // Continue execution even if table check/creation fails
+}
+
 $title = "Chi tiết nhiệm vụ | CubeFlow";
 $currentPage = "projects";
 
@@ -257,6 +281,11 @@ try {
       border-radius: 0.5rem; /* Bo góc */
       padding: 1rem; /* Khoảng cách bên trong */
     }
+    /* New edit mode styles */
+    .edit-mode {
+      border: 2px solid #4f46e5 !important;
+      background-color: #f9fafb !important;
+    }
   </style>
 </head>
 <body style="background-color: #f0f2f5;">
@@ -289,14 +318,16 @@ try {
             </a>
             <?php if (!$isAdmin): ?>
             <div class="space-x-2">
-              <button class="bg-red-600 hover:bg-orange-200 text-white px-4 py-2 rounded-md font-semibold">Xóa</button>
-              <button class="bg-indigo-600 hover:bg-[#2970FF] text-white px-4 py-2 rounded-md font-semibold">Thay đổi</button>
+              <button id="btnDelete" class="bg-red-600 hover:bg-orange-200 text-white px-4 py-2 rounded-md font-semibold">Xóa</button>
+              <button id="btnEdit" class="bg-indigo-600 hover:bg-[#2970FF] text-white px-4 py-2 rounded-md font-semibold">Thay đổi</button>
+              <button id="btnSave" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-semibold hidden">Lưu</button>
+              <button id="btnCancel" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hidden">Hủy</button>
             </div>
             <?php endif; ?>
           </div>
           
           <h1 class="text-2xl font-bold"><?= htmlspecialchars($task['TaskTitle']) ?></h1>
-          <div class="text-gray-600 mt-2">trong danh sách <span class="text-indigo-600 font-bold"><?= htmlspecialchars($task['StatusName']) ?></span></div>
+          <div class="text-gray-600 mt-2">trong danh sách <span id="taskStatus" class="text-indigo-600 font-bold"><?= htmlspecialchars($task['StatusName']) ?></span></div>
           
           <!-- Task Info -->
           <div class="mt-6 grid grid-cols-2 gap-6">
@@ -308,12 +339,22 @@ try {
                   </svg>
                   <span>Tag</span>
                 </div>
+                <?php if (!$isAdmin && isset($_SESSION['edit_mode']) && $_SESSION['edit_mode']): ?>
+                <div class="flex items-center">
+                  <input id="tagName" type="text" value="<?= htmlspecialchars($task['TagName'] ?? '') ?>" placeholder="Tên tag" class="mr-2 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent edit-mode" style="max-width: 120px;">
+                  <input id="tagColor" type="color" value="<?= htmlspecialchars($task['TagColor'] ?? '#3B82F6') ?>" class="h-8 w-8 border-0 rounded cursor-pointer edit-mode">
+                  <div id="tagPreview" class="ml-2 px-3 py-1 rounded-full text-sm text-white" style="background-color: <?= htmlspecialchars($task['TagColor'] ?? '#3B82F6') ?>">
+                    <?= htmlspecialchars($task['TagName'] ?? 'Tag mới') ?>
+                  </div>
+                </div>
+                <?php else: ?>
                 <?php if (!empty($task['TagName'])): ?>
                 <span class="px-3 py-1 rounded-full text-sm text-white" style="background-color: <?= htmlspecialchars($task['TagColor']) ?>">
                   <?= htmlspecialchars($task['TagName']) ?>
                 </span>
                 <?php else: ?>
                 <span class="text-gray-500">Chưa có tag</span>
+                <?php endif; ?>
                 <?php endif; ?>
               </div>
               
@@ -325,7 +366,7 @@ try {
                   <span>Độ ưu tiên</span>
                 </div>
                 <div class="relative">
-                  <select class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" <?= $isAdmin ? 'disabled' : '' ?>>
+                  <select id="taskPriority" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" <?= $isAdmin || !isset($_SESSION['edit_mode']) ? 'readonly' : '' ?>>
                     <option <?= $task['Priority'] === '' ? 'selected' : '' ?>>Chọn</option>
                     <option <?= $task['Priority'] === 'Khẩn cấp' ? 'selected' : '' ?>>Khẩn cấp</option>
                     <option <?= $task['Priority'] === 'Cao' ? 'selected' : '' ?>>Cao</option>
@@ -347,9 +388,9 @@ try {
                   </svg>
                   <span>Ngày</span>
                 </div>
-                <input type="date" value="<?= $task['StartDate'] ?>" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" <?= $isAdmin ? 'disabled' : '' ?>>
+                <input id="startDate" type="date" value="<?= $task['StartDate'] ?>" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" <?= $isAdmin || !isset($_SESSION['edit_mode']) ? 'readonly' : '' ?>>
                 <span class="mx-2">-</span>
-                <input type="date" value="<?= $task['EndDate'] ?>" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" <?= $isAdmin ? 'disabled' : '' ?>>
+                <input id="endDate" type="date" value="<?= $task['EndDate'] ?>" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" <?= $isAdmin || !isset($_SESSION['edit_mode']) ? 'readonly' : '' ?>>
               </div>
             </div>
             
@@ -372,12 +413,30 @@ try {
               </div>
             </div>
           </div>
+          
+          <!-- Status Update Buttons (always visible for non-admin) -->
+          <?php if (!$isAdmin): ?>
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <h3 class="text-lg font-medium mb-2">Cập nhật trạng thái</h3>
+            <div class="flex space-x-2">
+              <button id="btnMarkTodo" class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                Cần làm
+              </button>
+              <button id="btnMarkInProgress" class="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
+                Đang làm
+              </button>
+              <button id="btnMarkCompleted" class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                Hoàn thành
+              </button>
+            </div>
+          </div>
+          <?php endif; ?>
         </div>
         
         <!-- Task Description -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 class="text-xl font-bold mb-4">Mô tả nhiệm vụ</h2>
-          <div class="custom-textarea p-4 bg-gray-50 rounded-lg">
+          <div id="taskDescription" class="custom-textarea p-4 bg-gray-50 rounded-lg" <?= $isAdmin || !isset($_SESSION['edit_mode']) ? 'contenteditable="false"' : 'contenteditable="true"' ?>>
             <?= nl2br(htmlspecialchars($task['TaskDescription'] ?? 'Không có mô tả')) ?>
           </div>
         </div>
@@ -385,7 +444,7 @@ try {
         <!-- Recent Activity -->
         <div class="bg-white rounded-lg shadow-sm p-6">
           <h2 class="text-xl font-bold mb-4">Hoạt động gần đây</h2>
-          <div class="space-y-4">
+          <div id="activityList" class="space-y-4">
             <?php if (count($activities) > 0): ?>
               <?php foreach ($activities as $activity): ?>
                 <div class="flex items-start">
@@ -423,15 +482,329 @@ try {
       </main>
     </div>
   </div>
+  
+  <!-- Add a success notification element -->
+  <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 hidden">
+    <div class="flex items-center">
+      <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      <span id="notificationMessage">Đã cập nhật thành công!</span>
+    </div>
+  </div>
 </body>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Track user interactions with task details
+    // Task information
+    const taskId = <?= $taskId ?? 'null' ?>;
+    const projectId = <?= $projectId ?? 'null' ?>;
+    
+    // Edit mode elements
+    const btnEdit = document.getElementById('btnEdit');
+    const btnSave = document.getElementById('btnSave');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnDelete = document.getElementById('btnDelete');
+    
+    // Editable form elements
+    const taskPriority = document.getElementById('taskPriority');
+    const startDate = document.getElementById('startDate');
+    const endDate = document.getElementById('endDate');
+    const taskDescription = document.getElementById('taskDescription');
+    const tagName = document.getElementById('tagName');
+    const tagColor = document.getElementById('tagColor');
+    const tagPreview = document.getElementById('tagPreview');
+    
+    // Status elements
+    const taskStatus = document.getElementById('taskStatus');
+    const btnMarkTodo = document.getElementById('btnMarkTodo');
+    const btnMarkInProgress = document.getElementById('btnMarkInProgress');
+    const btnMarkCompleted = document.getElementById('btnMarkCompleted');
+    
+    // Track if we're in edit mode
+    let editMode = false;
+    
+    // Save original values for cancel
+    let originalValues = {
+      priority: taskPriority?.value || '',
+      startDate: startDate?.value || '',
+      endDate: endDate?.value || '',
+      description: taskDescription?.innerHTML || '',
+      tagName: tagName?.value || '',
+      tagColor: tagColor?.value || '#3B82F6'
+    };
+    
+    // Function to toggle edit mode
+    function toggleEditMode(enabled) {
+      editMode = enabled;
+      
+      // Set session edit mode via fetch call
+      fetch('../../../api/task/SetEditMode.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ edit_mode: enabled })
+      }).catch(err => console.error('Failed to set edit mode:', err));
+      
+      // Toggle button visibility
+      btnEdit.classList.toggle('hidden', enabled);
+      btnSave.classList.toggle('hidden', !enabled);
+      btnCancel.classList.toggle('hidden', !enabled);
+      btnDelete.classList.toggle('hidden', enabled);
+      
+      // Toggle field editability (add tag fields)
+      if (taskPriority) taskPriority.readOnly = !enabled;
+      if (startDate) startDate.readOnly = !enabled;
+      if (endDate) endDate.readOnly = !enabled;
+      if (taskDescription) taskDescription.contentEditable = enabled.toString();
+      
+      // Toggle visual edit mode indicators
+      if (enabled) {
+        if (taskPriority) taskPriority.classList.add('edit-mode');
+        if (startDate) startDate.classList.add('edit-mode');
+        if (endDate) endDate.classList.add('edit-mode');
+        if (taskDescription) taskDescription.classList.add('edit-mode');
+      } else {
+        if (taskPriority) taskPriority.classList.remove('edit-mode');
+        if (startDate) startDate.classList.remove('edit-mode');
+        if (endDate) endDate.classList.remove('edit-mode');
+        if (taskDescription) taskDescription.classList.remove('edit-mode');
+      }
+    }
+    
+    // Event listeners for edit controls
+    if (btnEdit) {
+      btnEdit.addEventListener('click', function() {
+        // Save original values before entering edit mode
+        originalValues = {
+          priority: taskPriority?.value || '',
+          startDate: startDate?.value || '',
+          endDate: endDate?.value || '',
+          description: taskDescription?.innerHTML || '',
+          tagName: tagName?.value || '',
+          tagColor: tagColor?.value || '#3B82F6'
+        };
+        
+        toggleEditMode(true);
+        logInteraction('edit_mode_enabled', this);
+      });
+    }
+    
+    if (btnCancel) {
+      btnCancel.addEventListener('click', function() {
+        // Restore original values
+        if (taskPriority) taskPriority.value = originalValues.priority;
+        if (startDate) startDate.value = originalValues.startDate;
+        if (endDate) endDate.value = originalValues.endDate;
+        if (taskDescription) taskDescription.innerHTML = originalValues.description;
+        if (tagName) tagName.value = originalValues.tagName;
+        if (tagColor) {
+          tagColor.value = originalValues.tagColor;
+          tagPreview.style.backgroundColor = originalValues.tagColor;
+        }
+        if (tagPreview) tagPreview.textContent = originalValues.tagName || 'Tag mới';
+        
+        toggleEditMode(false);
+        logInteraction('edit_cancelled', this);
+      });
+    }
+    
+    if (btnSave) {
+      btnSave.addEventListener('click', function() {
+        saveTaskChanges();
+      });
+    }
+    
+    // Function to save task changes
+    function saveTaskChanges() {
+      if (!taskId) return;
+      
+      const formData = {
+        task_id: taskId,
+        priority: taskPriority?.value || '',
+        start_date: startDate?.value || '',
+        end_date: endDate?.value || '',
+        description: taskDescription?.innerText.trim() || '',
+        tag_name: tagName?.value || '',
+        tag_color: tagColor?.value || ''
+      };
+      
+      // Send data to server for updating
+      fetch('../../../api/task/UpdateTask.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Lỗi khi cập nhật nhiệm vụ');
+        }
+        return response.json();
+      })
+      .then(result => {
+        if (result.success) {
+          toggleEditMode(false);
+          showNotification('Đã cập nhật nhiệm vụ thành công!');
+          logInteraction('task_updated', document.body);
+        } else {
+          alert('Lỗi: ' + (result.message || 'Không thể cập nhật nhiệm vụ'));
+        }
+      })
+      .catch(error => {
+        console.error('Error updating task:', error);
+        alert('Lỗi: ' + error.message);
+      });
+    }
+    
+    // Function to update task status
+    function updateTaskStatus(statusId, statusName) {
+      if (!taskId) return;
+      
+      // Show loading indicator
+      const btn = document.querySelector(`button[data-status-id="${statusId}"]`);
+      if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="animate-pulse">Đang cập nhật...</span>';
+        btn.disabled = true;
+      }
+      
+      const formData = {
+        task_id: taskId,
+        status_id: statusId
+      };
+      
+      console.log('Sending status update:', formData);
+      
+      // Send data to server for updating status
+      fetch('../../../api/task/UpdateTaskStatus.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      .then(response => {
+        console.log('Status update response:', response);
+        return response.json();
+      })
+      .then(result => {
+        console.log('Status update result:', result);
+        
+        // Restore button state
+        if (btn) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+        
+        if (result.success) {
+          // Update the UI
+          taskStatus.textContent = statusName;
+          showNotification(`Đã cập nhật trạng thái thành "${statusName}"!`);
+          logInteraction('status_updated', document.body);
+          
+          // Add new activity to the activity list
+          addNewActivity('đã thay đổi trạng thái nhiệm vụ thành ' + statusName);
+        } else {
+          alert('Lỗi: ' + (result.message || 'Không thể cập nhật trạng thái'));
+        }
+      })
+      .catch(error => {
+        console.error('Error updating status:', error);
+        
+        // Restore button state
+        if (btn) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+        
+        alert('Lỗi: ' + error.message);
+      });
+    }
+    
+    // Add event listeners to the status buttons
+    if (btnMarkTodo) {
+      btnMarkTodo.setAttribute('data-status-id', '1');
+      btnMarkTodo.addEventListener('click', function() {
+        updateTaskStatus(1, 'Cần làm');
+      });
+    }
+    
+    if (btnMarkInProgress) {
+      btnMarkInProgress.setAttribute('data-status-id', '2');
+      btnMarkInProgress.addEventListener('click', function() {
+        updateTaskStatus(2, 'Đang làm');
+      });
+    }
+    
+    if (btnMarkCompleted) {
+      btnMarkCompleted.setAttribute('data-status-id', '3');
+      btnMarkCompleted.addEventListener('click', function() {
+        updateTaskStatus(3, 'Hoàn thành');
+      });
+    }
+    
+    // Add a new activity to the activity list
+    function addNewActivity(actionText) {
+      const activityList = document.getElementById('activityList');
+      if (!activityList) return;
+      
+      // Get current user's info
+      const userName = '<?= $_SESSION['full_name'] ?? 'Người dùng' ?>';
+      const userAvatar = '<?= $_SESSION['avatar'] ?? 'public/uploads/default-avatar.png' ?>';
+      const now = new Date();
+      const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                        now.getMinutes().toString().padStart(2, '0') + ' - ' + 
+                        now.getDate().toString().padStart(2, '0') + '/' + 
+                        (now.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                        now.getFullYear();
+      
+      // Create new activity element
+      const newActivity = document.createElement('div');
+      newActivity.className = 'flex items-start';
+      newActivity.innerHTML = `
+        <img src="../../../${userAvatar}" alt="User" class="w-8 h-8 rounded-full mr-3">
+        <div>
+          <p class="font-medium">${userName}</p>
+          <p class="text-gray-700">${actionText}</p>
+          <p class="text-gray-500 text-sm">${timeString}</p>
+        </div>
+      `;
+      
+      // Remove "no activities" message if present
+      const noActivitiesMsg = activityList.querySelector('p.text-gray-500.text-sm');
+      if (noActivitiesMsg && noActivitiesMsg.textContent.includes('Hiện không có hoạt động nào')) {
+        noActivitiesMsg.parentElement.parentElement.remove();
+      }
+      
+      // Add to the beginning of the list
+      if (activityList.firstChild) {
+        activityList.insertBefore(newActivity, activityList.firstChild);
+      } else {
+        activityList.appendChild(newActivity);
+      }
+    }
+    
+    // Function to show notification
+    function showNotification(message) {
+      const notification = document.getElementById('notification');
+      const notificationMessage = document.getElementById('notificationMessage');
+      
+      notificationMessage.textContent = message;
+      notification.classList.remove('hidden');
+      
+      // Animate in
+      setTimeout(() => {
+        notification.classList.remove('translate-y-20', 'opacity-0');
+      }, 10);
+      
+      // Animate out after 3 seconds
+      setTimeout(() => {
+        notification.classList.add('translate-y-20', 'opacity-0');
+        setTimeout(() => {
+          notification.classList.add('hidden');
+        }, 300);
+      }, 3000);
+    }
     
     // Function to log interaction events
     function logInteraction(interactionType, element) {
       // Only log if we have task information
-      const taskId = <?= $taskId ?? 'null' ?>;
       if (!taskId) return;
       
       // Prepare data for logging
@@ -466,48 +839,18 @@ try {
       });
     }
     
-    // Add buttons to interact with task
-    const taskHeader = document.querySelector('.bg-white.rounded-lg.shadow-sm.p-6.mb-6');
-    if (taskHeader && !<?= $isAdmin ? 'true' : 'false' ?>) {
-      const interactionContainer = document.createElement('div');
-      interactionContainer.className = 'mt-4 pt-4 border-t border-gray-200';
-      interactionContainer.innerHTML = `
-        <h3 class="text-lg font-medium mb-2">Cập nhật trạng thái</h3>
-        <div class="flex space-x-2">
-          <button id="btnMarkInProgress" class="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
-            Đang làm
-          </button>
-          <button id="btnMarkCompleted" class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
-            Hoàn thành
-          </button>
-        </div>
-      `;
-      taskHeader.appendChild(interactionContainer);
-      
-      // Add event listeners to the buttons
-      document.getElementById('btnMarkInProgress').addEventListener('click', function() {
-        logInteraction('mark_in_progress', this);
-        alert('Đã đánh dấu nhiệm vụ là "Đang làm"');
-      });
-      
-      document.getElementById('btnMarkCompleted').addEventListener('click', function() {
-        logInteraction('mark_completed', this);
-        alert('Đã đánh dấu nhiệm vụ là "Hoàn thành"');
-      });
-    }
-    
     // Track clicks on task description
-    const taskDescription = document.querySelector('.custom-textarea');
     if (taskDescription) {
       taskDescription.addEventListener('click', function() {
-        logInteraction('view_description', this);
+        if (!editMode) {
+          logInteraction('view_description', this);
+        }
       });
     }
     
     // Track clicks on task fields
-    const priorityField = document.querySelector('select');
-    if (priorityField) {
-      priorityField.addEventListener('change', function() {
+    if (taskPriority) {
+      taskPriority.addEventListener('change', function() {
         logInteraction('change_priority', this);
       });
     }
@@ -527,6 +870,21 @@ try {
         // Log before navigating
         logInteraction('back_to_project', this);
         // Don't prevent default - allow navigation to continue
+      });
+    }
+    
+    // Add event listener for tag editor
+    if (tagName && tagColor && tagPreview) {
+      // Update tag preview when name changes
+      tagName.addEventListener('input', function() {
+        tagPreview.textContent = this.value || 'Tag mới';
+        logInteraction('change_tag_name', this);
+      });
+      
+      // Update tag preview color when color changes
+      tagColor.addEventListener('input', function() {
+        tagPreview.style.backgroundColor = this.value;
+        logInteraction('change_tag_color', this);
       });
     }
     
