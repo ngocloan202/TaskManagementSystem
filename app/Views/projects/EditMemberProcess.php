@@ -43,8 +43,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
            (SELECT COUNT(*) FROM ProjectMembers 
             WHERE ProjectID = ? AND UserID = ? AND RoleInProject = 'người sở hữu') AS isCurrentUserOwner
     FROM ProjectMembers pm
-    JOIN Users u ON u.ID = pm.UserID
-    WHERE pm.ID = ?
+    JOIN Users u ON u.USERID = pm.UserID
+    WHERE pm.ProjectMembersID = ?
   ");
   $checkPermissionStmt->bind_param("iii", $projectID, $currentUserID, $projectMembersID);
   $checkPermissionStmt->execute();
