@@ -13,7 +13,7 @@ function fetchProjectStats() {
             document.getElementById('projectCount').textContent = data.count;
         })
         .catch(error => {
-            console.error('Error fetching project stats:', error);
+            // Silent error handling without console.error
             document.getElementById('projectCount').textContent = 'Error';
         });
 }

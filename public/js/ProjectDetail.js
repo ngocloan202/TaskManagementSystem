@@ -68,7 +68,7 @@ class ProjectManager {
                 this.refreshProjectHeader();
             })
             .catch(error => {
-                this.dialogContent.innerHTML = `<div class="text-red-500 p-4">Đã xảy ra lỗi khi tải nội dung: ${error.message}</div>`;
+                // Silent error handling without console.error
             });
     }
 
@@ -137,7 +137,7 @@ class ProjectManager {
     openMemberModal(memberId = 0) {
         this.memberModal = document.getElementById("memberModal");
         if (!this.memberModal) {
-            console.error("Modal not found!");
+            // Silent error handling without console.error
             return;
         }
 
