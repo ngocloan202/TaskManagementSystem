@@ -208,11 +208,18 @@ foreach ($allTasks as $tk) {
             </div>
             
             <div id="projectNameEditForm" class="hidden mb-3">
-              <div class="flex items-center">
-                <input type="text" id="projectNameInput" class="border border-gray-300 rounded px-3 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
-                  value="<?= htmlspecialchars($proj["ProjectName"]) ?>">
-                <button id="saveProjectNameBtn" class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Lưu</button>
-                <button id="cancelProjectNameBtn" class="px-3 py-2 ml-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+              <div class="flex flex-col">
+                <div class="flex items-center relative">
+                  <div id="projectNameSizer" class="absolute invisible whitespace-pre"></div>
+                  <input type="text" id="projectNameInput" 
+                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                    style="min-width: 200px;" 
+                    value="<?= htmlspecialchars($proj["ProjectName"]) ?>">
+                </div>
+                <div class="flex items-center mt-2">
+                  <button id="saveProjectNameBtn" class="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Lưu</button>
+                  <button id="cancelProjectNameBtn" class="px-3 py-2 ml-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Hủy</button>
+                </div>
               </div>
               <p id="projectNameError" class="text-red-500 text-sm mt-1 hidden"></p>
             </div>
@@ -346,7 +353,30 @@ foreach ($allTasks as $tk) {
     <script src="../../../public/js/dialogManageMembers.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        // Project name editing functionality
+        // Function to resize the input based on content
+        function resizeProjectNameInput() {
+          const sizer = document.getElementById('projectNameSizer');
+          const input = document.getElementById('projectNameInput');
+          
+          if (!sizer || !input) return;
+          
+          // Set the sizer's font properties to match the input
+          const inputStyle = window.getComputedStyle(input);
+          sizer.style.fontSize = inputStyle.fontSize;
+          sizer.style.fontFamily = inputStyle.fontFamily;
+          sizer.style.fontWeight = inputStyle.fontWeight;
+          
+          // Set sizer content and get its width
+          sizer.textContent = input.value || projectNameDisplay.textContent.trim();
+          
+          // Add some extra width for padding and comfortable editing
+          const extraWidth = 30;  // in pixels
+          
+          // Set input width based on text width plus padding
+          input.style.width = (sizer.offsetWidth + extraWidth) + 'px';
+        }
+        
+        // Toggle edit mode for project name
         const projectNameDisplay = document.getElementById('projectNameDisplay');
         const editProjectNameBtn = document.getElementById('editProjectNameBtn');
         const projectNameEditForm = document.getElementById('projectNameEditForm');
@@ -355,14 +385,28 @@ foreach ($allTasks as $tk) {
         const cancelProjectNameBtn = document.getElementById('cancelProjectNameBtn');
         const projectNameError = document.getElementById('projectNameError');
         
-        // Toggle edit mode for project name
         if (editProjectNameBtn) {
           editProjectNameBtn.addEventListener('click', function() {
             projectNameDisplay.classList.add('hidden');
             projectNameEditForm.classList.remove('hidden');
-            projectNameInput.focus();
-            projectNameInput.select();
+            
+            // Set the input value to current project name
+            projectNameInput.value = projectNameDisplay.textContent.trim();
+            
+            // Resize the input based on current text
+            resizeProjectNameInput();
+            
+            // Focus and select the text after a small delay
+            setTimeout(() => {
+              projectNameInput.focus();
+              projectNameInput.select();
+            }, 50);
           });
+        }
+        
+        // Make the input field resize automatically as you type
+        if (projectNameInput) {
+          projectNameInput.addEventListener('input', resizeProjectNameInput);
         }
         
         // Cancel editing
