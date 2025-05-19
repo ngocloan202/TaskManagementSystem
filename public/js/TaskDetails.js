@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentTagName) {
         // Nếu có tag
         const tagSpan = document.createElement('span');
-        tagSpan.className = 'px-3 py-1 rounded-full text-sm text-white';
+        tagSpan.className = 'px-3 py-1 rounded-full text-sm text-white font-semibold';
         tagSpan.style.backgroundColor = currentTagColor;
         tagSpan.textContent = currentTagName;
         tagContainer.appendChild(tagSpan);

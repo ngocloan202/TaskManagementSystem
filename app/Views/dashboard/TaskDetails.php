@@ -450,7 +450,7 @@ try {
                 <?php else: ?>
                 <div id="tagContainer">
                 <?php if (!empty($task['TagName'])): ?>
-                <span class="px-3 py-1 rounded-full text-sm text-white" style="background-color: <?= htmlspecialchars($task['TagColor']) ?>">
+                <span class="px-3 py-1 rounded-full text-sm text-white font-semibold" style="background-color: <?= htmlspecialchars($task['TagColor']) ?>">
                   <?= htmlspecialchars($task['TagName']) ?>
                 </span>
                 <?php else: ?>
