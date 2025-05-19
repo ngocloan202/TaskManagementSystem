@@ -285,7 +285,7 @@ foreach ($allTasks as $tk) {
                       <?php endif; ?>
                       
                       <?php if (!empty($task["UserIDs"])): ?>
-                        <div class="mt-2 flex flex-wrap items-center text-sm text-gray-500">
+                        <div class="mt-2 flex items-center -space-x-2 text-sm text-gray-500">
                           <?php 
                             $userIDs = explode(',', $task["UserIDs"]);
                             $names = explode('|||', $task["AssignedToNames"]);
@@ -294,10 +294,9 @@ foreach ($allTasks as $tk) {
                             for ($i = 0; $i < count($userIDs); $i++):
                               if (isset($names[$i]) && isset($avatars[$i])):
                           ?>
-                            <div class="flex items-center mr-3 mb-1">
-                              <img src="../../..<?= htmlspecialchars($avatars[$i]) ?>" class="w-6 h-6 rounded-full mr-1">
-                              <span><?= htmlspecialchars($names[$i]) ?></span>
-                            </div>
+                            <img src="../../..<?= htmlspecialchars($avatars[$i]) ?>" 
+                                 class="w-6 h-6 rounded-full border-2 border-white" 
+                                 title="<?= htmlspecialchars($names[$i]) ?>">
                           <?php 
                               endif;
                             endfor;
