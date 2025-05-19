@@ -25,7 +25,7 @@ if (!$isAdmin) {
   $memberCheckStmt->bind_param("ii", $projectId, $userID);
   $memberCheckStmt->execute();
   $isMemberResult = $memberCheckStmt->get_result()->fetch_assoc();
-  
+
   if (!$isMemberResult || $isMemberResult['isMember'] == 0) {
     die("Bạn không có quyền xem dự án này");
   }
@@ -143,7 +143,7 @@ foreach ($allTasks as $tk) {
       margin-bottom: 5px;
     }
   </style>
-  
+
 </head>
 
 <body class="bg-gray-100">
@@ -156,20 +156,22 @@ foreach ($allTasks as $tk) {
         <!-- Breadcrumb -->
         <div class="mb-6 flex items-center text-gray-600">
           <?php if ($isAdmin): ?>
-            <?php 
-              // Xây dựng URL quay lại với các tham số đã lưu
-              $backUrl = "../admin/Projects.php";
-              $refererParams = $_SESSION['project_view_referer']['params'] ?? [];
-              
-              if (!empty($refererParams)) {
-                $queryParams = [];
-                foreach ($refererParams as $key => $value) {
-                  $queryParams[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
-                }
-                $backUrl .= '?' . implode('&', $queryParams);
+            <?php
+            // Xây dựng URL quay lại với các tham số đã lưu
+            $backUrl = "../admin/Projects.php";
+            $refererParams = $_SESSION['project_view_referer']['params'] ?? [];
+
+            if (!empty($refererParams)) {
+              $queryParams = [];
+              foreach ($refererParams as $key => $value) {
+                $queryParams[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
               }
+              $backUrl .= '?' . implode('&', $queryParams);
+            }
             ?>
-            <a href="<?= $backUrl ?>" class="text-indigo-600 font-bold">Quay lại danh sách dự án</a>
+            <a href="<?= $backUrl ?>" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center">
+              Danh sách dự án
+            </a>
           <?php else: ?>
             <a href="index.php" class="text-indigo-600 font-bold">Dự án</a>
           <?php endif; ?>
@@ -181,14 +183,18 @@ foreach ($allTasks as $tk) {
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6 flex items-center justify-between">
           <div id="projectDetailPage" class="relative z-0">
             <?php if ($isAdmin): ?>
-            <div class="mb-3">
-              <a href="<?= $backUrl ?>" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 inline-flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Quay lại danh sách dự án
-              </a>
-            </div>
+              <div class="mb-6">
+                <a href="<?= $backUrl ?>" class="inline-block border border-gray-300 rounded-md shadow-sm">
+                  <div class="flex items-center px-3 py-2 bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span>Quay lại</span>
+                  </div>
+                </a>
+              </div>
             <?php endif; ?>
             <h1 class="text-2xl font-semibold mb-1"><?= htmlspecialchars(
               $proj["ProjectName"]
@@ -208,9 +214,9 @@ foreach ($allTasks as $tk) {
                 class="w-8 h-8 rounded-full border-2 border-white" />
             <?php endforeach; ?>
             <?php if (!$isAdmin): ?>
-            <button id="btnMember" class="ml-4 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">
-              Quản lý thành viên
-            </button>
+              <button id="btnMember" class="ml-4 px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">
+                Quản lý thành viên
+              </button>
             <?php endif; ?>
           </div>
         </div>
@@ -251,15 +257,14 @@ foreach ($allTasks as $tk) {
                   </span>
                 </div>
                 <?php if (!$isAdmin): ?>
-                <button class="p-2 rounded-full <?= $styles["bg"] ?> <?= $styles["color"] ?>
+                  <button class="p-2 rounded-full <?= $styles["bg"] ?> <?= $styles["color"] ?>
                   hover:bg-opacity-90 transition transform hover:scale-110" onclick="addTask('<?= $status ?>')"
-                  title="Thêm nhiệm vụ mới (<?= $status ?>)"
-                  id="btnAddTask">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                </button>
+                    title="Thêm nhiệm vụ mới (<?= $status ?>)" id="btnAddTask">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
                 <?php endif; ?>
               </div>
 
@@ -267,12 +272,12 @@ foreach ($allTasks as $tk) {
               <div class="space-y-2">
                 <?php foreach ($tasksByStatus[$status] as $task): ?>
                   <div class="p-3 <?= $styles["bg"] ?> rounded-lg <?= $styles[
-   "hover"
- ] ?> <?= $styles["border"] ?>">
+                       "hover"
+                     ] ?> <?= $styles["border"] ?>">
                     <h4 class="font-medium"><?= htmlspecialchars($task["TaskTitle"]) ?></h4>
                     <?php if (!empty($task["TagName"])): ?>
                       <span class="inline-block px-2 py-1 rounded text-white text-xs font-semibold mb-1"
-                            style="background-color: <?= htmlspecialchars($task["TagColor"]) ?>">
+                        style="background-color: <?= htmlspecialchars($task["TagColor"]) ?>">
                         <?= htmlspecialchars($task["TagName"]) ?>
                       </span>
                     <?php endif; ?>
@@ -294,14 +299,14 @@ foreach ($allTasks as $tk) {
         </div>
 
         <!-- Member Dialog - will be loaded via JavaScript -->
-        <div id="memberDialog" 
-             class="hidden fixed inset-0 z-50 flex items-center justify-center overflow-auto"
-             style="background-color: rgba(0,0,0,0.4); backdrop-filter: blur(2px);"
-        >
+        <div id="memberDialog" class="hidden fixed inset-0 z-50 flex items-center justify-center overflow-auto"
+          style="background-color: rgba(0,0,0,0.4); backdrop-filter: blur(2px);">
           <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto">
             <div class="relative p-4">
-              <button id="closeMemberDialog" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <button id="closeMemberDialog"
+                class="absolute top-4 right-4 text-gray-400 hover:text-red-500 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -319,6 +324,7 @@ foreach ($allTasks as $tk) {
         </div>
       </main>
     </div>
-<script src="../../../public/js/ProjectDetail.js"></script>
+    <script src="../../../public/js/ProjectDetail.js"></script>
 </body>
+
 </html>
