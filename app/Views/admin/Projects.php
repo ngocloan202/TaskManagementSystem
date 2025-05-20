@@ -1,10 +1,10 @@
 <?php
-// Projects.php - Đã cải thiện xử lý dữ liệu
+// Projects.php - Improved data handling
 require_once '../../../config/SessionInit.php';
 require_once '../../../config/database.php';
-check_role("ADMIN");  // chỉ cho ADMIN truy cập
+check_role("ADMIN");  // Only ADMIN can access
 
-// Chuẩn bị truy vấn lấy danh sách dự án kèm tên người tạo và số thành viên, task
+// Prepare query to get project list with creator name and member/task counts
 $projectsQuery = "
   SELECT 
     p.ProjectID, 
@@ -29,22 +29,22 @@ if ($projectsResult) {
     }
 }
 
-// Xử lý thông báo
+// Handle notifications
 $flashSuccess = $_SESSION["success"] ?? null;
 $flashError = $_SESSION["error"] ?? null;
 unset($_SESSION["success"], $_SESSION["error"]);
 
-// Xử lý sắp xếp và phân trang
+// Handle sorting and pagination
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $perPage = 10;
 $offset = ($page - 1) * $perPage;
 
-// Xử lý sắp xếp
+// Handle sorting
 $sortColumn = isset($_GET['sort']) ? $_GET['sort'] : 'id';
 $sortDirection = isset($_GET['order']) ? $_GET['order'] : 'desc';
 
-// Ánh xạ tên cột hiển thị với tên cột trong database
+// Map display column names to database column names
 $sortMapping = [
     'id' => 'p.ProjectID',
     'name' => 'p.ProjectName',
@@ -53,14 +53,14 @@ $sortMapping = [
     'tasks' => 'TaskCount'
 ];
 
-// Đảm bảo cột sắp xếp hợp lệ
+// Ensure valid sort column
 $sortColumnDB = isset($sortMapping[$sortColumn]) ? $sortMapping[$sortColumn] : 'p.ProjectID';
-// Đảm bảo hướng sắp xếp hợp lệ
+// Ensure valid sort direction
 $sortDirectionDB = strtoupper($sortDirection) === 'DESC' ? 'DESC' : 'ASC';
 
-// Xây dựng truy vấn cho tìm kiếm
+// Build search query
 if (!empty($search)) {
-    // Thêm điều kiện tìm kiếm vào truy vấn
+    // Add search conditions to query
     $sql = "
       SELECT 
         p.ProjectID, 
@@ -79,7 +79,7 @@ if (!empty($search)) {
       LIMIT $perPage OFFSET $offset
     ";
     
-    // Truy vấn đếm tổng số dự án thỏa mãn điều kiện tìm kiếm
+    // Query to count total projects matching search criteria
     $countQuery = "
       SELECT COUNT(*) as total 
       FROM Project p
@@ -90,7 +90,7 @@ if (!empty($search)) {
     $countResult = $connect->query($countQuery);
     $totalProjects = $countResult->fetch_assoc()['total'];
 } else {
-    // Sắp xếp và phân trang cho kết quả ban đầu
+    // Sort and paginate initial results
     $sql = "
       SELECT 
         p.ProjectID, 
@@ -108,13 +108,13 @@ if (!empty($search)) {
       LIMIT $perPage OFFSET $offset
     ";
     
-    // Đếm tổng số dự án
+    // Count total projects
     $countQuery = "SELECT COUNT(*) as total FROM Project";
     $countResult = $connect->query($countQuery);
     $totalProjects = $countResult->fetch_assoc()['total'];
 }
 
-// Thực thi truy vấn
+// Execute query
 $result = $connect->query($sql);
 $projects = [];
 if ($result) {
@@ -126,26 +126,26 @@ if ($result) {
 $totalPages = ceil($totalProjects / $perPage);
 $currentPage = "projects";
 
-// Xử lý sự kiện xem dự án
+// Handle project view event
 if (isset($_GET['view']) && isset($_GET['id'])) {
     $projectId = (int)$_GET['id'];
     $adminId = $_SESSION['user_id'] ?? 0;
     $viewTime = date('Y-m-d H:i:s');
     
-    // Tạo URL tham chiếu với các tham số hiện tại (ngoại trừ view và id)
+    // Create reference URL with current parameters (except view and id)
     $refererParams = [];
     foreach ($_GET as $key => $value) {
         if ($key !== 'view' && $key !== 'id') {
             $refererParams[$key] = $value;
         }
     }
-    // Lưu trữ tham số vào session để có thể quay lại đúng trạng thái của trang
+    // Store parameters in session to return to correct page state
     $_SESSION['project_view_referer'] = [
         'params' => $refererParams,
         'time' => time()
     ];
     
-    // Ghi log sự kiện xem dự án
+    // Log project view event
     $logQuery = "INSERT INTO ActivityLog (UserID, ActivityType, RelatedID, ActivityTime, Details) 
                 VALUES (?, 'view_project', ?, ?, ?)";
     
@@ -156,7 +156,7 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
         $stmt->execute();
     }
     
-    // Chuyển hướng đến trang xem dự án
+    // Redirect to project detail page
     header("Location: ../dashboard/ProjectDetail.php?id=" . $projectId);
     exit();
 }
@@ -164,11 +164,11 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CubeFlow - Quản lý dự án</title>
+    <title>CubeFlow - Project Management</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
     <link rel="stylesheet" href="../../../public/css/admin.css">
     <style>
@@ -188,7 +188,7 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen">
-        <!-- Lưu trữ tạm thời các biến này để tránh ghi đè -->
+        <!-- Temporarily store these variables to avoid overwriting -->
         <?php 
         $temp_projects = $projects;
         $temp_totalProjects = $totalProjects;
@@ -216,7 +216,7 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
             <!-- Main Content -->
             <main class="flex-1 p-6 overflow-auto">
                 <div class="max-w-7xl mx-auto">
-                    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Quản lý dự án</h1>
+                    <h1 class="text-2xl font-semibold text-gray-900 mb-6">Project Management</h1>
                     
                     <!-- Thông báo -->
                     <?php if ($flashSuccess): ?>

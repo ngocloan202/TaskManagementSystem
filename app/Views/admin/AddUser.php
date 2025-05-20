@@ -2,10 +2,10 @@
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
-// Kiểm tra quyền admin
+// Check admin role
 check_role("ADMIN");
 
-// Khởi tạo biến để lưu thông tin người dùng
+// Initialize user information variable
 $user = [
     'username' => '',
     'email' => '',
@@ -14,9 +14,9 @@ $user = [
     'role' => 'USER'
 ];
 
-// Xử lý khi form được submit
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Lấy dữ liệu từ form
+    // Get form data
     $user = [
         'username' => isset($_POST['username']) ? $_POST['username'] : '',
         'email' => isset($_POST['email']) ? $_POST['email'] : '',
@@ -25,59 +25,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'role' => isset($_POST['role']) ? $_POST['role'] : 'USER'
     ];
     
-    // Validate dữ liệu
+    // Validate data
     $errors = [];
     
-    // Kiểm tra username
+    // Check username
     if (empty($user['username'])) {
-        $errors['username'] = 'Tên người dùng không được để trống';
+        $errors['username'] = 'Username cannot be empty';
     } else {
-        // Kiểm tra username đã tồn tại chưa
+        // Check if username already exists
         $stmt = $connect->prepare("SELECT UserID FROM Users WHERE Username = ?");
         $stmt->bind_param("s", $user['username']);
         $stmt->execute();
         if ($stmt->get_result()->num_rows > 0) {
-            $errors['username'] = 'Tên người dùng đã tồn tại';
+            $errors['username'] = 'Username already exists';
         }
     }
     
-    // Kiểm tra email
+    // Check email
     if (empty($user['email'])) {
-        $errors['email'] = 'Email không được để trống';
+        $errors['email'] = 'Email cannot be empty';
     } elseif (!filter_var($user['email'], FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = 'Email không hợp lệ';
+        $errors['email'] = 'Invalid email format';
     } else {
-        // Kiểm tra email đã tồn tại chưa
+        // Check if email already exists
         $stmt = $connect->prepare("SELECT UserID FROM Users WHERE Email = ?");
         $stmt->bind_param("s", $user['email']);
         $stmt->execute();
         if ($stmt->get_result()->num_rows > 0) {
-            $errors['email'] = 'Email đã tồn tại';
+            $errors['email'] = 'Email already exists';
         }
     }
     
-    // Kiểm tra password
+    // Check password
     if (empty($user['password'])) {
-        $errors['password'] = 'Mật khẩu không được để trống';
+        $errors['password'] = 'Password cannot be empty';
     } elseif (strlen($user['password']) < 6) {
-        $errors['password'] = 'Mật khẩu phải có ít nhất 6 ký tự';
+        $errors['password'] = 'Password must be at least 6 characters';
     }
     
-    // Nếu không có lỗi, thêm người dùng mới
+    // If no errors, add new user
     if (empty($errors)) {
-        // Mã hóa mật khẩu bằng MD5
+        // Hash password using MD5
         $hashedPassword = md5($user['password']);
         
-        // Thêm người dùng mới
+        // Add new user
         $stmt = $connect->prepare("INSERT INTO Users (Username, Email, Password, FullName, Role) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $user['username'], $user['email'], $hashedPassword, $user['fullname'], $user['role']);
         
         if ($stmt->execute()) {
-            $_SESSION['success'] = 'Thêm người dùng thành công';
+            $_SESSION['success'] = 'User added successfully';
             header('Location: Users.php');
             exit;
         } else {
-            $errors['general'] = 'Có lỗi xảy ra: ' . $connect->error;
+            $errors['general'] = 'An error occurred: ' . $connect->error;
         }
     }
 }
@@ -85,11 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $currentPage = "users";
 ?>
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CubeFlow - Thêm người dùng mới</title>
+    <title>CubeFlow - Add New User</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
     <style>
         .menuItem {
@@ -120,22 +120,22 @@ $currentPage = "users";
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </a>
-                        <h1 class="text-2xl font-semibold text-gray-900">Thêm người dùng mới</h1>
+                        <h1 class="text-2xl font-semibold text-gray-900">Add New User</h1>
                     </div>
                     
-                    <!-- Thông báo lỗi chung -->
+                    <!-- General error notification -->
                     <?php if (isset($errors['general'])): ?>
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                             <span class="font-medium"><?= htmlspecialchars($errors['general']) ?></span>
                         </div>
                     <?php endif; ?>
                     
-                    <!-- Form thêm người dùng -->
+                    <!-- Add user form -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <form method="POST">
-                            <!-- Tên người dùng -->
+                            <!-- Username -->
                             <div class="mb-4">
-                                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Tên người dùng <span class="text-red-500">*</span></label>
+                                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
                                 <input 
                                     type="text" 
                                     id="username" 
@@ -165,9 +165,9 @@ $currentPage = "users";
                                 <?php endif; ?>
                             </div>
                             
-                            <!-- Mật khẩu -->
+                            <!-- Password -->
                             <div class="mb-4">
-                                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu <span class="text-red-500">*</span></label>
+                                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
                                 <input 
                                     type="password" 
                                     id="password" 
@@ -178,13 +178,13 @@ $currentPage = "users";
                                 <?php if (isset($errors['password'])): ?>
                                     <p class="text-red-500 text-sm mt-1"><?= htmlspecialchars($errors['password']) ?></p>
                                 <?php else: ?>
-                                    <p class="text-gray-500 text-sm mt-1">Mật khẩu phải có ít nhất 6 ký tự (Lưu ý: Mật khẩu sẽ được mã hóa bằng MD5)</p>
+                                    <p class="text-gray-500 text-sm mt-1">Password must be at least 6 characters (Note: Password will be hashed using MD5)</p>
                                 <?php endif; ?>
                             </div>
                             
-                            <!-- Họ và tên -->
+                            <!-- Full name -->
                             <div class="mb-4">
-                                <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
+                                <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">Full name</label>
                                 <input 
                                     type="text" 
                                     id="fullname" 
@@ -194,23 +194,23 @@ $currentPage = "users";
                                 >
                             </div>
                             
-                            <!-- Quyền -->
+                            <!-- Role -->
                             <div class="mb-6">
-                                <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Quyền</label>
+                                <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
                                 <select 
                                     id="role" 
                                     name="role" 
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
-                                    <option value="USER" <?= isset($user['role']) && $user['role'] === 'USER' ? 'selected' : '' ?>>User</option>
-                                    <option value="ADMIN" <?= isset($user['role']) && $user['role'] === 'ADMIN' ? 'selected' : '' ?>>Admin</option>
+                                    <option value="USER" <?= $user['role'] === 'USER' ? 'selected' : '' ?>>User</option>
+                                    <option value="ADMIN" <?= $user['role'] === 'ADMIN' ? 'selected' : '' ?>>Admin</option>
                                 </select>
                             </div>
                             
-                            <!-- Nút submit -->
+                            <!-- Submit button -->
                             <div class="flex justify-end">
-                                <a href="Users.php" class="mr-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Hủy</a>
-                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Thêm người dùng</button>
+                                <a href="Users.php" class="mr-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</a>
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Add User</button>
                             </div>
                         </form>
                     </div>

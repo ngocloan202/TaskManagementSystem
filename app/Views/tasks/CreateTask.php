@@ -1,17 +1,13 @@
 <?php
-// File: create_task.php
-// Handle new task creation
 
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
-// Check if it's a POST request
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
   echo json_encode(["success" => false, "message" => "Method not supported"]);
   exit();
 }
 
-// Get form information
 $projectId = isset($_POST["projectId"]) ? intval($_POST["projectId"]) : 0;
 $taskName = isset($_POST["taskName"]) ? trim($_POST["taskName"]) : "";
 $tag = isset($_POST["tag"]) ? trim($_POST["tag"]) : "";

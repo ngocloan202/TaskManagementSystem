@@ -2,33 +2,33 @@
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
-// Kiểm tra quyền admin
+// Check admin role
 check_role("ADMIN");
 
-// Kiểm tra ID người dùng
+// Check user ID
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    $_SESSION['error'] = "ID người dùng không hợp lệ";
+    $_SESSION['error'] = "Invalid user ID";
     header('Location: Users.php');
     exit;
 }
 
 $userId = (int)$_GET['id'];
 
-// Lấy thông tin người dùng
+// Get user information
 $stmt = $connect->prepare("SELECT * FROM Users WHERE UserID = ?");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    $_SESSION['error'] = "Không tìm thấy người dùng";
+    $_SESSION['error'] = "User not found";
     header('Location: Users.php');
     exit;
 }
 
 $user = $result->fetch_assoc();
 
-// Nếu form chưa được submit, sử dụng dữ liệu từ database
+// If form not submitted, use data from database
 $userData = [
     'username' => $user['Username'],
     'email' => $user['Email'],
@@ -36,9 +36,9 @@ $userData = [
     'role' => $user['Role']
 ];
 
-// Xử lý khi form được submit
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Lấy dữ liệu từ form
+    // Get form data
     $userData = [
         'username' => isset($_POST['username']) ? $_POST['username'] : '',
         'email' => isset($_POST['email']) ? $_POST['email'] : '',
@@ -47,57 +47,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'role' => isset($_POST['role']) ? $_POST['role'] : 'USER'
     ];
     
-    // Validate dữ liệu
+    // Validate data
     $errors = [];
     
-    // Kiểm tra username
+    // Check username
     if (empty($userData['username'])) {
-        $errors['username'] = 'Tên người dùng không được để trống';
+        $errors['username'] = 'Username cannot be empty';
     } else {
-        // Kiểm tra username đã tồn tại chưa (trừ user hiện tại)
+        // Check if username already exists (except current user)
         $stmt = $connect->prepare("SELECT UserID FROM Users WHERE Username = ? AND UserID != ?");
         $stmt->bind_param("si", $userData['username'], $userId);
         $stmt->execute();
         if ($stmt->get_result()->num_rows > 0) {
-            $errors['username'] = 'Tên người dùng đã tồn tại';
+            $errors['username'] = 'Username already exists';
         }
     }
     
-    // Kiểm tra email
+    // Check email
     if (empty($userData['email'])) {
-        $errors['email'] = 'Email không được để trống';
+        $errors['email'] = 'Email cannot be empty';
     } elseif (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = 'Email không hợp lệ';
+        $errors['email'] = 'Invalid email format';
     } else {
-        // Kiểm tra email đã tồn tại chưa (trừ user hiện tại)
+        // Check if email already exists (except current user)
         $stmt = $connect->prepare("SELECT UserID FROM Users WHERE Email = ? AND UserID != ?");
         $stmt->bind_param("si", $userData['email'], $userId);
         $stmt->execute();
         if ($stmt->get_result()->num_rows > 0) {
-            $errors['email'] = 'Email đã tồn tại';
+            $errors['email'] = 'Email already exists';
         }
     }
     
-    // Kiểm tra mật khẩu mới (nếu được cung cấp)
+    // Check new password (if provided)
     if (!empty($userData['newPassword']) && strlen($userData['newPassword']) < 6) {
-        $errors['new_password'] = 'Mật khẩu mới phải có ít nhất 6 ký tự';
+        $errors['new_password'] = 'New password must be at least 6 characters';
     }
     
-    // Nếu không có lỗi, cập nhật thông tin người dùng
+    // If no errors, update user information
     if (empty($errors)) {
-        // Chuẩn bị câu lệnh SQL cơ bản (không thay đổi mật khẩu)
+        // Prepare basic SQL statement (without password change)
         $sql = "UPDATE Users SET Username = ?, Email = ?, FullName = ?";
         $params = [$userData['username'], $userData['email'], $userData['fullname']];
         $types = "sss";
         
-        // Nếu là admin đang sửa người dùng khác, có thể thay đổi quyền
+        // If admin is editing another user, can change role
         if ($userId != $_SESSION['user_id']) {
             $sql .= ", Role = ?";
             $params[] = $userData['role'];
             $types .= "s";
         }
         
-        // Nếu mật khẩu mới được cung cấp, thêm vào câu lệnh SQL
+        // If new password provided, add to SQL statement
         if (!empty($userData['newPassword'])) {
             $hashedPassword = md5($userData['newPassword']);
             $sql .= ", Password = ?";
@@ -109,16 +109,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $params[] = $userId;
         $types .= "i";
         
-        // Cập nhật thông tin người dùng
+        // Update user information
         $stmt = $connect->prepare($sql);
         $stmt->bind_param($types, ...$params);
         
         if ($stmt->execute()) {
-            $_SESSION['success'] = 'Cập nhật thông tin người dùng thành công';
+            $_SESSION['success'] = 'User information updated successfully';
             header('Location: Users.php');
             exit;
         } else {
-            $errors['general'] = 'Có lỗi xảy ra: ' . $connect->error;
+            $errors['general'] = 'An error occurred: ' . $connect->error;
         }
     }
 }
@@ -126,11 +126,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $currentPage = "users";
 ?>
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CubeFlow - Chỉnh sửa người dùng</title>
+    <title>CubeFlow - Edit User</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
     <style>
         .menuItem {
@@ -161,22 +161,22 @@ $currentPage = "users";
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </a>
-                        <h1 class="text-2xl font-semibold text-gray-900">Chỉnh sửa người dùng</h1>
+                        <h1 class="text-2xl font-semibold text-gray-900">Edit User</h1>
                     </div>
                     
-                    <!-- Thông báo lỗi chung -->
+                    <!-- General error notification -->
                     <?php if (isset($errors['general'])): ?>
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                             <span class="font-medium"><?= htmlspecialchars($errors['general']) ?></span>
                         </div>
                     <?php endif; ?>
                     
-                    <!-- Form chỉnh sửa người dùng -->
+                    <!-- Edit user form -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <form method="POST">
-                            <!-- Tên người dùng -->
+                            <!-- Username -->
                             <div class="mb-4">
-                                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Tên người dùng <span class="text-red-500">*</span></label>
+                                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
                                 <input 
                                     type="text" 
                                     id="username" 
@@ -208,7 +208,7 @@ $currentPage = "users";
                             
                             <!-- Mật khẩu mới (không bắt buộc) -->
                             <div class="mb-4">
-                                <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới</label>
+                                <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">New password</label>
                                 <input 
                                     type="password" 
                                     id="new_password" 
@@ -218,13 +218,13 @@ $currentPage = "users";
                                 <?php if (isset($errors['new_password'])): ?>
                                     <p class="text-red-500 text-sm mt-1"><?= htmlspecialchars($errors['new_password']) ?></p>
                                 <?php else: ?>
-                                    <p class="text-gray-500 text-sm mt-1">Để trống nếu không muốn thay đổi mật khẩu (Lưu ý: Mật khẩu sẽ được mã hóa bằng MD5)</p>
+                                    <p class="text-gray-500 text-sm mt-1">Leave empty if you don't want to change the password (Note: Password will be hashed using MD5)</p>
                                 <?php endif; ?>
                             </div>
                             
                             <!-- Họ và tên -->
                             <div class="mb-4">
-                                <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
+                                <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">Full name</label>
                                 <input 
                                     type="text" 
                                     id="fullname" 
@@ -236,7 +236,7 @@ $currentPage = "users";
                             
                             <!-- Quyền (chỉ cho phép thay đổi nếu không phải chính mình) -->
                             <div class="mb-6">
-                                <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Quyền</label>
+                                <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
                                 <select 
                                     id="role" 
                                     name="role" 
@@ -248,7 +248,7 @@ $currentPage = "users";
                                 </select>
                                 
                                 <?php if ($userId == $_SESSION['user_id']): ?>
-                                    <p class="text-gray-500 text-sm mt-1">Bạn không thể thay đổi quyền của chính mình</p>
+                                    <p class="text-gray-500 text-sm mt-1">You cannot change the role of yourself</p>
                                     <!-- Field ẩn để đảm bảo giá trị role vẫn được gửi khi form submit -->
                                     <input type="hidden" name="role" value="<?= htmlspecialchars($userData['role']) ?>">
                                 <?php endif; ?>
@@ -256,8 +256,8 @@ $currentPage = "users";
                             
                             <!-- Nút submit -->
                             <div class="flex justify-end">
-                                <a href="Users.php" class="mr-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Hủy</a>
-                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Lưu thay đổi</button>
+                                <a href="Users.php" class="mr-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</a>
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Save changes</button>
                             </div>
                         </form>
                     </div>

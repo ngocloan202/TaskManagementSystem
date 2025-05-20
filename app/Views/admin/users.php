@@ -2,25 +2,21 @@
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
-// Kiểm tra quyền admin
 check_role("ADMIN");
 
-// Xử lý thông báo
 $flashSuccess = $_SESSION["success"] ?? null;
 $flashError = $_SESSION["error"] ?? null;
 unset($_SESSION["success"], $_SESSION["error"]);
 
-// Xử lý xóa người dùng
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $userId = $_GET['id'];
-    // Không cho phép xóa chính mình
+    // Don't allow deleting own account
     if ($userId == $_SESSION['user_id']) {
         $_SESSION['error'] = "Không thể xóa tài khoản đang đăng nhập";
         header("Location: Users.php");
         exit;
     }
     
-    // Xóa người dùng
     $stmt = $connect->prepare("DELETE FROM Users WHERE UserID = ?");
     $stmt->bind_param("i", $userId);
     if ($stmt->execute()) {
@@ -32,12 +28,11 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     exit;
 }
 
-// Xử lý thay đổi quyền người dùng
 if (isset($_POST['change_role'])) {
     $userId = $_POST['user_id'];
     $newRole = $_POST['new_role'];
     
-    // Không cho phép thay đổi quyền của chính mình
+    // Don't allow changing own role
     if ($userId == $_SESSION['user_id']) {
         $_SESSION['error'] = "Không thể thay đổi quyền của tài khoản đang đăng nhập";
         header("Location: Users.php");
@@ -55,17 +50,14 @@ if (isset($_POST['change_role'])) {
     exit;
 }
 
-// Lấy danh sách người dùng
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $perPage = 10;
 $offset = ($page - 1) * $perPage;
 
-// Xử lý sắp xếp
 $sortColumn = isset($_GET['sort']) ? $_GET['sort'] : 'id';
 $sortDirection = isset($_GET['order']) ? $_GET['order'] : 'asc';
 
-// Ánh xạ tên cột hiển thị với tên cột trong database
 $sortMapping = [
     'id' => 'UserID',
     'username' => 'Username',
@@ -74,9 +66,7 @@ $sortMapping = [
     'role' => 'Role'
 ];
 
-// Đảm bảo cột sắp xếp hợp lệ
 $sortColumnDB = isset($sortMapping[$sortColumn]) ? $sortMapping[$sortColumn] : 'UserID';
-// Đảm bảo hướng sắp xếp hợp lệ
 $sortDirectionDB = strtoupper($sortDirection) === 'DESC' ? 'DESC' : 'ASC';
 
 $countQuery = "SELECT COUNT(*) as total FROM Users WHERE 1=1";
@@ -88,10 +78,10 @@ if (!empty($search)) {
     $usersQuery .= " AND (Username LIKE ? OR Email LIKE ? OR FullName LIKE ?)";
 }
 
-// Sử dụng backticks để tránh lỗi với các tên cột đặc biệt
+// Use backticks to avoid errors with special column names
 $usersQuery .= " ORDER BY `$sortColumnDB` $sortDirectionDB LIMIT ? OFFSET ?";
 
-// Lấy tổng số người dùng
+// Get total users
 $stmt = $connect->prepare($countQuery);
 if (!empty($search)) {
     $stmt->bind_param("sss", $searchTerm, $searchTerm, $searchTerm);
@@ -100,7 +90,6 @@ $stmt->execute();
 $totalUsers = $stmt->get_result()->fetch_assoc()['total'];
 $totalPages = ceil($totalUsers / $perPage);
 
-// Lấy danh sách người dùng theo phân trang
 $stmt = $connect->prepare($usersQuery);
 if ($stmt === false) {
     // Xử lý lỗi khi chuẩn bị câu truy vấn
@@ -140,7 +129,7 @@ $currentPage = "users";
                 <div class="max-w-7xl mx-auto">
                     <h1 class="text-2xl font-semibold text-gray-900 mb-6">Quản lý người dùng</h1>
                     
-                    <!-- Thông báo -->
+                    <!-- Notification -->
                     <?php if ($flashSuccess): ?>
                         <div id="successAlert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex items-center justify-between">
                             <div class="flex items-center">
@@ -169,10 +158,10 @@ $currentPage = "users";
                         </div>
                     <?php endif; ?>
                     
-                    <!-- Tìm kiếm và thêm người dùng mới -->
+                    <!-- Search and add new user -->
                     <div class="bg-white rounded-lg shadow p-6 mb-6">
                         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 flex-wrap">
-                            <!-- Tìm kiếm -->
+                            <!-- Search -->
                             <form class="flex-1 flex items-center gap-2 min-w-0" method="GET">
                                 <div class="relative flex-1 min-w-0">
                                     <input type="text" name="search" placeholder="Tìm kiếm người dùng..." value="<?= htmlspecialchars($search) ?>"
@@ -188,7 +177,7 @@ $currentPage = "users";
                                 </button>
                             </form>
                             
-                            <!-- Thêm người dùng mới -->
+                            <!-- Add new user -->
                             <a href="AddUser.php" class="h-10 bg-green-600 text-white px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center justify-center whitespace-nowrap text-sm font-medium">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -197,7 +186,7 @@ $currentPage = "users";
                             </a>
                         </div>
                         
-                        <!-- Bảng người dùng -->
+                        <!-- User table -->
                         <div class="overflow-x-auto">
                             <table class="min-w-full bg-white border border-gray-200" id="userTable">
                                 <thead class="bg-gray-50">
@@ -264,7 +253,7 @@ $currentPage = "users";
                             </table>
                         </div>
                         
-                        <!-- Phân trang -->
+                        <!-- Pagination -->
                         <?php if ($totalPages > 1): ?>
                             <div class="flex justify-between items-center mt-6">
                                 <div class="text-sm text-gray-700">
@@ -272,7 +261,7 @@ $currentPage = "users";
                                 </div>
                                 <div class="flex space-x-1">
                                     <?php 
-                                    // Xây dựng chuỗi query từ các tham số
+                                    // Build query string from parameters
                                     $queryParams = [];
                                     if (!empty($search)) $queryParams[] = 'search=' . urlencode($search);
                                     if (!empty($sortColumn)) $queryParams[] = 'sort=' . urlencode($sortColumn);
@@ -302,7 +291,7 @@ $currentPage = "users";
         </div>
     </div>
 
-    <!-- Modal thêm người dùng -->
+    <!-- Modal add new user -->
     <div id="addUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
             <div class="flex justify-between items-center mb-4">
@@ -345,7 +334,7 @@ $currentPage = "users";
         </div>
     </div>
     
-    <!-- Modal xác nhận xóa người dùng -->
+    <!-- Modal confirm user deletion -->
     <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
     style="background-color: rgba(0, 0, 0, 0.4);">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
@@ -365,7 +354,7 @@ $currentPage = "users";
     </div>
     
     <script>
-        // Biến toàn cục để lưu trữ ID của timeout và interval
+        // Global variable to store timeout and interval
         let deleteModalTimeout;
         let countdownInterval;
         let successAlertTimeout;
@@ -373,21 +362,19 @@ $currentPage = "users";
         let successCountdownInterval;
         let errorCountdownInterval;
 
-        // Xử lý modal thêm người dùng và xác nhận xóa người dùng
+        // Handle add user modal and confirm deletion
         document.addEventListener('DOMContentLoaded', function() {
             const addBtn = document.getElementById('addUserBtn');
             const addModal = document.getElementById('addUserModal');
             const closeAddModal = document.getElementById('closeAddModal');
             const cancelAdd = document.getElementById('cancelAdd');
             
-            // Xử lý mở modal thêm người dùng
             if (addBtn) {
                 addBtn.addEventListener('click', function() {
                     addModal.classList.remove('hidden');
                 });
             }
             
-            // Xử lý đóng modal thêm người dùng
             if (closeAddModal) {
                 closeAddModal.addEventListener('click', function() {
                     addModal.classList.add('hidden');
@@ -400,12 +387,10 @@ $currentPage = "users";
                 });
             }
             
-            // Xử lý modal xác nhận xóa
             const deleteModal = document.getElementById('deleteConfirmModal');
             const cancelDelete = document.getElementById('cancelDelete');
             const confirmDelete = document.getElementById('confirmDelete');
             
-            // Đăng ký sự kiện cho nút Hủy
             if (cancelDelete) {
                 cancelDelete.addEventListener('click', function() {
                     clearTimeout(deleteModalTimeout);
@@ -414,13 +399,11 @@ $currentPage = "users";
                 });
             }
             
-            // Đăng ký sự kiện cho modal khi rê chuột vào
             deleteModal.addEventListener('mouseenter', function() {
                 clearTimeout(deleteModalTimeout);
                 clearInterval(countdownInterval);
             });
             
-            // Đăng ký sự kiện cho nút Xóa
             if (confirmDelete) {
                 confirmDelete.addEventListener('click', function() {
                     clearTimeout(deleteModalTimeout);
@@ -428,13 +411,12 @@ $currentPage = "users";
                 });
             }
             
-            // Xử lý thông báo thành công tự động đóng
+            // Handle success notification auto close
             const successAlert = document.getElementById('successAlert');
             if (successAlert) {
                 const successCountdown = document.getElementById('successCountdown');
                 let secondsLeftSuccess = 3;
                 
-                // Thiết lập interval để đếm ngược thông báo thành công
                 successCountdownInterval = setInterval(function() {
                     secondsLeftSuccess -= 1;
                     successCountdown.textContent = secondsLeftSuccess;
@@ -444,20 +426,19 @@ $currentPage = "users";
                     }
                 }, 1000);
                 
-                // Thiết lập timeout để tự động ẩn thông báo thành công sau 3 giây
                 successAlertTimeout = setTimeout(function() {
                     successAlert.style.display = 'none';
                     clearInterval(successCountdownInterval);
                 }, 3000);
                 
-                // Tạm dừng đếm ngược khi di chuột vào thông báo
+                // Temporarily pause countdown when mouse enters notification
                 successAlert.addEventListener('mouseenter', function() {
                     clearTimeout(successAlertTimeout);
                     clearInterval(successCountdownInterval);
                     successCountdown.textContent = "dừng";
                 });
                 
-                // Tiếp tục đếm ngược khi di chuột ra khỏi thông báo
+                // Resume countdown when mouse leaves notification
                 successAlert.addEventListener('mouseleave', function() {
                     if (successCountdown.textContent === "dừng") {
                         secondsLeftSuccess = 3;
@@ -480,13 +461,11 @@ $currentPage = "users";
                 });
             }
             
-            // Xử lý thông báo lỗi tự động đóng
             const errorAlert = document.getElementById('errorAlert');
             if (errorAlert) {
                 const errorCountdown = document.getElementById('errorCountdown');
                 let secondsLeftError = 3;
                 
-                // Thiết lập interval để đếm ngược thông báo lỗi
                 errorCountdownInterval = setInterval(function() {
                     secondsLeftError -= 1;
                     errorCountdown.textContent = secondsLeftError;
@@ -496,20 +475,17 @@ $currentPage = "users";
                     }
                 }, 1000);
                 
-                // Thiết lập timeout để tự động ẩn thông báo lỗi sau 3 giây
                 errorAlertTimeout = setTimeout(function() {
                     errorAlert.style.display = 'none';
                     clearInterval(errorCountdownInterval);
                 }, 3000);
                 
-                // Tạm dừng đếm ngược khi di chuột vào thông báo
                 errorAlert.addEventListener('mouseenter', function() {
                     clearTimeout(errorAlertTimeout);
                     clearInterval(errorCountdownInterval);
                     errorCountdown.textContent = "dừng";
                 });
                 
-                // Tiếp tục đếm ngược khi di chuột ra khỏi thông báo
                 errorAlert.addEventListener('mouseleave', function() {
                     if (errorCountdown.textContent === "dừng") {
                         secondsLeftError = 3;
@@ -533,72 +509,60 @@ $currentPage = "users";
             }
         });
 
-        // Hàm hiển thị modal xác nhận xóa
+        // Function to show delete confirmation modal
         function showDeleteConfirm(userId, username) {
             const modal = document.getElementById('deleteConfirmModal');
             const confirmText = document.getElementById('deleteConfirmText');
             const confirmDeleteBtn = document.getElementById('confirmDelete');
             
-            // Xóa timeout cũ nếu có
             if (deleteModalTimeout) {
                 clearTimeout(deleteModalTimeout);
             }
             
-            // Xóa interval cũ nếu có
             if (countdownInterval) {
                 clearInterval(countdownInterval);
             }
             
-            // Cập nhật nội dung modal
             confirmText.textContent = `Bạn có chắc chắn muốn xóa người dùng "${username}" không?`;
             confirmDeleteBtn.href = `Users.php?action=delete&id=${userId}`;
-            
-            // Hiển thị modal
+
             modal.classList.remove('hidden');
         }
 
-        // Thêm JavaScript cho tính năng sắp xếp
         document.addEventListener('DOMContentLoaded', function() {
-            // Lấy các phần tử cần thiết
             const table = document.getElementById('userTable');
             const headers = table.querySelectorAll('th.sortable');
             
-            // Biến lưu trạng thái sắp xếp
             let currentSort = {
                 column: 'id',
                 direction: 'asc'
             };
             
-            // Thêm sự kiện click cho các tiêu đề cột
             headers.forEach(header => {
                 header.addEventListener('click', function() {
                     const column = this.getAttribute('data-sort');
                     
-                    // Xác định hướng sắp xếp
+                    // Determine sorting direction
                     const direction = 
                         column === currentSort.column && currentSort.direction === 'asc' ? 'desc' : 'asc';
                     
-                    // Cập nhật giao diện
                     headers.forEach(h => {
                         h.classList.remove('asc', 'desc');
                     });
                     this.classList.add(direction);
                     
-                    // Cập nhật trạng thái sắp xếp
                     currentSort.column = column;
                     currentSort.direction = direction;
                     
-                    // Chuyển đến URL có tham số sắp xếp
                     const urlParams = new URLSearchParams(window.location.search);
                     urlParams.set('sort', column);
                     urlParams.set('order', direction);
                     
-                    // Giữ lại tham số tìm kiếm và phân trang nếu có
                     window.location.search = urlParams.toString();
                 });
             });
             
-            // Đánh dấu cột đang sắp xếp
+            // Mark sorted column
             const urlParams = new URLSearchParams(window.location.search);
             const sortColumn = urlParams.get('sort') || 'id';
             const sortDirection = urlParams.get('order') || 'asc';
