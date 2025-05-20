@@ -58,11 +58,11 @@ $totalUsers = $totalUsersResult ? $totalUsersResult->fetch_assoc()['total'] : 0;
 $totalTasks = $totalTasksResult ? $totalTasksResult->fetch_assoc()['total'] : 0;
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CubeFlow - Admin Dashboard</title>
+    <title>CubeFlow - Bảng điều khiển Admin</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
     <style>
         .menuItem {
@@ -120,7 +120,7 @@ $totalTasks = $totalTasksResult ? $totalTasksResult->fetch_assoc()['total'] : 0;
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                         <!-- Total Users -->
                         <div class="bg-white rounded-lg shadow p-6">
-                            <h3 class="text-lg font-medium text-gray-700">Total Users</h3>
+                            <h3 class="text-lg font-medium text-gray-700">Tổng số người dùng</h3>
                             <p class="text-3xl font-bold text-indigo-600 mt-2">
                                 <?= number_format($totalUsers) ?>
                             </p>
@@ -128,7 +128,7 @@ $totalTasks = $totalTasksResult ? $totalTasksResult->fetch_assoc()['total'] : 0;
                         
                         <!-- Total Projects -->
                         <div class="bg-white rounded-lg shadow p-6">
-                            <h3 class="text-lg font-medium text-gray-700">Total Projects</h3>
+                            <h3 class="text-lg font-medium text-gray-700">Tổng số dự án</h3>
                             <p class="text-3xl font-bold text-indigo-600 mt-2">
                                 <?= number_format($totalProjects) ?>
                             </p>
@@ -136,7 +136,7 @@ $totalTasks = $totalTasksResult ? $totalTasksResult->fetch_assoc()['total'] : 0;
                         
                         <!-- Total Tasks -->
                         <div class="bg-white rounded-lg shadow p-6">
-                            <h3 class="text-lg font-medium text-gray-700">Total Tasks</h3>
+                            <h3 class="text-lg font-medium text-gray-700">Tổng số công việc</h3>
                             <p class="text-3xl font-bold text-indigo-600 mt-2">
                                 <?= number_format($totalTasks) ?>
                             </p>
@@ -147,24 +147,24 @@ $totalTasks = $totalTasksResult ? $totalTasksResult->fetch_assoc()['total'] : 0;
                     <div class="bg-white rounded-lg shadow mb-6">
                         <div class="p-6">
                             <!-- System Management -->
-                            <h2 class="text-xl font-semibold mb-6">System Management</h2>
+                            <h2 class="text-xl font-semibold mb-6">Quản lý hệ thống</h2>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <!-- User Management -->
                                 <a href="Users.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
-                                    <h3 class="text-lg font-medium text-blue-700 mb-1">User Management</h3>
-                                    <p class="text-sm text-gray-600">View and manage all users in the system</p>
+                                    <h3 class="text-lg font-medium text-blue-700 mb-1">Quản lý người dùng</h3>
+                                    <p class="text-sm text-gray-600">Xem và quản lý tất cả người dùng trong hệ thống</p>
                                 </a>
                                 
                                 <!-- Project Management -->
                                 <a href="Projects.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
-                                    <h3 class="text-lg font-medium text-blue-700 mb-1">Project Management</h3>
-                                    <p class="text-sm text-gray-600">View and manage all projects in the system</p>
+                                    <h3 class="text-lg font-medium text-blue-700 mb-1">Quản lý dự án</h3>
+                                    <p class="text-sm text-gray-600">Xem và quản lý tất cả dự án trong hệ thống</p>
                                 </a>
                                 
                                 <!-- System Settings -->
                                 <a href="settings.php" class="management-card block bg-blue-50 rounded-lg p-4 transition duration-200">
-                                    <h3 class="text-lg font-medium text-blue-700 mb-1">System Settings</h3>
-                                    <p class="text-sm text-gray-600">Configure and manage system settings</p>
+                                    <h3 class="text-lg font-medium text-blue-700 mb-1">Cài đặt hệ thống</h3>
+                                    <p class="text-sm text-gray-600">Cấu hình và quản lý cài đặt hệ thống</p>
                                 </a>
                             </div>
                         </div>
@@ -221,14 +221,14 @@ $totalTasks = $totalTasksResult ? $totalTasksResult->fetch_assoc()['total'] : 0;
         
         // Confirm delete user
         function confirmDelete(userId, username) {
-            if (confirm(`Are you sure you want to delete user "${username}"?`)) {
+            if (confirm(`Bạn có chắc chắn muốn xóa người dùng "${username}"?`)) {
                 window.location.href = `Users.php?action=delete&id=${userId}`;
             }
         }
         
         // Confirm delete project
         function confirmDeleteProject(projectId, projectName) {
-            if (confirm(`Are you sure you want to delete project "${projectName}"?`)) {
+            if (confirm(`Bạn có chắc chắn muốn xóa dự án "${projectName}"?`)) {
                 window.location.href = `Projects.php?action=delete&id=${projectId}`;
             }
         }

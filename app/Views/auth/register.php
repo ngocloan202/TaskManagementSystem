@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Đăng ký</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
     <style>
         body {
@@ -66,10 +66,8 @@
             border-radius: 1rem;
             position: relative;
             animation: modalFadeIn ease 0.4s;
-
         }
     </style>
-    
 </head>
 
 <body>
@@ -84,7 +82,7 @@
     $registerSuccess = false;
 
     if (!$connect) {
-      die("Could not connect to DB: " . $connect->connect_error);
+      die("Không thể kết nối đến cơ sở dữ liệu: " . $connect->connect_error);
       exit();
     }
 
@@ -96,22 +94,22 @@
       $confirm = $_POST["confirm-password"];
 
       if ($username == "" || $email == "" || $password == "" || $confirm == "" || $fullname == "") {
-        $message = "Please fill in all fields!";
+        $message = "Vui lòng điền đầy đủ thông tin!";
       } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message = "Invalid email format!";
+        $message = "Email không hợp lệ!";
       } elseif (strlen($password) < 6) {
-        $message = "Password must be at least 6 characters!";
+        $message = "Mật khẩu phải có ít nhất 6 ký tự!";
       } elseif (strlen($username) < 3 || strlen($username) > 20) {
-        $message = "Username must be between 3 and 20 characters!";
+        $message = "Tên đăng nhập phải từ 3 đến 20 ký tự!";
       } elseif (strlen($fullname) < 3 || strlen($fullname) > 100) {
-        $message = "Full name must be between 3 and 100 characters!";
+        $message = "Họ tên phải từ 3 đến 100 ký tự!";
       } elseif ($password !== $confirm) {
-        $message = "Passwords do not match!";
+        $message = "Mật khẩu không khớp!";
       } else {
         $sql = "SELECT * FROM Users WHERE Username='$username' OR Email='$email'";
         $result = $connect->query($sql);
         if ($result->num_rows > 0) {
-          $message = "Username or Email already exists!";
+          $message = "Tên đăng nhập hoặc Email đã tồn tại!";
         } else {
           $hashed = md5($password);
           $sql = "INSERT INTO Users (Username, Password, Email, Role, FullName, PhoneNumber, Avatar)
@@ -119,7 +117,7 @@
           if ($connect->query($sql) === true) {
             $registerSuccess = true;
           } else {
-            $message = "Registration error: " . $connect->error;
+            $message = "Lỗi đăng ký: " . $connect->error;
           }
         }
       }
@@ -141,7 +139,7 @@
                         <path fill-rule="evenodd" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" clip-rule="evenodd" />
                     </svg>
                 </span>
-                <input class="outline-none font-semibold" type="text" id="fullname" name="fullname" placeholder="Full name">
+                <input class="outline-none font-semibold" type="text" id="fullname" name="fullname" placeholder="Họ và tên">
             </div>
             <!-- Email field -->
             <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4 register-input-group">
@@ -166,7 +164,7 @@
                     </svg>
 
                 </span>
-                <input class="outline-none font-semibold" type="text" id="username" name="username" placeholder="Username">
+                <input class="outline-none font-semibold" type="text" id="username" name="username" placeholder="Tên đăng nhập">
             </div>
 
             <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4 register-input-group">
@@ -178,7 +176,7 @@
                     </svg>
 
                 </span>
-                <input class="outline-none font-semibold" type="password" id="password" name="password" placeholder="Password">
+                <input class="outline-none font-semibold" type="password" id="password" name="password" placeholder="Mật khẩu">
             </div>
 
             <div class="bg-blue-300 rounded-lg p-3 flex items-center mb-4 register-input-group">
@@ -189,15 +187,15 @@
                             clip-rule="evenodd" />
                     </svg>
                 </span>
-                <input class="outline-none font-semibold" type="password" id="confirm-password" name="confirm-password" placeholder="Confirm password">
+                <input class="outline-none font-semibold" type="password" id="confirm-password" name="confirm-password" placeholder="Xác nhận mật khẩu">
             </div>
 
-            <button type="submit" class="registerButton w-full px-2 py-2 rounded-lg font-semibold text-white">Register</button>
+            <button type="submit" class="registerButton w-full px-2 py-2 rounded-lg font-semibold text-white">Đăng ký</button>
             <?php if (!empty($message)): ?>
                 <p class="text-center mt-2 text-red-600 font-semibold"><?= $message ?></p>
             <?php endif; ?>
             <p class="text-center mt-4">
-                Already have an account? <a href="login.php" class="hover:underline font-semibold" style="color: #2F42C0;">Login here</a>
+                Đã có tài khoản? <a href="login.php" class="hover:underline font-semibold" style="color: #2F42C0;">Đăng nhập</a>
             </p>
         </form>
     </div>
@@ -209,9 +207,9 @@
         <div class="bg-white rounded-xl shadow-lg border border-[#A6A9FC] text-center relative p-6">
             <button onclick="document.getElementById('successModal').classList.add('hidden')" class="absolute top-2 right-2 text-2xl font-bold text-gray-400 hover:text-gray-700">&times;</button>
             <img src="../../images/cubeflow-logo.png" alt="Cube Flow" class="w-20 h-20 mx-auto mb-4">
-            <h2 class="text-2xl font-bold text-[#2C77E8] mb-2">🎉 Registration successful!</h2>
-            <p class="text-gray-700 mb-4">Your account has been created. You can now log in.</p>
-            <a href="login.php" class="inline-block bg-[#2C77E8] hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">Go to login</a>
+            <h2 class="text-2xl font-bold text-[#2C77E8] mb-2">🎉 Đăng ký thành công!</h2>
+            <p class="text-gray-700 mb-4">Tài khoản của bạn đã được tạo. Bạn có thể đăng nhập ngay bây giờ.</p>
+            <a href="login.php" class="inline-block bg-[#2C77E8] hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">Đến trang đăng nhập</a>
         </div>
     </div>
 </div>

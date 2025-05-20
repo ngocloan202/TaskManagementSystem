@@ -3,11 +3,11 @@ require_once __DIR__ . "/../../../config/SessionInit.php";
 require_once __DIR__ . "/../../../config/database.php";
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
+    <title>Đăng nhập</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
   </head>
   <body class="min-h-screen bg-[#EEF0FF] flex items-center justify-center px-4">
@@ -16,10 +16,8 @@ require_once __DIR__ . "/../../../config/database.php";
           <?= htmlspecialchars($_SESSION["login_error"]) ?>
         </div>
       <?php unset($_SESSION["login_error"]);endif;
-// Clear for next time
 ?>
     <div class="relative w-full max-w-sm">
-      <!-- Logo circle -->
       <div class="absolute left-1/2 -translate-x-1/2 -top-12">
         <div
           class="w-24 h-24 bg-[#EEF0FF] rounded-full border-3 border-[#7C64F0] flex items-center justify-center shadow-md"
@@ -28,17 +26,13 @@ require_once __DIR__ . "/../../../config/database.php";
         </div>
       </div>
       
-      <!-- Card -->
       <div class="bg-white rounded-2xl shadow-lg pt-14 px-6 pb-8">
-        <!-- Title -->
         <h2 class="text-center text-[#7C64F0] text-2xl font-bold mb-6">
           Cube Flow
         </h2>
         
-        <!-- Form -->
         <form action="LoginProcess.php" method="POST" class="space-y-4">
         
-          <!-- Username -->
           <div class="flex items-center bg-[#9A94E5] rounded-xl h-12 px-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +51,7 @@ require_once __DIR__ . "/../../../config/database.php";
             <input
               type="text"
               name="username"
-              placeholder="Username"
+              placeholder="Tên đăng nhập"
               class="w-full bg-transparent placeholder-white placeholder-opacity-90 focus:outline-none text-white"
               required
             />
@@ -82,33 +76,30 @@ require_once __DIR__ . "/../../../config/database.php";
             <input
               type="password"
               name="password"
-              placeholder="Password"
+              placeholder="Mật khẩu"
               class="w-full bg-transparent placeholder-white placeholder-opacity-90 focus:outline-none text-white"
               required
             />
           </div>
           
-          <!-- Login button -->
           <button
             type="submit"
             class="w-full h-10 bg-[#2970FF] hover:bg-[#bddef5] text-white font-semibold rounded-xl transition"
           >
-            Login
+            Đăng nhập
           </button>
         </form>
         
-        <!-- Forgot password -->
         <div class="mt-4 text-center">
           <a href="#" class="text-[#272E71] text-sm hover:underline font-semibold">
-            Forgot password?
+            Quên mật khẩu?
           </a>
         </div>
         
-        <!-- Register link -->
         <p class="mt-2 text-center text-gray-800 text-sm">
-          Don't have an account?
+          Chưa có tài khoản?
           <a href="register.php" class="text-[#2970FF] font-semibold hover:underline">
-            Register here
+            Đăng ký ngay
           </a>
         </p>
       </div>

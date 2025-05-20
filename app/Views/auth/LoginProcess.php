@@ -5,7 +5,7 @@ include_once "../../../config/database.php";
 $message = "";
 
 if (!$connect) {
-  die("Could not connect to DB: " . $connect->connect_error);
+  die("Không thể kết nối đến cơ sở dữ liệu: " . $connect->connect_error);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -13,28 +13,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $password = $_POST["password"] ?? "";
 
   if ($username === "" || $password === "") {
-    $message = "Please fill in all fields!";
+    $message = "Vui lòng điền đầy đủ thông tin!";
   } else {
-    // Query user (without prepare)
     $sql = "SELECT * FROM Users WHERE Username='$username'";
     $result = $connect->query($sql);
 
     if (!$result || $result->num_rows === 0) {
-      $message = "Invalid username or password!";
+      $message = "Tên đăng nhập hoặc mật khẩu không đúng!";
     } else {
       $user = $result->fetch_assoc();
-      // Check password hash (MD5)
       if (md5($password) === $user["Password"]) {
-        // Login successful
         $_SESSION["user_id"] = $user["UserID"];
         $_SESSION["username"] = $user["Username"];
         $_SESSION["role"] = $user["Role"] ?? "USER"; // Default to USER if role not set
         $_SESSION["fullname"] = $user["FullName"];
         $_SESSION["avatar"] = $user["Avatar"] ?? "/public/images/default-avatar.png";
         $_SESSION["last_activity"] = time();
-        $_SESSION["success"] = "🎉 Login successful!";
+        $_SESSION["success"] = "🎉 Đăng nhập thành công!";
 
-        // Redirect based on role
         if ($_SESSION["role"] === "ADMIN") {
           header("Location: ../admin/dashboard.php");
         } else {
@@ -42,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         exit();
       } else {
-        $message = "Invalid username or password!";
+        $message = "Tên đăng nhập hoặc mật khẩu không đúng!";
       }
     }
   }
