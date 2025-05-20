@@ -28,10 +28,10 @@ try {
   }
 } catch (Exception $e) {
   error_log("Error checking/creating ActivityLog table: " . $e->getMessage());
-  // Continue execution even if table check/creation fails
+
 }
 
-$title = "Task Details | CubeFlow";
+$title = "Chi tiết nhiệm vụ | CubeFlow";
 $currentPage = "projects";
 
 // Initialize variables to avoid undefined variable errors
@@ -45,7 +45,7 @@ try {
   $projectId = isset($_GET["project_id"]) ? intval($_GET["project_id"]) : 0;
 
   if ($taskId <= 0 || $projectId <= 0) {
-    throw new Exception("Invalid task information");
+    throw new Exception("Thông tin nhiệm vụ không hợp lệ");
   }
 
   // Check permission to view task (user must be a project member or admin)
@@ -53,7 +53,6 @@ try {
   $isAdmin = $_SESSION['role'] === 'ADMIN';
 
   if (!$isAdmin) {
-    // Check if user is a member of the project
     $memberCheckStmt = $connect->prepare("
       SELECT COUNT(*) as isMember 
       FROM ProjectMembers 
@@ -61,7 +60,7 @@ try {
     ");
     
     if (!$memberCheckStmt) {
-      throw new Exception("Query error: " . $connect->error);
+      throw new Exception("Lỗi truy vấn: " . $connect->error);
     }
     
     $memberCheckStmt->bind_param("ii", $projectId, $userID);
@@ -69,11 +68,11 @@ try {
     $isMemberResult = $memberCheckStmt->get_result()->fetch_assoc();
     
     if (!$isMemberResult || $isMemberResult['isMember'] == 0) {
-      throw new Exception("You don't have permission to view this task");
+      throw new Exception("Bạn không có quyền xem nhiệm vụ này");
     }
   }
 
-  // Get task details
+
   $taskQuery = $connect->prepare("
     SELECT 
       t.TaskID,
@@ -94,7 +93,7 @@ try {
   ");
 
   if (!$taskQuery) {
-    throw new Exception("Task query error: " . $connect->error);
+    throw new Exception("Lỗi truy vấn task: " . $connect->error);
   }
 
   $taskQuery->bind_param("ii", $taskId, $projectId);
@@ -102,14 +101,13 @@ try {
   $taskResult = $taskQuery->get_result();
   
   if ($taskResult->num_rows === 0) {
-    throw new Exception("Task not found");
+    throw new Exception("Không tìm thấy nhiệm vụ");
   }
   
   $task = $taskResult->fetch_assoc();
 
   // Log task view event
   try {
-    // Avoid logging repeatedly if user refreshes the page
     $lastViewKey = "last_view_task_{$userID}_{$taskId}";
     $currentTime = time();
     $lastViewTime = $_SESSION[$lastViewKey] ?? 0;
@@ -133,7 +131,6 @@ try {
         $logQuery->bind_param('iiss', $userID, $taskId, $viewTime, $details);
         $logQuery->execute();
         
-        // Save last view time to session
         $_SESSION[$lastViewKey] = $currentTime;
         
         error_log("Logged task view event: User $userID viewed task $taskId at $viewTime");
@@ -143,10 +140,9 @@ try {
     }
   } catch (Exception $e) {
     error_log("Error logging task view: " . $e->getMessage());
-    // Continue execution even if logging fails
+
   }
 
-  // Get information about assigned users
   try {
     $assigneeSQL = "
       SELECT 
@@ -164,7 +160,6 @@ try {
     if (!$assigneeQuery) {
       error_log("SQL Error in TaskDetails.php (assigneeQuery): " . $connect->error . " - SQL: " . $assigneeSQL);
       
-      // Try a direct query to check if we can get any user from the table
       $directQuery = "SELECT TaskID, UserID FROM TaskAssignment WHERE TaskID = $taskId LIMIT 1";
       $directResult = $connect->query($directQuery);
       if ($directResult && $directResult->num_rows > 0) {
@@ -185,7 +180,6 @@ try {
       $assigneeQuery->bind_param("i", $taskId);
       $assigneeQuery->execute();
       
-      // Check for execution errors
       if ($assigneeQuery->error) {
         error_log("Execution error for assignee query: " . $assigneeQuery->error);
       } else {
@@ -195,7 +189,6 @@ try {
           $assignees[] = $row;
         }
         
-        // Log whether we found assignees
         if (count($assignees) > 0) {
           error_log("Found " . count($assignees) . " assignees for task $taskId");
         } else {
@@ -205,7 +198,6 @@ try {
     }
   } catch (Exception $e) {
     error_log("Error getting assignee: " . $e->getMessage());
-    // Continue execution even if assignee query fails
   }
 
   // Get recent activities for this task
@@ -229,7 +221,6 @@ try {
     if (!$activityQuery) {
       error_log("SQL Error in TaskDetails.php (activityQuery): " . $connect->error . " - SQL: " . $activitySQL);
       
-      // Check if ActivityLog table exists
       $checkTable = $connect->query("SHOW TABLES LIKE 'ActivityLog'");
       if ($checkTable && $checkTable->num_rows === 0) {
         error_log("Table 'ActivityLog' does not exist in the database");
@@ -252,16 +243,14 @@ try {
     }
   } catch (Exception $e) {
     error_log("Error getting activities: " . $e->getMessage());
-    // Continue execution even if activity query fails
   }
 } catch (Exception $e) {
-  // Handle exceptions gracefully
   die($e->getMessage());
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -285,12 +274,11 @@ try {
       border-radius: 0.5rem;
       padding: 1rem;
     }
-    /* Edit mode styles */
     .edit-mode {
       border: 2px solid #4f46e5 !important;
       background-color: #f9fafb !important;
     }
-    /* Member dropdown styles */
+
     .member-dropdown {
       position: relative;
       display: inline-block;
@@ -401,7 +389,7 @@ try {
       <main class="flex-1 overflow-y-auto bg-gray-100 p-6">
         <!-- Breadcrumb -->
         <div class="flex items-center mb-6 text-gray-600">
-          <a href="ProjectDetail.php?id=<?= $projectId ?>" class="text-indigo-600 font-bold text-xl">Project</a>
+          <a href="ProjectDetail.php?id=<?= $projectId ?>" class="text-indigo-600 font-bold text-xl">Dự án</a>
           <span class="mx-2">›</span>
           <span class="font-bold text-xl"><?= htmlspecialchars($task['ProjectName']) ?></span>
         </div>
@@ -413,20 +401,20 @@ try {
               <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
               </svg>
-              Back
+              Quay lại
             </a>
             <?php if (!$isAdmin): ?>
             <div class="space-x-2">
-              <button id="btnDelete" class="bg-red-600 hover:bg-orange-200 text-white px-4 py-2 rounded-md font-semibold">Delete</button>
-              <button id="btnEdit" class="bg-indigo-600 hover:bg-[#2970FF] text-white px-4 py-2 rounded-md font-semibold">Edit</button>
-              <button id="btnSave" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-semibold hidden">Save</button>
-              <button id="btnCancel" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hidden">Cancel</button>
+              <button id="btnDelete" class="bg-red-600 hover:bg-orange-200 text-white px-4 py-2 rounded-md font-semibold">Xóa</button>
+              <button id="btnEdit" class="bg-indigo-600 hover:bg-[#2970FF] text-white px-4 py-2 rounded-md font-semibold">Thay đổi</button>
+              <button id="btnSave" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-semibold hidden">Lưu</button>
+              <button id="btnCancel" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-semibold hidden">Hủy</button>
             </div>
             <?php endif; ?>
           </div>
           
           <h1 class="text-2xl font-bold"><?= htmlspecialchars($task['TaskTitle']) ?></h1>
-          <div class="text-gray-600 mt-2">in list <span id="taskStatus" class="text-indigo-600 font-bold"><?= htmlspecialchars($task['StatusName']) ?></span></div>
+          <div class="text-gray-600 mt-2">trong danh sách <span id="taskStatus" class="text-indigo-600 font-bold"><?= htmlspecialchars($task['StatusName']) ?></span></div>
           
           <!-- Task Info -->
           <div class="mt-6 grid grid-cols-2 gap-6">
@@ -440,10 +428,10 @@ try {
                 </div>
                 <?php if (!$isAdmin && isset($_SESSION['edit_mode']) && $_SESSION['edit_mode']): ?>
                 <div id="tagContainer" class="flex items-center">
-                  <input id="tagName" type="text" value="<?= htmlspecialchars($task['TagName'] ?? '') ?>" placeholder="Tag name" class="mr-2 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent edit-mode" style="max-width: 120px;">
+                  <input id="tagName" type="text" value="<?= htmlspecialchars($task['TagName'] ?? '') ?>" placeholder="Tên tag" class="mr-2 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent edit-mode" style="max-width: 120px;">
                   <input id="tagColor" type="color" value="<?= htmlspecialchars($task['TagColor'] ?? '#3B82F6') ?>" class="h-8 w-8 border-0 rounded cursor-pointer edit-mode">
                   <div id="tagPreview" class="ml-2 px-3 py-1 rounded-full text-sm text-white" style="background-color: <?= htmlspecialchars($task['TagColor'] ?? '#3B82F6') ?>">
-                    <?= htmlspecialchars($task['TagName'] ?? 'New tag') ?>
+                    <?= htmlspecialchars($task['TagName'] ?? 'Tag mới') ?>
                   </div>
                 </div>
                 <?php else: ?>
@@ -453,7 +441,7 @@ try {
                   <?= htmlspecialchars($task['TagName']) ?>
                 </span>
                 <?php else: ?>
-                <span class="text-gray-500">No tag</span>
+                <span class="text-gray-500">Chưa có tag</span>
                 <?php endif; ?>
                 </div>
                 <?php endif; ?>
@@ -464,15 +452,15 @@ try {
                   <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M3 4a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                   </svg>
-                  <span>Priority</span>
+                  <span>Độ ưu tiên</span>
                 </div>
                 <div class="relative">
                   <select id="taskPriority" class="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" <?= $isAdmin || !isset($_SESSION['edit_mode']) ? 'readonly' : '' ?>>
-                    <option <?= $task['Priority'] === '' ? 'selected' : '' ?>>Select</option>
-                    <option <?= $task['Priority'] === 'Urgent' ? 'selected' : '' ?>>Urgent</option>
-                    <option <?= $task['Priority'] === 'High' ? 'selected' : '' ?>>High</option>
-                    <option <?= $task['Priority'] === 'Medium' ? 'selected' : '' ?>>Medium</option>
-                    <option <?= $task['Priority'] === 'Low' ? 'selected' : '' ?>>Low</option>
+                    <option <?= $task['Priority'] === '' ? 'selected' : '' ?>>Chọn</option>
+                    <option <?= $task['Priority'] === 'Khẩn cấp' ? 'selected' : '' ?>>Khẩn cấp</option>
+                    <option <?= $task['Priority'] === 'Cao' ? 'selected' : '' ?>>Cao</option>
+                    <option <?= $task['Priority'] === 'Trung bình' ? 'selected' : '' ?>>Trung bình</option>
+                    <option <?= $task['Priority'] === 'Thấp' ? 'selected' : '' ?>>Thấp</option>
                   </select>
                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -487,7 +475,7 @@ try {
                   <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                   </svg>
-                  <span>Date</span>
+                  <span>Ngày</span>
                 </div>
                 <input id="startDate" type="date" value="<?= $task['StartDate'] ?>" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" <?= $isAdmin || !isset($_SESSION['edit_mode']) ? 'readonly' : '' ?>>
                 <span class="mx-2">-</span>
@@ -501,7 +489,7 @@ try {
                   <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                   </svg>
-                  <span>Members</span>
+                  <span>Thành viên</span>
                 </div>
                 
                 <?php if (!$isAdmin): ?>
@@ -520,7 +508,7 @@ try {
                       <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                       </svg>
-                      Add Member
+                      Thêm thành viên
                     </button>
                     <?php endif; ?>
                     
@@ -530,17 +518,17 @@ try {
                       <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                       </svg>
-                      Add More
+                      Thêm
                     </button>
                     <?php endif; ?>
                   </div>
                   
                   <div id="memberDropdown" class="member-dropdown-content">
                     <div class="member-search">
-                      <input type="text" id="memberSearchInput" placeholder="Search members...">
+                      <input type="text" id="memberSearchInput" placeholder="Tìm kiếm thành viên...">
                     </div>
                     <div id="memberList" class="member-list">
-                      <div class="no-members-message">Loading member list...</div>
+                      <div class="no-members-message">Đang tải danh sách thành viên...</div>
                     </div>
                   </div>
                 </div>
@@ -554,7 +542,7 @@ try {
                       </div>
                     <?php endforeach; ?>
                   <?php else: ?>
-                  <span class="text-gray-500">Not assigned to anyone</span>
+                  <span class="text-gray-500">Chưa giao cho ai</span>
                   <?php endif; ?>
                 </div>
                 <?php endif; ?>
@@ -565,16 +553,16 @@ try {
           <!-- Status Update Buttons (always visible for non-admin) -->
           <?php if (!$isAdmin): ?>
           <div class="mt-4 pt-4 border-t border-gray-200">
-            <h3 class="text-lg font-medium mb-2">Update Status</h3>
+            <h3 class="text-lg font-medium mb-2">Cập nhật trạng thái</h3>
             <div class="flex space-x-2">
               <button id="btnMarkTodo" class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-                To Do
+                Cần làm
               </button>
               <button id="btnMarkInProgress" class="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
-                In Progress
+                Đang làm
               </button>
               <button id="btnMarkCompleted" class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
-                Completed
+                Hoàn thành
               </button>
             </div>
           </div>
@@ -583,15 +571,15 @@ try {
         
         <!-- Task Description -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 class="text-xl font-bold mb-4">Task Description</h2>
+          <h2 class="text-xl font-bold mb-4">Mô tả nhiệm vụ</h2>
           <div id="taskDescription" class="custom-textarea p-4 bg-gray-50 rounded-lg" <?= $isAdmin || !isset($_SESSION['edit_mode']) ? 'contenteditable="false"' : 'contenteditable="true"' ?>>
-            <?= nl2br(htmlspecialchars($task['TaskDescription'] ?? 'No description')) ?>
+            <?= nl2br(htmlspecialchars($task['TaskDescription'] ?? 'Không có mô tả')) ?>
           </div>
         </div>
         
         <!-- Recent Activity -->
         <div class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
+          <h2 class="text-xl font-bold mb-4">Hoạt động gần đây</h2>
           <div id="activityList" class="space-y-4">
             <?php if (count($activities) > 0): ?>
               <?php foreach ($activities as $activity): ?>
@@ -603,14 +591,14 @@ try {
                       <?php
                       $details = json_decode($activity['Details'], true);
                       $activityTypeMap = [
-                        'task_created' => 'created task',
-                        'task_updated' => 'updated task',
-                        'task_assigned' => 'assigned task to',
-                        'task_unassigned' => 'unassigned task from',
-                        'task_status_changed' => 'changed task status',
-                        'task_detail_viewed' => 'viewed task',
-                        'task_priority_changed' => 'changed task priority',
-                        'task_date_changed' => 'changed task date'
+                        'task_created' => 'đã tạo nhiệm vụ',
+                        'task_updated' => 'đã cập nhật nhiệm vụ',
+                        'task_assigned' => 'đã giao nhiệm vụ cho',
+                        'task_unassigned' => 'đã hủy giao nhiệm vụ cho',
+                        'task_status_changed' => 'đã thay đổi trạng thái nhiệm vụ',
+                        'task_detail_viewed' => 'đã xem nhiệm vụ',
+                        'task_priority_changed' => 'đã thay đổi ưu tiên nhiệm vụ',
+                        'task_date_changed' => 'đã thay đổi ngày nhiệm vụ'
                       ];
                       echo $activityTypeMap[$activity['ActivityType']] ?? $activity['ActivityType'];
                       ?>
@@ -624,7 +612,7 @@ try {
             <?php else: ?>
               <div class="flex items-start">
                 <div>
-                  <p class="text-gray-500 text-sm">No recent activity</p>
+                  <p class="text-gray-500 text-sm">Hiện không có hoạt động nào</p>
                 </div>
               </div>
             <?php endif; ?>
@@ -640,13 +628,11 @@ try {
       <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
       </svg>
-      <span id="notificationMessage">Updated successfully!</span>
+      <span id="notificationMessage">Đã cập nhật thành công!</span>
     </div>
   </div>
 
-  <!-- Data Transfer Script - Pass PHP data to JavaScript -->
   <script>
-    // Task data
     window.TASK_DATA = {
       taskId: <?= $taskId ?? 'null' ?>,
       projectId: <?= $projectId ?? 'null' ?>,
@@ -660,13 +646,12 @@ try {
       isAdmin: <?= $isAdmin ? 'true' : 'false' ?>,
       currentUser: {
         id: <?= $_SESSION['user_id'] ?? 'null' ?>,
-        name: <?= json_encode($_SESSION['full_name'] ?? 'User') ?>,
+        name: <?= json_encode($_SESSION['full_name'] ?? 'Người dùng') ?>,
         avatar: <?= json_encode($_SESSION['avatar'] ?? 'public/uploads/default-avatar.png') ?>
       }
     };
   </script>
   
-  <!-- Include JavaScript files -->
   <script src="../../../public/js/modules/taskEditMode.js"></script>
   <script src="../../../public/js/modules/taskStatus.js"></script>
   <script src="../../../public/js/modules/taskNotification.js"></script>

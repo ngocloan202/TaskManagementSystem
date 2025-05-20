@@ -3,11 +3,11 @@ require_once "../../../config/SessionInit.php";
 require_once __DIR__ . "/../../../config/database.php";
 include __DIR__ . "../../../Controllers/LoadUserData.php";
 ?>
-<!-- Modal Profile -->
+<!-- Profile Modal -->
 <div id="profileModal" style="background-color: rgba(0, 0, 0, 0.4);"
   class="fixed inset-0 bg-opacity-40 flex items-center justify-center z-[9999] hidden">
   <div class="bg-white rounded-2xl shadow-lg w-full max-w-md relative overflow-hidden">
-    <!-- Avatar user -->
+    <!-- User Avatar -->
     <div class="h-28 flex items-center justify-center bg-indigo-200">
       <div class="w-20 h-20 rounded-full border-4 border-black flex items-center justify-center bg-[#EEF0FF] shadow-md">
         <img id="profileAvatar" src="<?= htmlspecialchars(
@@ -15,21 +15,21 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
         ) ?>" alt="Avatar" class="object-cover w-full h-full rounded-full" />
       </div>
     </div>
-    <!-- Nút upload avatar -->
+    <!-- Avatar upload button -->
     <form id="avatarForm" action="../../Controllers/UploadAvatar.php" method="POST" enctype="multipart/form-data"
       class="mt-2 text-center">
       <input type="hidden" id="newAvatarPath" value="">
       <label class="cursor-pointer text-indigo-600 hover:underline text-sm">
-        Đổi ảnh đại diện
+        Change avatar
         <input type="file" name="avatar" id="avatarInput" accept="image/*" class="hidden" />
       </label>
     </form>
-    <!-- Nội dung form -->
+    <!-- Form content -->
     <div class="px-6 pb-8 pt-4">
-      <h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">Thông tin người dùng</h2>
+      <h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">User Information</h2>
       <form id="profileForm" class="space-y-4" action="../../Controllers/UploadAvatar" method="POST">
         <div>
-          <label class="block text-gray-700 mb-1 font-medium" for="username">Tên người dùng</label>
+          <label class="block text-gray-700 mb-1 font-medium" for="username">Username</label>
           <input id="username" name="fullname" type="text" value="<?= htmlspecialchars(
             $_SESSION["fullname"] ?? ""
           ) ?>" readonly
@@ -43,32 +43,32 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
-          <label class="block text-gray-700 mb-1 font-medium" for="phone">Số điện thoại</label>
+          <label class="block text-gray-700 mb-1 font-medium" for="phone">Phone number</label>
           <input id="phone" name="phone" type="tel" value="<?= htmlspecialchars(
             $_SESSION["phone"] ?? ""
           ) ?>"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:outline-none" />
         </div>
         <div>
-          <label class="block text-gray-700 mb-1 font-medium" for="projects">Số dự án tham gia</label>
+          <label class="block text-gray-700 mb-1 font-medium" for="projects">Number of projects</label>
           <input id="projects" name="project_count" type="text"
             value="<?= htmlspecialchars($_SESSION["project_count"] ?? "0") ?>" readonly
             class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed text-gray-600" />
         </div>
         <div class="flex justify-center space-x-4 mt-6">
           <button id="btnProfileEdit" type="button"
-            class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg transition">Sửa
+            class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg transition">Edit
           </button>
           <button id="btnProfileSave" type="submit"
-            class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition hidden">Lưu
+            class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition hidden">Save
           </button>
           <button id="btnProfileCancel" type="button"
-            class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg transition hidden">Hủy
+            class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg transition hidden">Cancel
           </button>
         </div>
       </form>
     </div>
-    <!-- Nút đóng modal -->
+    <!-- Close modal button -->
     <button id="closeProfileModal" class="absolute top-3 right-3 text-gray-500 hover:text-red-400 text-2xl font-bold">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
         data-slot="icon" class="size-7 ">
@@ -80,22 +80,22 @@ include __DIR__ . "../../../Controllers/LoadUserData.php";
   </div>
 </div>
 
-<!-- Modal xác nhận lưu -->
+<!-- Save confirmation modal -->
 <div id="confirmSaveModal"  style="background-color: rgba(0, 0, 0, 0.4);" class="fixed inset-0 flex items-center justify-center bg-opacity-40 z-[10000] hidden">
   <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-xs text-center">
-    <div class="mb-4 text-lg font-semibold text-gray-800">Bạn có muốn lưu những thay đổi này không?</div>
+    <div class="mb-4 text-lg font-semibold text-gray-800">Do you want to save these changes?</div>
     <div class="flex justify-center gap-4 mt-4">
-      <button id="btnConfirmSave" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">Có</button>
-      <button id="btnCancelSave" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition">Không</button>
+      <button id="btnConfirmSave" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">Yes</button>
+      <button id="btnCancelSave" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition">No</button>
     </div>
   </div>
 </div>
 
-<!-- Modal lưu thành công -->
+<!-- Save success modal -->
 <div id="profileSuccessModal" style="background-color: rgba(0, 0, 0, 0.4);" class="fixed inset-0 flex items-center justify-center bg-opacity-40 z-[10000] hidden">
   <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-xs text-center">
-    <div class="mb-4 text-2xl font-bold text-green-600">✔️ Lưu thành công!</div>
-    <button id="closeProfileSuccessModal" class="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">Đóng</button>
+    <div class="mb-4 text-2xl font-bold text-green-600">✔️ Saved successfully!</div>
+    <button id="closeProfileSuccessModal" class="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">Close</button>
   </div>
 </div>
 
