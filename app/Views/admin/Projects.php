@@ -1,8 +1,8 @@
 <?php
-// Projects.php - Improved data handling
+
 require_once '../../../config/SessionInit.php';
 require_once '../../../config/database.php';
-check_role("ADMIN");  // Only ADMIN can access
+check_role("ADMIN"); 
 
 // Prepare query to get project list with creator name and member/task counts
 $projectsQuery = "
@@ -29,22 +29,18 @@ if ($projectsResult) {
     }
 }
 
-// Handle notifications
 $flashSuccess = $_SESSION["success"] ?? null;
 $flashError = $_SESSION["error"] ?? null;
 unset($_SESSION["success"], $_SESSION["error"]);
 
-// Handle sorting and pagination
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $perPage = 10;
 $offset = ($page - 1) * $perPage;
 
-// Handle sorting
 $sortColumn = isset($_GET['sort']) ? $_GET['sort'] : 'id';
 $sortDirection = isset($_GET['order']) ? $_GET['order'] : 'desc';
 
-// Map display column names to database column names
 $sortMapping = [
     'id' => 'p.ProjectID',
     'name' => 'p.ProjectName',
@@ -53,14 +49,11 @@ $sortMapping = [
     'tasks' => 'TaskCount'
 ];
 
-// Ensure valid sort column
 $sortColumnDB = isset($sortMapping[$sortColumn]) ? $sortMapping[$sortColumn] : 'p.ProjectID';
-// Ensure valid sort direction
+
 $sortDirectionDB = strtoupper($sortDirection) === 'DESC' ? 'DESC' : 'ASC';
 
-// Build search query
 if (!empty($search)) {
-    // Add search conditions to query
     $sql = "
       SELECT 
         p.ProjectID, 
@@ -90,7 +83,6 @@ if (!empty($search)) {
     $countResult = $connect->query($countQuery);
     $totalProjects = $countResult->fetch_assoc()['total'];
 } else {
-    // Sort and paginate initial results
     $sql = "
       SELECT 
         p.ProjectID, 
@@ -114,7 +106,6 @@ if (!empty($search)) {
     $totalProjects = $countResult->fetch_assoc()['total'];
 }
 
-// Execute query
 $result = $connect->query($sql);
 $projects = [];
 if ($result) {
@@ -126,7 +117,6 @@ if ($result) {
 $totalPages = ceil($totalProjects / $perPage);
 $currentPage = "projects";
 
-// Handle project view event
 if (isset($_GET['view']) && isset($_GET['id'])) {
     $projectId = (int)$_GET['id'];
     $adminId = $_SESSION['user_id'] ?? 0;
@@ -156,7 +146,6 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
         $stmt->execute();
     }
     
-    // Redirect to project detail page
     header("Location: ../dashboard/ProjectDetail.php?id=" . $projectId);
     exit();
 }
@@ -201,7 +190,6 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
         <?php include "../components/Sidebar.php"; ?>
         
         <?php 
-        // Khôi phục các biến sau khi include
         $projects = $temp_projects;
         $totalProjects = $temp_totalProjects;
         $totalPages = $temp_totalPages;
@@ -218,7 +206,7 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
                 <div class="max-w-7xl mx-auto">
                     <h1 class="text-2xl font-semibold text-gray-900 mb-6">Project Management</h1>
                     
-                    <!-- Thông báo -->
+                    <!-- Notification -->
                     <?php if ($flashSuccess): ?>
                         <div id="successAlert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex items-center justify-between">
                             <div class="flex items-center">
@@ -247,10 +235,10 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
                         </div>
                     <?php endif; ?>
                     
-                    <!-- Tìm kiếm và thêm dự án mới -->
+                    <!-- Search and add new project -->
                     <div class="bg-white rounded-lg shadow p-6 mb-6">
                         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 flex-wrap">
-                            <!-- Tìm kiếm -->
+                            <!-- Search -->
                             <form class="flex-1 flex items-center gap-2 min-w-0" method="GET">
                                 <div class="relative flex-1 min-w-0">
                                     <input type="text" name="search" placeholder="Tìm kiếm dự án..." value="<?= htmlspecialchars($search) ?>"
@@ -267,7 +255,7 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
                             </form>
                         </div>
                         
-                        <!-- Bảng dự án -->
+                        <!-- Project table -->
                         <div class="overflow-x-auto">
                             <table class="min-w-full bg-white border border-gray-200" id="projectTable">
                                 <thead class="bg-gray-50">
@@ -285,7 +273,7 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
                                     <?php if (count($projects) > 0): ?>
                                         <?php foreach ($projects as $project): ?>
                                             <?php 
-                                            // Tính toán phần trăm hoàn thành
+                                            // Calculate completion percentage
                                             $progress = 0;
                                             if ($project['TaskCount'] > 0) {
                                                 $progress = round(($project['CompletedCount'] / $project['TaskCount']) * 100);
@@ -331,7 +319,7 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
                             </table>
                         </div>
                         
-                        <!-- Phân trang -->
+                        <!-- Pagination -->
                         <?php if ($totalPages > 1): ?>
                             <div class="flex justify-between items-center mt-6">
                                 <div class="text-sm text-gray-700">
@@ -339,7 +327,7 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
                                 </div>
                                 <div class="flex space-x-1">
                                     <?php 
-                                    // Xây dựng chuỗi query từ các tham số
+                                    // Build query string from parameters
                                     $queryParams = [];
                                     if (!empty($search)) $queryParams[] = 'search=' . urlencode($search);
                                     if (!empty($sortColumn)) $queryParams[] = 'sort=' . urlencode($sortColumn);
@@ -371,9 +359,8 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
     
     <script src="../../../public/js/admin.js"></script>
     <script>
-        // Xử lý đóng cảnh báo sau 3 giây
+        // Handle closing alerts after 3 seconds
         document.addEventListener('DOMContentLoaded', function() {
-            // Xử lý thông báo thành công
             const successAlert = document.getElementById('successAlert');
             if (successAlert) {
                 let seconds = 3;
@@ -388,7 +375,6 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
                 }, 1000);
             }
             
-            // Xử lý thông báo lỗi
             const errorAlert = document.getElementById('errorAlert');
             if (errorAlert) {
                 let seconds = 3;
@@ -404,7 +390,6 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
             }
         });
         
-        // Xử lý sắp xếp khi click vào tiêu đề cột
         document.addEventListener('DOMContentLoaded', function() {
             const sortableHeaders = document.querySelectorAll('.sortable');
             
@@ -414,12 +399,10 @@ if (isset($_GET['view']) && isset($_GET['id'])) {
                     const currentOrder = new URLSearchParams(window.location.search).get('order') || 'desc';
                     const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
                     
-                    // Xây dựng URL mới với tham số sắp xếp
                     const url = new URL(window.location.href);
                     url.searchParams.set('sort', sort);
                     url.searchParams.set('order', newOrder);
                     
-                    // Chuyển hướng tới URL mới
                     window.location.href = url.toString();
                 });
             });
