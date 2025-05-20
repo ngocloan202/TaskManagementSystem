@@ -3,11 +3,11 @@ require_once __DIR__ . "/../../../config/SessionInit.php";
 require_once __DIR__ . "/../../../config/database.php";
 ?>
 <!doctype html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng nhập</title>
+    <title>Login</title>
     <link rel="stylesheet" href="../../../public/css/tailwind.css">
   </head>
   <body class="min-h-screen bg-[#EEF0FF] flex items-center justify-center px-4">
@@ -16,7 +16,7 @@ require_once __DIR__ . "/../../../config/database.php";
           <?= htmlspecialchars($_SESSION["login_error"]) ?>
         </div>
       <?php unset($_SESSION["login_error"]);endif;
-// Xóa để lần sau không hiện nữa
+// Clear for next time
 ?>
     <div class="relative w-full max-w-sm">
       <!-- Logo circle -->
@@ -57,7 +57,7 @@ require_once __DIR__ . "/../../../config/database.php";
             <input
               type="text"
               name="username"
-              placeholder="Tài khoản"
+              placeholder="Username"
               class="w-full bg-transparent placeholder-white placeholder-opacity-90 focus:outline-none text-white"
               required
             />
@@ -82,7 +82,7 @@ require_once __DIR__ . "/../../../config/database.php";
             <input
               type="password"
               name="password"
-              placeholder="Mật khẩu"
+              placeholder="Password"
               class="w-full bg-transparent placeholder-white placeholder-opacity-90 focus:outline-none text-white"
               required
             />
@@ -93,22 +93,22 @@ require_once __DIR__ . "/../../../config/database.php";
             type="submit"
             class="w-full h-10 bg-[#2970FF] hover:bg-[#bddef5] text-white font-semibold rounded-xl transition"
           >
-            Đăng nhập
+            Login
           </button>
         </form>
         
         <!-- Forgot password -->
         <div class="mt-4 text-center">
           <a href="#" class="text-[#272E71] text-sm hover:underline font-semibold">
-            Quên mật khẩu?
+            Forgot password?
           </a>
         </div>
         
         <!-- Register link -->
         <p class="mt-2 text-center text-gray-800 text-sm">
-          Bạn chưa có tài khoản?
+          Don't have an account?
           <a href="register.php" class="text-[#2970FF] font-semibold hover:underline">
-            Đăng ký tại đây
+            Register here
           </a>
         </p>
       </div>

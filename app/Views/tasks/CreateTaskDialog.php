@@ -6,7 +6,7 @@
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
       <!-- Header -->
       <div class="flex justify-between items-center bg-[#0A1A44] text-white px-6 py-4 rounded-t-2xl">
-        <h3 class="text-lg font-semibold">Thêm nhiệm vụ mới</h3>
+        <h3 class="text-lg font-semibold">Add New Task</h3>
         <button class="hover:bg-indigo-500 p-1 rounded-full focus:outline-none close-dialog transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
             stroke-width="2">
@@ -20,7 +20,7 @@
         <input type="hidden" name="projectId" value="<?= $projectId ?>">
         <input type="hidden" name="statusName" id="statusField" value="">
 
-        <!-- Tên nhiệm vụ -->
+        <!-- Task Name -->
         <div
           class="flex items-center bg-indigo-50 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-indigo-300">
           <!-- Icon  -->
@@ -28,7 +28,7 @@
             viewBox="0 0 24 24" fill="currentColor">
             <path d="M4 7h16v3H4V7zm2-4h12v2H6V3zM4 10h16v10H4V10z" />
           </svg>
-          <input type="text" name="taskName" placeholder="Tên nhiệm vụ"
+          <input type="text" name="taskName" placeholder="Task name"
             class="ml-3 w-full bg-transparent placeholder-gray-500 focus:outline-none text-gray-700 font-medium"
             required />
         </div>
@@ -45,9 +45,9 @@
             class="ml-3 w-full bg-transparent placeholder-gray-500 focus:outline-none text-gray-700" />
         </div>
 
-        <!-- Chọn màu -->
+        <!-- Color Selection -->
         <div>
-          <p class="text-indigo-600 text-lg font-semibold">Chọn màu:</p>
+          <p class="text-indigo-600 text-lg font-semibold">Select color:</p>
           <div class="flex space-x-3 mt-2">
             <button type="button"
               class="color-btn w-8 h-8 rounded-full" style="background-color: #F472B6"
@@ -70,10 +70,10 @@
         <script src="../../../public/js/TaskFormHandler.js"></script>
 
 
-        <!-- Nút Thêm nhiệm vụ -->
+        <!-- Add Task Button -->
         <button type="submit"
           class="mt-4 w-full bg-[#0A1A44] hover:bg-blue-800 text-white font-semibold rounded-xl py-3 transition">
-          Tạo
+          Create
         </button>
       </form>
     </div>

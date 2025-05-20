@@ -1,40 +1,33 @@
-// Quản lý modal thêm/sửa thành viên
+
 class MemberManager {
     constructor() {
-        // Lấy projectID từ nhiều nguồn khác nhau
         window.projectID = this.getProjectID();
         
-        // Thiết lập event listeners cho nút thêm thành viên
+        // Set up event listeners for add member button
         this.setupAddButtonListener();
-        
-        // Đăng ký sự kiện xóa toàn cục
         window.deleteMember = (memberId, userName) => {
             this.deleteMember(memberId, userName);
         };
         
-        // Khởi tạo modal events ngay nếu modal đã hiển thị sẵn
+        // Initialize modal events if modal is already visible
         const modal = document.getElementById('memberModal');
         if (modal && !modal.classList.contains('hidden')) {
             this.setupModalEvents();
         }
     }
     
-    // Lấy projectID từ nhiều nguồn khác nhau
     getProjectID() {
-        // 1. Từ form thêm thành viên
         const projectIdInput = document.querySelector('#memberForm input[name="projectId"]');
         if (projectIdInput && projectIdInput.value) {
             return projectIdInput.value;
         }
         
-        // 2. Từ URL parameter
         const urlParams = new URLSearchParams(window.location.search);
         const projectID = urlParams.get('projectID') || urlParams.get('id');
         if (projectID) {
             return projectID;
         }
         
-        // 3. Từ data attribute trong body
         const body = document.body;
         if (body.dataset.projectId) {
             return body.dataset.projectId;
@@ -44,43 +37,37 @@ class MemberManager {
     }
 
     setupAddButtonListener() {
-        // Nút mở modal
         const addMemberBtn = document.getElementById('btnAddMember');
         if (addMemberBtn) {
             addMemberBtn.addEventListener('click', () => this.showAddMemberModal());
         }
     }
     
-    // Thiết lập các event handlers cho modal
+    // Set up modal event handlers
     setupModalEvents() {
         const modal = document.getElementById('memberModal');
         const form = document.getElementById('memberForm');
         
-        // Nút đóng modal (X)
         const closeBtn = document.getElementById('closeMemberModal');
         if (closeBtn) {
-            // Xóa bỏ event handlers cũ nếu có
             closeBtn.onclick = null;
             
-            // Gắn event handler mới
             closeBtn.addEventListener('click', () => {
                 this.hideModal();
             });
         }
 
-        // Nút Hủy
         const cancelBtn = document.getElementById('cancelMemberModal');
         if (cancelBtn) {
-            // Xóa bỏ event handlers cũ nếu có
+            // Remove old event handlers if any
             cancelBtn.onclick = null;
             
-            // Gắn event handler mới
+            // Add new event handler
             cancelBtn.addEventListener('click', () => {
                 this.hideModal();
             });
         }
         
-        // Đóng modal khi click ra ngoài
         if (modal) {
             modal.onclick = (e) => {
                 if (e.target === modal) {
@@ -89,13 +76,11 @@ class MemberManager {
             };
         }
         
-        // Xử lý submit form
         if (form) {
             form.onsubmit = (e) => this.handleFormSubmit(e, form);
         }
     }
     
-    // Hiển thị modal thêm thành viên mới
     showAddMemberModal() {
         const modal = document.getElementById('memberModal');
         const form = document.getElementById('memberForm');
@@ -104,10 +89,8 @@ class MemberManager {
             return;
         }
         
-        // Reset form
         form.reset();
         
-        // Set projectId
         const projectIdField = form.querySelector('input[name="projectId"]');
         if (projectIdField) {
             projectIdField.value = window.projectID;
@@ -119,14 +102,11 @@ class MemberManager {
             modalTitle.textContent = "Thêm thành viên";
         }
 
-        // Thiết lập events
         this.setupModalEvents();
         
-        // Hiển thị modal
         this.showModal(modal);
     }
 
-    // Hiển thị modal
     showModal(modal) {
         modal = modal || document.getElementById('memberModal');
         if (modal) {
@@ -135,7 +115,6 @@ class MemberManager {
         }
     }
 
-    // Ẩn modal
     hideModal() {
         const modal = document.getElementById('memberModal');
         if (modal) {
@@ -144,7 +123,6 @@ class MemberManager {
         }
     }
 
-    // Xử lý submit form
     async handleFormSubmit(e, form) {
         e.preventDefault();
         if (!form) return;
@@ -171,7 +149,6 @@ class MemberManager {
         }
     }
 
-    // Xử lý xóa thành viên
     async deleteMember(memberId, userName) {
         if (!memberId) {
             return;
@@ -182,7 +159,6 @@ class MemberManager {
             
             if (!confirmed) return;
 
-            // Lấy projectID từ hàm helper
             const projectID = this.getProjectID();
             
             if (!projectID || projectID === '0' || projectID === 0) {
@@ -232,7 +208,6 @@ class MemberManager {
         });
     }
 
-    // Hiển thị thông báo
     showNotification(type, message) {
         const notification = document.createElement('div');
         notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-[10000] ${

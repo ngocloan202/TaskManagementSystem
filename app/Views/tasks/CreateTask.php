@@ -1,34 +1,34 @@
 <?php
 // File: create_task.php
-// Xử lý tạo task mới
+// Handle new task creation
 
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
-// Kiểm tra nếu là yêu cầu POST
+// Check if it's a POST request
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-  echo json_encode(["success" => false, "message" => "Phương thức không được hỗ trợ"]);
+  echo json_encode(["success" => false, "message" => "Method not supported"]);
   exit();
 }
 
-// Lấy thông tin từ form
+// Get form information
 $projectId = isset($_POST["projectId"]) ? intval($_POST["projectId"]) : 0;
 $taskName = isset($_POST["taskName"]) ? trim($_POST["taskName"]) : "";
 $tag = isset($_POST["tag"]) ? trim($_POST["tag"]) : "";
 $color = isset($_POST["color"]) ? $_POST["color"] : "#60A5FA";
 $dueDate = isset($_POST["dueDate"]) ? $_POST["dueDate"] : "";
-$statusName = isset($_POST["statusName"]) ? $_POST["statusName"] : "Cần làm";
+$statusName = isset($_POST["statusName"]) ? $_POST["statusName"] : "To Do";
 
-// Validate dữ liệu
+// Validate data
 if ($projectId <= 0 || empty($taskName)) {
-  echo json_encode(["success" => false, "message" => "Dữ liệu không hợp lệ"]);
+  echo json_encode(["success" => false, "message" => "Invalid data"]);
   exit();
 }
 
-// Lấy TaskStatusID từ tên trạng thái
+// Get TaskStatusID from status name
 $stmt = $connect->prepare("SELECT TaskStatusID FROM TaskStatus WHERE StatusName = ?");
 if (!$stmt) {
-  echo json_encode(["success" => false, "message" => "Lỗi SQL: " . $connect->error]);
+  echo json_encode(["success" => false, "message" => "SQL Error: " . $connect->error]);
   exit();
 }
 
@@ -38,20 +38,20 @@ $result = $stmt->get_result();
 $statusData = $result->fetch_assoc();
 
 if (!$statusData) {
-  echo json_encode(["success" => false, "message" => "Trạng thái không hợp lệ"]);
+  echo json_encode(["success" => false, "message" => "Invalid status"]);
   exit();
 }
 
 $statusId = $statusData["TaskStatusID"];
 
-// Insert task mới vào database
+// Insert new task into database
 $stmt = $connect->prepare("
     INSERT INTO Task (TaskTitle, TaskDescription, TaskStatusID, Priority, StartDate, EndDate, ProjectID, ParentTaskID, TagName, TagColor)
-    VALUES (?, '', ?, 'Trung Bình', CURDATE(), CURDATE(), ?, NULL, ?, ?)
+    VALUES (?, '', ?, 'Medium', CURDATE(), CURDATE(), ?, NULL, ?, ?)
 ");
 
 if (!$stmt) {
-  echo json_encode(["success" => false, "message" => "Lỗi SQL: " . $connect->error]);
+  echo json_encode(["success" => false, "message" => "SQL Error: " . $connect->error]);
   exit();
 }
 
@@ -61,11 +61,11 @@ if ($stmt->execute()) {
   $taskId = $stmt->insert_id;
   echo json_encode([
     "success" => true,
-    "message" => "Tạo nhiệm vụ thành công",
+    "message" => "Task created successfully",
     "taskId" => $taskId,
   ]);
 } else {
-  echo json_encode(["success" => false, "message" => "Lỗi khi tạo nhiệm vụ: " . $stmt->error]);
+  echo json_encode(["success" => false, "message" => "Error creating task: " . $stmt->error]);
 }
 
 $stmt->close();
