@@ -2,10 +2,8 @@
 require_once "../../../config/SessionInit.php";
 require_once "../../../config/database.php";
 
-// Check admin role
 check_role("ADMIN");
 
-// Initialize user information variable
 $user = [
     'username' => '',
     'email' => '',
@@ -14,9 +12,7 @@ $user = [
     'role' => 'USER'
 ];
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get form data
     $user = [
         'username' => isset($_POST['username']) ? $_POST['username'] : '',
         'email' => isset($_POST['email']) ? $_POST['email'] : '',
@@ -25,14 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'role' => isset($_POST['role']) ? $_POST['role'] : 'USER'
     ];
     
-    // Validate data
     $errors = [];
     
-    // Check username
     if (empty($user['username'])) {
         $errors['username'] = 'Username cannot be empty';
     } else {
-        // Check if username already exists
         $stmt = $connect->prepare("SELECT UserID FROM Users WHERE Username = ?");
         $stmt->bind_param("s", $user['username']);
         $stmt->execute();
@@ -41,13 +34,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Check email
     if (empty($user['email'])) {
         $errors['email'] = 'Email cannot be empty';
     } elseif (!filter_var($user['email'], FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = 'Invalid email format';
     } else {
-        // Check if email already exists
         $stmt = $connect->prepare("SELECT UserID FROM Users WHERE Email = ?");
         $stmt->bind_param("s", $user['email']);
         $stmt->execute();
@@ -56,14 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Check password
     if (empty($user['password'])) {
         $errors['password'] = 'Password cannot be empty';
     } elseif (strlen($user['password']) < 6) {
         $errors['password'] = 'Password must be at least 6 characters';
     }
     
-    // If no errors, add new user
     if (empty($errors)) {
         // Hash password using MD5
         $hashedPassword = md5($user['password']);
