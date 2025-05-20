@@ -1,4 +1,3 @@
-<!-- Header -->
 <header class="bg-[#0A1A44] h-14 flex items-center px-6 shadow-md">
   <!-- Logo and back button section -->
   <div class="flex items-center space-x-4">
@@ -19,7 +18,7 @@
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" placeholder="Search"
+        <input type="text" placeholder="Tìm kiếm"
           class="pl-10 pr-4 py-2 rounded-lg w-full focus:outline-none bg-white text-gray-700" />
       </div>
     </div>
@@ -52,7 +51,7 @@
         <div class="py-3 px-5 text-gray-800 text-base space-y-2">
           <!-- Username -->
           <div class="font-semibold text-[16px]">
-            <?= "Hello, " . htmlspecialchars($_SESSION["fullname"] ?? $_SESSION["username"]) ?>
+            <?= "Xin chào, " . htmlspecialchars($_SESSION["fullname"] ?? $_SESSION["username"]) ?>
           </div>
 
           <!-- Personal information -->
@@ -64,7 +63,7 @@
                 d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
                 clip-rule="evenodd"></path>
             </svg>
-            Personal Information
+            Thông tin cá nhân
           </a>
 
           <!-- Logout -->
@@ -75,7 +74,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
             </svg>
-            Logout
+            Đăng xuất
           </a>
         </div>
       </div>
@@ -97,5 +96,4 @@
   });
 </script>
 
-<!-- Include Profile.php -->
 <?php include_once "../auth/Profile.php"; ?>
